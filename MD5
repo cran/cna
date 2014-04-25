@@ -1,0 +1,12 @@
+e1c1a73b5a8120eb6e206553409c3b5a *DESCRIPTION
+dec1f16fd5fe4817b85885e2793c33a7 *NAMESPACE
+b8d99331d182224ef2cd77a10941029b *R/cna.r
+ed3db3bc79529a562e078a86cef410c4 *R/cna_aux.r
+6b532259a66236fe18c577f08a92be53 *R/condTbl.r
+207cb6cb7dfd5bc116f8959c47d4aab4 *R/condition.r
+032866020a1c7ed3a5f2359c5496fb95 *R/truthTab.r
+319d124c7d1edf994fe46a46e52f91c6 *man/cna-package.Rd
+9b8da3d0db3fa7574d0fb8ece13212a3 *man/cna.Rd
+63363cf17b7bf61a61c224b539692187 *man/condTbl.Rd
+57f377404485785f3674c2b6c986c037 *man/condition.Rd
+6baa6637f8fa1b5d26b001a6d6aaa1ca *man/truthTab.Rd

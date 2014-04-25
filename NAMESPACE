@@ -1,0 +1,8 @@
+export(truthTab, cna, condition, msc, asf, csf, as.condTbl, group.by.outcome)
+
+S3method(print, truthTab)
+S3method(print, cna)
+S3method(print, cond)
+S3method(print, condTbl)
+S3method(condition, default)
+S3method(condition, condTbl)
