@@ -30,10 +30,15 @@ label.conditions <- function(cond){
   if (length(cond) == 0) return (NULL)
   condm <- as.matrix(cond)
   ch <- matrix("", ncol = ncol(cond), nrow = nrow(cond))
-  ch[!is.na(condm) & condm] <- 
-    toupper(names(cond))[col(condm)][!is.na(condm) & condm]
+  # mettre en maj. ou ne rien faire
+    ch[!is.na(condm) & condm] <- 
+    #  toupper(names(cond))[col(condm)][!is.na(condm) & condm]
+    names(cond)[col(condm)][!is.na(condm) & condm]
+  # mettre en min. ou mettre en polarité opposée
   ch[!is.na(condm) & !condm] <- 
-    tolower(names(cond))[col(condm)][!is.na(condm) & !condm]
+chartr("qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLYXCVBNM","QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm",names(cond))[col(condm)][!is.na(condm) & !condm]
+# tolower(names(cond))[col(condm)][!is.na(condm) & !condm]
+  
   apply(ch, 1, function(x) paste(x[nchar(x) > 0], collapse = "*"))
   }
 

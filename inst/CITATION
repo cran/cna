@@ -1,0 +1,22 @@
+citHeader("Please cite the cna package as:")
+
+  meta <- packageDescription("cna")
+  authors <- sprintf("%s", meta$Author)
+  year <- sub("-.*", "", meta$Date)
+  note <- sprintf("R Package Version %s", meta$Version)
+  title <- sprintf("%s", meta$Title)
+
+  bibentry(bibtype = "Manual",
+    author = personList(as.person("Mathias Ambuehl"),
+                        as.person("Michael Baumgartner"),
+                        as.person("Ruedi Epple"),
+                        as.person("Alexis Kauffmann"),
+                        as.person("Alrik Thiem")),
+    year = year,
+    title = title,
+    note = note,
+    url = "http://cran.r-project.org/package=cna",
+    textVersion = paste(authors, sprintf("%s", year),
+      title, note, "URL: http://cran.r-project.org/package=cna.", sep = ". ")
+)
+

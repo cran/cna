@@ -1,11 +1,11 @@
 # truthTab
 truthTab <- function(x, frequency = NULL,
-                       switch = FALSE, case.cutoff = 0){
+                     switch = FALSE, case.cutoff = 0){
   nm.x <- deparse(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x),
             length(case.cutoff) == 1)
   if (inherits(x, "truthTab")){
-    nofcases <- attr(x, "no.of.cases")
+    nofcases <- attr(x, "n")
     if (!is.null(frequency) && !is.null(nofcases) &&
         !all(frequency == nofcases))
       stop("Case Frequencies in the truth table ", nm.x, " and argument frequency are contradictory!")
@@ -50,7 +50,7 @@ truthTab <- function(x, frequency = NULL,
             paste(pairnms, collapse = ", "))
     }
   class(tt) <- c("truthTab", "data.frame")
-  attr(tt, "no.of.cases") <- f
+  attr(tt, "n") <- f
   attr(tt, "cases") <-
     as.vector(sapply(splitInput[!del.cases],
                      function(x) paste(rownames(x), collapse = ",")))
@@ -58,15 +58,15 @@ truthTab <- function(x, frequency = NULL,
   }
   
 # print method for class truthTab
-print.truthTab <- function(x, row.names = FALSE, show.cases = TRUE, ...){
-  if (is.null(attr(x, "no.of.cases")))
-    warning("Attribute \"no.of.cases\" ist missing")
+print.truthTab <- function(x, row.names = FALSE, show.cases = FALSE, ...){
+  if (is.null(attr(x, "n")))
+    warning("Attribute \"n\" is missing")
   if (is.null(attr(x, "cases")))
-    warning("Attribute \"cases\" ist missing")
-  df.args <- list(x, no.of.cases = attr(x, "no.of.cases"))
+    warning("Attribute \"cases\" is missing")
+  df.args <- list(x, n = attr(x, "n"))
   if (show.cases) df.args$cases <- attr(x, "cases")
   prntx <- do.call(data.frame, df.args)
   print(prntx, row.names = row.names, ...)
-  cat("Total no.of.cases:", sum(attr(x, "no.of.cases")), "\n")
+  cat("Total no.of.cases:", sum(attr(x, "n")), "\n")
   invisible(prntx)
   }

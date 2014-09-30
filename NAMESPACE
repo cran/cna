@@ -1,4 +1,13 @@
-export(truthTab, cna, condition, msc, asf, csf, as.condTbl, group.by.outcome)
+export(.onAttach,
+  as.condTbl,
+  asf,
+  cna,
+  condition,
+  csf,
+  group.by.outcome,
+  msc,
+  truthTab)
+importFrom("utils", "packageDescription")
 
 S3method(print, truthTab)
 S3method(print, cna)

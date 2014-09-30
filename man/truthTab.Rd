@@ -1,51 +1,123 @@
 \name{truthTab}
+
 \alias{truthTab}
 \alias{print.truthTab}
 
-\title{
-Generate a truth table
-}
+\title{Generate a truth table}
+
 \description{
-\code{truthTab} builds a truth table from an input table, which essentially means that duplicated rows are removed and the number of occurrences of each unique row is stored.
+This function builds a truth table from a Boolean data frame.
 }
 
 \usage{
 truthTab(x, frequency = NULL, switch = FALSE, case.cutoff = 0)
 
-\method{print}{truthTab}(x, row.names = FALSE, show.cases = TRUE, ...)
+\method{print}{truthTab}(x, row.names = FALSE, show.cases = FALSE, ...)
 }
 
 \arguments{
-  \item{x}{
-The input table. Must be a data frame or matrix with 0 and 1 as entries or something that is coerced to 0 and 1 by \code{as.integer},
-i.e. logicals are also possible. NA's are not allowed.
+  \item{x}{A Boolean data frame, i.e. a data frame or a matrix with 0 and 1 as entries.}
+  \item{frequency}{Numeric vector of length \code{nrow(x)}. All elements must be
+        non-negative. }
+  \item{switch}{Vector (integer, logical or character) specifying the columns in
+        \code{x} to be switched, i.e. the columns where 1 is replaced by 0 and vice versa.}
+  \item{case.cutoff}{Minimum number of occurrences (cases) of a configuration
+        in \code{x}. Configurations with fewer than \code{case.cutoff} occurrences (cases)
+        are not included in the truth table.}
+  \item{show.cases}{Logical; specifies whether the attribute \dQuote{cases}
+        is printed.}
+  \item{row.names,\dots}{Are passed to \code{\link{print.data.frame}}.}
 }
-  \item{frequency}{
-Numeric vector of length \code{nrow(x)}. All elements must be nonegative, NA's are not allowed.
-}
-  \item{switch}{
-Vector (integer, logical or character) specifying the columns in \code{x} to be \emph{switched}, i.e. 0 is replaced by 1 are vice versa.
-}
-  \item{case.cutoff}{
-Minimum number of occurrences of a combination of the factors in \code{x}. Combinations with fewer than \code{case.cutoff} occurrences are removed.
-}
-  \item{show.cases}{
-Logical value specifying whether the attribute \dQuote{cases} is printed.
-}
-  \item{row.names, \dots}{
-Are passed to \code{\link{print.data.frame}}.
-}}
 
 \details{
-The input table is reduced by removing duplicated rows, so that each row of the resulting truth table corresponds to a combination of the factors in \code{x}. 
-The number of occurrences and enumeration of the cases (taken from \code{rownames(x)}) are saved in attributes \dQuote{no.of.cases} and \dQuote{cases}, respectively.
+The \code{truthTab} function merges multiple rows of a data frame \code{x} featuring the same configuration into one row, such that each row of the resulting truth table corresponds to one determinate configuration of the factors in \code{x}.
+The number of occurrences (cases) and an enumeration of the cases are saved as attributes
+\dQuote{n} and \dQuote{cases}, respectively. The attribute \dQuote{n} is always printed in the output of \code{truthTab}, the attribute \dQuote{cases} is not printed by default but can be recovered by the \code{show.cases} argument of the \code{print} function.
+
+Instead of multiply listing identical configurations in \code{x}, the \code{frequency} argument can
+be used to indicate the frequency of each configuration in the data frame. \code{frequency} takes a numeric vector of length \code{nrow(x)} as value. For instance, \code{truthTab(x, frequency = c(3,4,2,3))} determines that the first configuration in \code{x} is featured in 3 cases, the second in 4, the third in 2, and the fourth in 3 cases.
+
+The \code{switch} argument serves the purpose of switching all values of a factor in its column of \code{x} from 1 to 0 and vice versa. Thereby, the corresponding factor is re-categorized. For instance, \code{truthTab(x, switch = c("SP"))} re-categorizes the factor "superior performance" into the factor "inferior performance".
+
+The \code{case.cutoff} argument is used to stipulate that configurations are only included in the truth table if they are instantiated at least as many times in \code{x} as the number assigned to \code{case.cutoff}. Or differently, configurations that are instantiated less than the number given to \code{case.cutoff} are excluded from the truth table. For instance, \code{truthTab(x, case.cutoff = 3)} entails that configurations with less than 3 cases are excluded.
+
+The \code{row.names} argument of the \code{print} function determines whether the row names of \code{x} are printed or not. The default is \code{FALSE}. 
+
 }
+
 
 \value{
-\code{truthTab} returns a data frame with additional class \dQuote{truthTab} and attributes \dQuote{no.of.cases} and \dQuote{cases}.
+\code{truthTab} returns a data frame of class \dQuote{truthTab} with
+attributes \dQuote{n} and \dQuote{cases}.
 }
 
-\seealso{
-A general overview of the facilities in the \code{cna} package is given in \link{cna-package}.
+\references{
+Greckhamer, Thomas, Vilmos F. Misangyi, Heather Elms, and Rodney Lacey. 2008.
+\dQuote{Using Qualitative Comparative Analysis in Strategic Management Research: An Examination of Combinations of Industry, Corporate, and Business-Unit Effects.}
+\emph{Organizational Research Methods} 11 (4):695-726.
 }
 
+\seealso{\code{\link{cna}}, \code{\link{condition}}, \code{\link{d.performance}}}
+
+\examples{
+# User defined data input
+#------------------------
+dat1 <- data.frame(
+A = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+B = c(1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0),
+C = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0),
+D = c(1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,0,0,0),
+E = c(1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,0,0)
+)
+
+# Default return of the truthTab function.
+truthTab(dat1)
+
+# By means of the print function, the cases featuring each configuration can be recovered.
+print(truthTab(dat1), show.cases = TRUE)
+
+# The same truth table as before can be generated by using the frequency argument while
+# listing each configuration only once.
+dat1 <- data.frame(
+A = c(1,1,1,1,1,1,0,0,0,0,0),
+B = c(1,1,1,0,0,0,1,1,1,0,0),
+C = c(1,1,1,1,1,1,1,1,1,0,0),
+D = c(1,0,0,1,0,0,1,1,0,1,0),
+E = c(1,1,0,1,1,0,1,0,1,1,0)
+)
+truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3))
+
+# Truth tables generated by truthTab can be input into the cna function.
+dat1_tt <- truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3))
+cna(dat1_tt, con = 0.85)
+
+# By means of the case.cutoff argument configurations with less than 2 cases can
+# be excluded, which maneuver yields perfect consistency and coverage scores for dat1.
+dat1_tt <- truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3), case.cutoff = 2)
+cna(dat1_tt)
+
+\donttest{ 
+# Greckhamer et al. (2008) on the causal conditions for superior business-unit performance
+#-----------------------------------------------------------------------------------------
+# Load dataset. 
+data(d.performance)
+truthTab(d.performance[1:8], frequency = d.performance$frequency)
+
+# Eliminate configurations with less than 5 cases.
+truthTab(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 5)
+
+# Switch the factor "superior performance" into the factor "inferior performance".
+truthTab(d.performance[1:8], frequency = d.performance$frequency, switch = c("SP"))
+
+# Various large-n CNAs of d.performance with varying case, consistency, and coverage
+# cut-offs.
+cna(truthTab(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 5),
+       con = 0.8, cov = 0.8)
+cna(truthTab(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 5),
+       con = 0.75, cov = 0.75)
+cna(truthTab(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 10),
+       con = 0.75, cov = 0.75)
+print(cna(truthTab(d.performance[1:8], frequency = d.performance$frequency,
+       case.cutoff = 7), con = 0.65, cov = 0.75, what = "c"), nsolutions = "all")
+}
+}

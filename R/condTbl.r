@@ -60,7 +60,7 @@ csf <- function(x, asfx = asf(x)){
   conds <- X[grepl("\\.condition$", names(X))]
   conds[] <- paste("(", unlist(conds), ")", sep = "")
   conds[] <- lapply(conds, format, justify = "right")
-  csfName <- apply(conds, 1, paste, collapse = " & ")
+  csfName <- apply(conds, 1, paste, collapse = "  *  ")
   out <- data.frame(condition = csfName,
     consistency = csfCon, coverage = csfCov)[csfOrder, ]
   rownames(out) <- NULL

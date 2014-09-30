@@ -1,0 +1,18 @@
+cna                           Perform Coincidence Analysis
+cna-package                   cna: A Package for Coincidence Analysis
+condition                     Uncover relevant properties of sufficient and necessary
+                              conditions in a truth table
+condTbl                       Extract conditions and solutions from an object of class
+                              "cna"
+d.educate                     Artifical data on education levels and left-party strength
+d.irrigate                    Data on the impact of development interventions on water
+                              adequacy in Nepal
+d.minaret                     Data on the voting outcome of the 2009 Swiss Minaret
+                              Initiative
+d.performance                 Data on combinations of industry, corporate, and
+                              business-unit effects
+d.volatile                    Data on the volatility of grassroots associations in Norway
+                              between 1980 and 2000
+d.women                       Data on high percentage of women's represention in
+                              parliaments of western countries
+truthTab                      Generate a truth table

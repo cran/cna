@@ -5,6 +5,8 @@ condition <- function(x, ...)
 
 # default method
 condition.default <- function(x, tt, ...){
+  if (inherits(tt, "truthTab")) {}
+  else {tt <- truthTab(tt)}
   stt <- deparse(substitute(tt))
   tt <- if (inherits(tt, "")) tt else (tt)
   x <- gsub(" ", "", as.character(x))
@@ -22,13 +24,13 @@ condition.default <- function(x, tt, ...){
   out <- split(condTbls, rep(seq_along(splitcond), sapply(splitcond, length)))
   out <- lapply(out, as.data.frame, optional = TRUE)
   names(out) <- lapply(out, function(condtbl) paste(names(condtbl), collapse = " -> "))
-  out <- lapply(out, data.frame, no.of.cases = as.vector(attr(tt, "no.of.cases")),
+  out <- lapply(out, data.frame, n = as.vector(attr(tt, "n")),
                 cases = as.vector(attr(tt, "cases")), check.names = FALSE)
   out <- lapply(out, "class<-", c("cond", "data.frame"))
   structure(lapply(out, appendInfo, tt), class = "listof")
   }
 
-# method for class condTbl
+# method for class condTbl (here, x is a conTbl)
 condition.condTbl <- function(x, tt, ...)
   condition.default(x[["condition"]], tt, ...)
 
@@ -37,7 +39,7 @@ print.cond <- function(x, digits = 3, print.table = TRUE,
                           row.names = FALSE, ...){
   if (print.table) print.data.frame(x, row.names = row.names, ...)
   info <- attr(x, "info")
-  if (length(setdiff(names(x), c("no.of.cases", "cases"))) == 2){
+  if (length(setdiff(names(x), c("n", "cases"))) == 2){
     cat("Consistency: ", formatC(attr(x, "consistency"), format = "f", digits = digits),
         " (", info["szy"], "/", info["sy"], ")\n",
         "Coverage:    ", formatC(attr(x, "coverage"), format = "f", digits = digits),
@@ -60,10 +62,10 @@ print.cond <- function(x, digits = 3, print.table = TRUE,
 # and stores them in several attributes that are assigned to this object
 appendInfo <- function(x, tt){
   y <- as.logical(x[[1]])
-  f <- x$no.of.cases
+  f <- x$n
   sy <- sum(f[y])
   sumf <- sum(f)
-  if (length(setdiff(names(x), c("no.of.cases", "cases"))) == 2){
+  if (length(setdiff(names(x), c("n", "cases"))) == 2){
     z <- as.logical(x[[2]])
     sz <- sum(f[z])
     szy <- sum(f[z & y])
@@ -112,14 +114,14 @@ grbyout1 <- function(x, cases){
   outName <- names(secondCols)[1]
   if (!all(apply(secondCols, 1, function(col) length(unique(col)) == 1)))
     stop("Response ", outName, "is not identical in all condition tables.")
-  ncases <- do.call(cbind, lapply(x, "[", "no.of.cases"))
+  ncases <- do.call(cbind, lapply(x, "[", "n"))
   if (!all(apply(ncases, 1, function(col) length(unique(col)) == 1)))
-    stop("No.of.cases is not identical in all condition tables.")
+    stop("n is not identical in all condition tables.")
   if (cases){  
     Cases <- do.call(cbind, lapply(x, "[", "cases"))
     if (!all(apply(Cases, 1, function(col) length(unique(col)) == 1)))
       stop("Cases are not identical in all condition tables.")
     }
   do.call(cbind, c(lapply(x, "[", 1), 
-                   x[[1]][c(outName, "no.of.cases", if (cases) "cases")]))
+                   x[[1]][c(outName, "n", if (cases) "cases")]))
   }  
