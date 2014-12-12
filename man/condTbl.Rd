@@ -124,4 +124,15 @@ condition(asf(cna.irrigate)$condition, d.irrigate)
 # output returned by msc and asf.
 as.condTbl(condition(msc(cna.irrigate)$condition, d.irrigate))
 as.condTbl(condition(asf(cna.irrigate)$condition, d.irrigate))
+
+
+
+
+
+
+
+
+
+
+
 }

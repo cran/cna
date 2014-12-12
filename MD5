@@ -1,4 +1,4 @@
-20d8bec38d64f1a9563e2549a61a1592 *DESCRIPTION
+fa7648c60110b0fc7fbf5e9cdd726417 *DESCRIPTION
 09c4900c901e3d4b791f4c5a428e8399 *INDEX
 884288dd2c2711990b31b6ceb2e78ca4 *NAMESPACE
 e1354bfaca973b7650f5bbf5da8a2229 *R/cna.r
@@ -15,10 +15,10 @@ f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
 2ceebd03eac59d5ae831ed1e94c3b212 *inst/CITATION
 10481dfe463229751f165a4702133f8d *inst/ChangeLog
-a825c904984550f2ebc39d2d8f65be88 *man/cna.Rd
+0678d1475c8b4d2f7fb93bbaa48e314f *man/cna.Rd
 92e40eab7ca237527fc048cc2841a2ce *man/cna.package.Rd
-9d56177f16d6f64c42e585d75ba61b8d *man/condTbl.Rd
-b5a12581e6ba9e00e0d50c02bd8e4917 *man/condition.Rd
+b93f216f72252d884864000ef7be592b *man/condTbl.Rd
+4a854d17da45331204400233448f228c *man/condition.Rd
 7d7f87e9ff961177ef5911fe83295fcd *man/d.educate.Rd
 dcaa27aae0bdb29c856cc344ddf712c2 *man/d.irrigate.Rd
 4a1431f6fbe3e79cd76b0969ee63924d *man/d.minaret.Rd

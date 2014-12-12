@@ -339,25 +339,29 @@ dat1_tt <- truthTab(dat1, frequency = c(3,3,3,1,3,1,3,1,3,1,3,1,3,1,1,4))
 cna(dat1_tt)
 
 
-# Data input via matrix()
-dat2 <-
-  matrix(scan(what = integer(0)), ncol = 5, byrow = TRUE)
-  1 1 1 1 1
-  1 1 1 0 1
-  1 0 1 1 1
-  1 0 1 0 1
-  0 1 1 1 1
-  0 1 1 0 1
-  0 0 0 1 1
-  0 0 0 0 0
-  0 0 0 1 1
-  0 0 0 1 1
-  1 1 1 0 1
-  1 1 1 0 1
-  1 0 1 0 1
-  1 1 1 1 1
+# Data input via matrix() is also possible
+# dat2 <-
+#  matrix(scan(what = integer(0)), ncol = 5, byrow = TRUE)
+#  1 1 1 1 1
+#  1 1 1 0 1
+#  1 0 1 1 1
+#  1 0 1 0 1
+#  0 1 1 1 1
+#  0 1 1 0 1
+#  0 0 0 1 1
+#  0 0 0 0 0
+#  0 0 0 1 1
+#  0 0 0 1 1
+#  1 1 1 0 1
+#  1 1 1 0 1
+#  1 0 1 0 1
+#  1 1 1 1 1
+#
+#cna(dat2)
 
-cna(dat2)
+
+
+
 }
 }
 

@@ -135,5 +135,9 @@ print(irrigate.cna2.asf, digits = 2)
 condition("A*r + L*C", d.irrigate)
 condition(c("A*r + L*C", "A*L -> F", "C -> A*R + C*l"), d.irrigate)
 condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"), d.irrigate)
+
+
+
+
 }
 }
