@@ -19,8 +19,8 @@ configurational comparative method related to Qualitative Comparative Analysis (
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 0.1-0\cr
-Date:    \tab 2014-09-25\cr
+Version: \tab 1.0-2\cr
+Date:    \tab 2014-12-30\cr
 License: \tab GPL (>= 2)\cr
     }
 }

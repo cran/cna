@@ -88,7 +88,7 @@ University of Chicago Press.
 
 
 \examples{
-\donttest{ 
+
 # Lam and Ostrom (2010) on the impact of development interventions on water adequacy in Nepal
 #--------------------------------------------------------------------------------------------
 # Load dataset. 
@@ -139,5 +139,5 @@ condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"), d.irr
 
 
 
-}
+
 }

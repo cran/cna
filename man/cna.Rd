@@ -161,7 +161,7 @@ Wollebaek, Dag. 2010.
 \seealso{\code{\link{truthTab}}, \code{\link{condition}}, \code{\link{condTbl}}, \code{\link{d.educate}}, \code{\link{d.irrigate}}, \code{\link{d.volatile}}, \code{\link{d.minaret}}}
 
 \examples{
-\donttest{ 
+
 # Artificial data on high levels of education
 #--------------------------------------------
 # Load dataset.
@@ -251,6 +251,8 @@ cna(d.irrigate, ordering = list(c("a","r","l"),c("f","c"),"w"), notcols = "all",
 
 
 
+
+
 # Wollebaek (2010) on very high volatility of grassroots associations in Norway
 #------------------------------------------------------------------------------
 # Load dataset. 
@@ -259,7 +261,7 @@ data(d.volatile)
 # CNA with ordering from Wollebaek (2010) [Beware: due to massive ambiguities, this analysis
 # will not terminate in reasonable time on most computers! In that case, R has to be 
 # interrupted manually, e.g. by ESC, Ctr+C, or Alt+M+Enter.]
-cna(d.volatile, ordering = list(c("PG","RB","EL","SE","CS","OD","PC","UP"),"VO2"))
+\dontrun{cna(d.volatile, ordering = list(c("PG","RB","EL","SE","CS","OD","PC","UP"),"VO2"))}
 
 # Using suff.only, CNA can be forced to abandon the analysis after minimization of sufficient 
 # conditions. [This analysis terminates reasonably quickly.]
@@ -340,28 +342,29 @@ cna(dat1_tt)
 
 
 # Data input via matrix() is also possible
-# dat2 <-
-#  matrix(scan(what = integer(0)), ncol = 5, byrow = TRUE)
-#  1 1 1 1 1
-#  1 1 1 0 1
-#  1 0 1 1 1
-#  1 0 1 0 1
-#  0 1 1 1 1
-#  0 1 1 0 1
-#  0 0 0 1 1
-#  0 0 0 0 0
-#  0 0 0 1 1
-#  0 0 0 1 1
-#  1 1 1 0 1
-#  1 1 1 0 1
-#  1 0 1 0 1
-#  1 1 1 1 1
-#
-#cna(dat2)
+\dontrun{
+ dat2 <-
+  matrix(scan(what = integer(0)), ncol = 5, byrow = TRUE)
+  1 1 1 1 1
+  1 1 1 0 1
+  1 0 1 1 1
+  1 0 1 0 1
+  0 1 1 1 1
+  0 1 1 0 1
+  0 0 0 1 1
+  0 0 0 0 0
+  0 0 0 1 1
+  0 0 0 1 1
+  1 1 1 0 1
+  1 1 1 0 1
+  1 0 1 0 1
+  1 1 1 1 1
 
-
-
-
+cna(dat2)
 }
+
+
+
+
 }
 

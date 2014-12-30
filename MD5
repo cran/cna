@@ -1,4 +1,4 @@
-fa7648c60110b0fc7fbf5e9cdd726417 *DESCRIPTION
+9e557571431d4a18e53891cd2e583e01 *DESCRIPTION
 09c4900c901e3d4b791f4c5a428e8399 *INDEX
 884288dd2c2711990b31b6ceb2e78ca4 *NAMESPACE
 e1354bfaca973b7650f5bbf5da8a2229 *R/cna.r
@@ -14,11 +14,11 @@ f432319904a5f379b855381e2cf8a656 *R/onAttach.R
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
 2ceebd03eac59d5ae831ed1e94c3b212 *inst/CITATION
-10481dfe463229751f165a4702133f8d *inst/ChangeLog
-0678d1475c8b4d2f7fb93bbaa48e314f *man/cna.Rd
-92e40eab7ca237527fc048cc2841a2ce *man/cna.package.Rd
+b6cdb81e7dbdfdc786222fae0b895080 *inst/ChangeLog
+bfbfb9143ebf4aedcd9c2ee49db81bbc *man/cna.Rd
+cbda6328b6d1c099f57d9a7f93e107e9 *man/cna.package.Rd
 b93f216f72252d884864000ef7be592b *man/condTbl.Rd
-4a854d17da45331204400233448f228c *man/condition.Rd
+8c83833e13fe5fd76b3998d50729aa8e *man/condition.Rd
 7d7f87e9ff961177ef5911fe83295fcd *man/d.educate.Rd
 dcaa27aae0bdb29c856cc344ddf712c2 *man/d.irrigate.Rd
 4a1431f6fbe3e79cd76b0969ee63924d *man/d.minaret.Rd
@@ -28,4 +28,4 @@ d05b1998e6f557410ded6cc30bd2f4b1 *man/d.women.Rd
 667d3dcbf174d19546da5903551edbc4 *man/figures/structures.png
 3407e04f09b21ce60ce7275c66eb04a9 *man/figures/structures2.png
 4936e788c3c7c03c125243a840d9b889 *man/figures/structures3.png
-7ff5cce3c92bd5ea62d4c95d24ed2b5f *man/truthTab.Rd
+cfe55148dde4cb249e0a25611369540b *man/truthTab.Rd

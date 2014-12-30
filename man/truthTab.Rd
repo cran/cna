@@ -96,7 +96,7 @@ cna(dat1_tt, con = 0.85)
 dat1_tt <- truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3), case.cutoff = 2)
 cna(dat1_tt)
 
-\donttest{ 
+
 # Greckhamer et al. (2008) on the causal conditions for superior business-unit performance
 #-----------------------------------------------------------------------------------------
 # Load dataset. 
@@ -119,5 +119,5 @@ cna(truthTab(d.performance[1:8], frequency = d.performance$frequency, case.cutof
        con = 0.75, cov = 0.75)
 print(cna(truthTab(d.performance[1:8], frequency = d.performance$frequency,
        case.cutoff = 7), con = 0.65, cov = 0.75, what = "c"), nsolutions = "all")
-}
+
 }
