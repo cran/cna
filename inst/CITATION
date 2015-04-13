@@ -1,6 +1,6 @@
 citHeader("Please cite the cna package as:")
 
-  meta <- packageDescription("cna")
+ if(!exists("meta") || is.null(meta)) meta <- packageDescription("cna")
   authors <- sprintf("%s", meta$Author)
   year <- sub("-.*", "", meta$Date)
   note <- sprintf("R Package Version %s", meta$Version)

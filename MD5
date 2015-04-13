@@ -1,8 +1,8 @@
-9e557571431d4a18e53891cd2e583e01 *DESCRIPTION
+c04688b0ff4e9373f4b952189fb28911 *DESCRIPTION
 09c4900c901e3d4b791f4c5a428e8399 *INDEX
 884288dd2c2711990b31b6ceb2e78ca4 *NAMESPACE
 e1354bfaca973b7650f5bbf5da8a2229 *R/cna.r
-05087b6eeef9e6a6214ecad4e790343c *R/cna_aux.r
+f55f80e803fdc39dd3420db9651fa622 *R/cna_aux.r
 3c29f626741c3542b9f8c38e2a4e80ee *R/condTbl.r
 e418a6c2dc7a54ee7959ef5d20237e81 *R/condition.r
 f432319904a5f379b855381e2cf8a656 *R/onAttach.R
@@ -13,10 +13,10 @@ f432319904a5f379b855381e2cf8a656 *R/onAttach.R
 8c018ee8a696fd2ce0b20b1576bf07ed *data/d.performance.tab.gz
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
-2ceebd03eac59d5ae831ed1e94c3b212 *inst/CITATION
-b6cdb81e7dbdfdc786222fae0b895080 *inst/ChangeLog
+ef0a2736a4b7715f5d4a9776945c6859 *inst/CITATION
+b9b7a07991a3ea1fdc5a68b97dd270bc *inst/ChangeLog
 bfbfb9143ebf4aedcd9c2ee49db81bbc *man/cna.Rd
-cbda6328b6d1c099f57d9a7f93e107e9 *man/cna.package.Rd
+35b8924e80d4d2811748e44804f069d0 *man/cna.package.Rd
 b93f216f72252d884864000ef7be592b *man/condTbl.Rd
 8c83833e13fe5fd76b3998d50729aa8e *man/condition.Rd
 7d7f87e9ff961177ef5911fe83295fcd *man/d.educate.Rd

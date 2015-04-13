@@ -34,7 +34,7 @@ label.conditions <- function(cond){
     ch[!is.na(condm) & condm] <- 
     #  toupper(names(cond))[col(condm)][!is.na(condm) & condm]
     names(cond)[col(condm)][!is.na(condm) & condm]
-  # mettre en min. ou mettre en polarité opposée
+  # mettre en min. ou mettre en pol. opp.
   ch[!is.na(condm) & !condm] <- 
 chartr("qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLYXCVBNM","QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm",names(cond))[col(condm)][!is.na(condm) & !condm]
 # tolower(names(cond))[col(condm)][!is.na(condm) & !condm]
