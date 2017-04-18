@@ -13,10 +13,10 @@ This dataset is from Greckhammer et al. (2008), who analyze the causal condition
 \usage{data(d.performance)}
 
 \format{
-This dataset contains 214 rows featuring configurations, one column reporting the frequencies of each configuration, and 8 columns listing the following Boolean factors:
+The data frame contains 214 rows featuring configurations, one column reporting the frequencies of each configuration, and 8 columns listing the following Boolean factors:
 
 \tabular{rll}{
-[ , 1] \tab \bold{MU} \tab above average industry munificience     \cr
+[ , 1] \tab \bold{MU} \tab above average industry munificence     \cr
 [ , 2] \tab \bold{DY} \tab high industry dynamism \cr
 [ , 3] \tab \bold{CO} \tab high industry competitiveness   \cr
 [ , 4] \tab \bold{DIV} \tab high corporate diversification      \cr

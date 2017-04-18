@@ -13,7 +13,7 @@ This dataset is from Wollebaek (2010), who analyzes the causes of disbandings of
 \usage{data(d.volatile)}
 
 \format{
-This dataset contains 22 rows (cases) and the following 9 columns (Boolean factors):
+The data frame contains 22 rows (cases) and the following 9 columns featuring Boolean factors taking values 1 and 0 only:
 
 \tabular{rll}{
 [ , 1] \tab \bold{PG} \tab high population growth                         \cr
@@ -23,7 +23,7 @@ This dataset contains 22 rows (cases) and the following 9 columns (Boolean facto
 [ , 5] \tab \bold{CS} \tab existence of Christian strongholds        \cr
 [ , 6] \tab \bold{OD} \tab high organizational density \cr
 [ , 7] \tab \bold{PC} \tab existence of polycephality (i.e. municipalities with multiple centers)\cr
-[ , 8] \tab \bold{UP} \tab existence urban proximity        \cr
+[ , 8] \tab \bold{UP} \tab urban proximity        \cr
 [ , 9] \tab \bold{VO2} \tab very high volatility of grassroots associations        
 }
 }

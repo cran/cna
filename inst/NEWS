@@ -1,0 +1,17 @@
+Changes in version 2.0.0 (2017-04-11)
+  * Most functions in the package have been fundamentally redesigned or revised. Although we tried to maintain backward compatibility where it was reasonably achievable, code compatible with older versions will not work in many cases.
+  * Three different types of data are now handled: crisp-set, multi-value, and fuzzy-set. Accordingly, several functions have a type argument with possible values "cs", "mv", "fs".
+  * truthTab() has new arguments: type, rm.dup.factors, rm.const.factors and .cases. The argument switch has been removed.
+  * The new convenience functions cstt(), mvtt() and fstt() provide easy access to truthTab().
+  * condition() is now able to handle complex expressions.
+  * New arguments in condition(): type, force.bool, rm.parentheses.
+  * The convenience functions cscond(), mvcond() and fscond() provide easy access to condition().
+  * cna() uses a different (more general and usually faster) algorithm to find solutions.
+  * New arguments in cna(): type, con.msc, rm.const.factors, rm.dup.factors, only.minimal.msc, maxSol, cutoff, border.
+  * The meaning of the argument maxstep in cna() has changed.
+  * The convenience functions cscna(), mvcna() and fscna() provide easy access to cna().
+  * complexity has been added in the output of msc(), asf() and csf(). coherence has been added in the output of csf().
+  * The new functions allCombs(), makeFuzzy(), selectCases(), selectCases1() and some() facilitate the generation of simulated data for inverse search trials that assess the correctness of models output by cna.
+  * Additional new functions: fs2tt(), coherence().
+  * New data sets: d.autonomy, d.jobsecurity, d.pacts, d.pban.
+

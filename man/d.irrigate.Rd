@@ -14,7 +14,7 @@ experiment in Nepal.
 \usage{data(d.irrigate)}
 
 \format{
-This dataset contains 15 rows (cases) and the following 6 columns (Boolean factors):
+The dataset contains 15 rows (cases) and the following 6 columns featuring Boolean factors taking values 1 and 0 only:
 
 \tabular{rll}{
 [ , 1] \tab \bold{A} \tab continual assistance on infrastructure improvement                         \cr

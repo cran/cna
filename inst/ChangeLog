@@ -1,9 +1,0 @@
-Version 1.0-3
-    o Citation file modified, some modifications in the example data.
-Version 1.0-2
-    o Other very tiny changes in the documentation. Bug hapenning with the command example(cna) fixed.
-Version 1.0-1
-    o Very tiny changes in the documentation from version 1.0-0.
-Version 1.0-0
-    o Release version, replacing the pre-release version 0.1-3. The documentation is now completed and the condition function works also with data frame arguments.
-

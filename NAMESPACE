@@ -1,17 +1,34 @@
-export(.onAttach,
-  as.condTbl,
-  asf,
-  cna,
-  condition,
-  csf,
-  group.by.outcome,
-  msc,
-  truthTab)
-importFrom("utils", "packageDescription")
+export(allCombs, makeFuzzy, selectCases, selectCases1, some,
+       truthTab, some.truthTab, cstt, mvtt, fstt, tt2df,
+       condition, cscond, mvcond, fscond,
+       msc, asf, csf, as.condTbl, coherence,
+       cna, cscna, mvcna, fscna,
+       group.by.outcome)
+
+useDynLib(cna, .registration = TRUE)
+importFrom(Rcpp, sourceCpp)
+importFrom(utils, head, tail, combn, packageVersion)
+importFrom(stats, as.dist, cutree, hclust, setNames)
 
 S3method(print, truthTab)
+S3method("$<-", truthTab)
+S3method("[", truthTab)
+S3method("[[<-", truthTab)
+S3method("[<-", truthTab)
+S3method(as.data.frame, truthTab) 
+S3method(print, truthTab)
+S3method(some, data.frame)
+S3method(some, truthTab)
+S3method(subset, truthTab)
+S3method(head, truthTab)
+S3method(tail, truthTab)
+
 S3method(print, cna)
 S3method(print, cond)
-S3method(print, condTbl)
 S3method(condition, default)
+
+S3method(print, condTbl)
 S3method(condition, condTbl)
+
+S3method(print, complexCond)
+S3method(print, groupedConds)

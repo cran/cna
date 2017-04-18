@@ -13,7 +13,7 @@ This dataset is from Krook (2010), who analyzes the causal conditions for high w
 \usage{data(d.women)}
 
 \format{
-This dataset contains 22 rows (cases) and the following 6 columns (Boolean factors):\cr
+The data frame contains 22 rows (cases) and the following 6 columns featuring Boolean factors taking values 1 and 0 only:
 \tabular{rll}{
 [ , 1] \tab \bold{ES} \tab existence of a PR electoral system     \cr
 [ , 2] \tab \bold{QU} \tab existence of quotas for women \cr

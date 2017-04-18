@@ -14,16 +14,20 @@ of the outcome of the vote on the 2009 Swiss Minaret Initative.
 \usage{data(d.minaret)}
 
 \format{
-This dataset contains 26 rows (cases) and the following 6 columns (variables):
+The data frame contains 26 rows (cases) and the following 6 columns featuring raw data:
 
 \tabular{rll}{
-[ , 1] \tab \bold{a} \tab rate of old xenophobia                                    \cr
-[ , 2] \tab \bold{l} \tab left party strength                                       \cr
-[ , 3] \tab \bold{s} \tab share of native speakers of Serbian, Croatian, or Albanian\cr
-[ , 4] \tab \bold{t} \tab strength of traditional economic sector                   \cr
-[ , 5] \tab \bold{x} \tab rate of new xenophobia                                    \cr
-[ , 6] \tab \bold{m} \tab acceptance of Minaret Initiative
+[ , 1] \tab \bold{A} \tab rate of old xenophobia                                    \cr
+[ , 2] \tab \bold{L} \tab left party strength                                       \cr
+[ , 3] \tab \bold{S} \tab share of native speakers of Serbian, Croatian, or Albanian\cr
+[ , 4] \tab \bold{T} \tab strength of traditional economic sector                   \cr
+[ , 5] \tab \bold{X} \tab rate of new xenophobia                                    \cr
+[ , 6] \tab \bold{M} \tab acceptance of Minaret Initiative
 }
+}
+
+\section{Contributors}{
+Ruedi Epple: collection, documentation
 }
 
 \source{

@@ -1,13 +1,27 @@
 Package: cna
-Version: 1.0-3
-Date: 2015-04-13
-Title: A Package for Coincidence Analysis (CNA)
-Author: Ambuehl, Mathias, Michael Baumgartner, Ruedi Epple, Alexis Kauffmann and Alrik Thiem
-Maintainer: Alexis Kauffmann <alexis.kauffmann@unige.ch>
-Depends: R (>= 2.13.0), utils
-Description: Provides functions for performing Coincidence Analysis (CNA).
+Type: Package
+Title: Causal Modeling with Coincidence Analysis
+Version: 2.0.0
+Date: 2017-04-18
+Authors@R: c(person("Mathias", "Ambuehl", role = c("aut", "cre", "cph"), 
+                    email = "mathias.ambuehl@consultag.ch"),
+             person("Michael", "Baumgartner", role = c("aut", "cph"),
+                     email = "michael.baumgartner@unige.ch"),
+             person("Ruedi", "Epple", role = "ctb"),
+             person("Alrik", "Thiem", role = "ctb")
+             )
+Description: Provides comprehensive functionalities for causal modeling with Coincidence Analysis (CNA), which is a configurational comparative method of causal data analysis that was first introduced in Baumgartner (2009) <doi:10.1177/0049124109339369>. CNA is related to Qualitative Comparative Analysis (QCA), but contrary to the latter, it is custom-built for uncovering causal structures with multiple outcomes. While previous versions have only been capable of processing dichotomous variables, the current version generalizes CNA for multi-value and continuous variables whose values are interpreted as membership scores in fuzzy sets.
 License: GPL (>= 2)
-Packaged: 2015-04-17 11:09:47 UTC; lettres
-NeedsCompilation: no
+URL: https://CRAN.R-project.org/package=cna
+Depends: R (>= 3.2.0)
+Imports: Rcpp, utils, stats
+LinkingTo: Rcpp
+NeedsCompilation: yes
+Packaged: 2017-04-18 12:02:09 UTC; MAM
+Author: Mathias Ambuehl [aut, cre, cph],
+  Michael Baumgartner [aut, cph],
+  Ruedi Epple [ctb],
+  Alrik Thiem [ctb]
+Maintainer: Mathias Ambuehl <mathias.ambuehl@consultag.ch>
 Repository: CRAN
-Date/Publication: 2015-04-18 08:56:07
+Date/Publication: 2017-04-18 12:52:55 UTC

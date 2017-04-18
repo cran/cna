@@ -2,75 +2,94 @@
 \alias{condition}
 \alias{condition.default}
 \alias{condition.condTbl}
+\alias{cscond}
+\alias{mvcond}
+\alias{fscond}
 \alias{print.cond}
 \alias{group.by.outcome}
 
 
 \title{
-Uncover relevant properties of sufficient and necessary conditions in a truth table
+Uncover relevant properties of msc, asf, and csf in a data frame or \code{truthTab}
 }
 
 \description{
-Provides assistance to inspect the properties of sufficient and necessary conditions in a truth table, most notably, of minimally sufficient conditions that appear in solution formulas as returned by \code{\link{cna}}. \code{condition} reveals which configurations and cases instantiate a given condition or solution and lists consistency, coverage as well as unique coverage scores. 
+Provides assistance to inspect the properties of msc, asf, and csf in a data frame or \code{truthTab}, most notably, of msc, asf, and csf as returned by \code{\link{cna}}, but also of any other Boolean function. \code{condition} reveals which configurations and cases instantiate a given msc, asf, or csf and lists consistency, coverage, as well as unique coverage scores. 
 }
 
 \usage{
 condition(x, ...)
 
-\method{condition}{default}(x, tt, ...)
+\method{condition}{default}(x, tt, type, force.bool = FALSE, rm.parentheses = FALSE, ...)
 \method{condition}{condTbl}(x, tt, ...)
+cscond(...)
+mvcond(...)
+fscond(...)
 
-\method{print}{cond}(x, digits = 3, print.table = TRUE, row.names = FALSE, ...)
+\method{print}{cond}(x, digits = 3, print.table = TRUE, 
+      show.cases = NULL, ...)
 
 group.by.outcome(condlst, cases = TRUE)
 }
 
 \arguments{
-  \item{x}{A vector of character strings specifying
-        conditions as \code{"A+B*C -> D"}, where \code{"A","B","C","D"} are
-        column names in \code{tt}.}
+  \item{x}{A character vector specifying a Boolean expression as \code{"A + B*C -> D"}, where \code{"A","B","C","D"} are column names in \code{tt}.}
   \item{tt}{A truth table as produced by \code{\link{truthTab}} or a data frame.}
+  \item{type}{A character vector specifying the type of \code{tt}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value), or \code{"fs"} (fuzzy-set). Defaults to the type of \code{tt}, if \code{tt} is a \code{truthTab}
+or to \code{"cs"} otherwise.}
+  \item{force.bool}{Logical; if \code{TRUE}, any \code{x} is interpreted as a mere Boolean function, not as a causal model.} 
+  \item{rm.parentheses}{Logical; if \code{TRUE}, parantheses around \code{x} are removed prior to evaluation.}
   \item{digits}{Number of digits to print in consistency and coverage scores.}
-  \item{print.table}{Logical; specifies whether to print the table assigning configurations and cases to conditions.}
-  \item{row.names}{In \code{print.cond}, these arguments are passed to
-  \code{\link{print.data.frame}}.}
-  \item{condlst}{A list of objects, each of them of class \dQuote{cond} as
-        returned by \code{condition}.}
-  \item{cases, \dots}{Logical; if \code{TRUE}, the returned data frame has a
-        column \dQuote{cases}.}
+  \item{print.table}{Logical; if \code{TRUE} the table assigning configurations and cases to conditions is printed.}
+  \item{show.cases}{In \code{print.cond}: logical; specifies whether the attribute \dQuote{cases} of the truthTab is printed. Same default behavior as in \code{\link{print.truthTab}}.}
+  \item{condlst}{A list of objects, each of them of class \dQuote{cond}, as returned by \code{condition}.}
+  \item{cases}{Logical; if \code{TRUE}, the returned data frame has a
+        column named \dQuote{cases}.}
+  \item{\dots}{
+        In \code{cscond}, \code{mvcond}, \code{fscond}: any formal argument of \code{condition} except \code{type}.}
 }
 
 \details{
-Depending on the processed data frame or truth table, the solutions output by \code{\link{cna}} are sometimes ambiguous, that is, it can happen that many solution formulas fit the data equally well. In such cases, the data alone are insufficient to single out one solution that corresponds to the underlying causal structure. While \code{\link{cna}} simply lists the possible solutions, the \code{condition} function is intended to provide assistance in comparing different possible conditions or solutions in order to have a better basis for selecting among them. 
+Depending on the processed data frame or truth table, the solutions output by \code{\link{cna}} are often ambiguous; that is, it can happen that many solution formulas fit the data equally well. In such cases, the data alone are insufficient to single out one solution that corresponds to the underlying causal structure. While \code{\link{cna}} simply lists the possible solutions, the \code{condition} function is intended to provide assistance in comparing different minimally sufficient conditions (msc), atomic solution formulas (asf), and complex solution formulas (csf) in order to have a better basis for selecting among them. 
 
-Most importantly, the output of the \code{condition} function highlights in which configurations and cases in the data an analyzed condition or atomic solution formula is instantiated. Thus, if the user has independent causal knowledge about particular configurations or cases, the information received from \code{condition} may be helpful in selecting the conditions or solutions that are consistent with that knowledge. Moreover, the \code{condition} function allows for directly contrasting consistency, coverage, and unique coverage scores or frequencies of different conditions contained in atomic solution formulas (for details on unique coverage cf. Ragin 2008:63-68). 
+Most importantly, the output of the \code{condition} function highlights in which configurations and cases in the data an msc, asf, and csf is instantiated. Thus, if the user has independent causal knowledge about particular configurations or cases, the information received from \code{condition} may be helpful in selecting the solutions that are consistent with that knowledge. Moreover, the \code{condition} function allows for directly contrasting consistency, coverage, and unique coverage scores or frequencies of different conditions contained in asf (for details on unique coverage cf. Ragin 2008:63-68). 
 
-The \code{condition} function is independent of \code{\link{cna}}. That is, any conditions or atomic solution formulas -- irrespective of whether they are output by \code{\link{cna}} --  can be given as input to the \code{condition} function. Even Boolean expressions that do not have the standard syntax of CNA solution formulas can be fed into \code{condition}. This makes it possible to also test conditions or Boolean formulas for consistency, coverage, or frequency that are interesting or of relevance independently of \code{\link{cna}}.
+The \code{condition} function is independent of \code{\link{cna}}. That is, any msc, asf, or csf---irrespective of whether they are output by \code{\link{cna}}---can be given as input to \code{condition}. Even Boolean expressions that do not have the syntax of CNA solution formulas can be fed into \code{condition}. This makes it possible to also assess the properties of Boolean functions that are interesting or of relevance independently of \code{\link{cna}}.
 
-The first required input \code{x} of \code{condition} is a character vector consisting of Boolean formulas exclusively composed of factor names that are column names of the truth table \code{tt} as produced by \code{\link{truthTab}}, which is the second required input. Instead of a truth table, it is also possible to give \code{condition} a data frame as second input, in which case \code{condition} first transforms the data frame into a truth table via \code{\link{truthTab}}.
-The presupposed Boolean syntax is as follows: conjunction is expressed by \dQuote{\code{*}}, disjunction by \dQuote{\code{+}}, negation by changing upper case into lower case letters and vice versa, and implication by \dQuote{\code{->}}. Examples are \code{condition("A*b -> C", tt)} or \code{condition(c("A+b*c", "A*B*C", "C -> A*B + a*b"), tt)}.
+The first required input \code{x} of \code{condition} is a character vector consisting of Boolean formulas exclusively composed of factor names that are column names of the truth table \code{tt} as produced by \code{\link{truthTab}}, which is the second required input. Instead of a truth table, it is also possible to give \code{condition} a data frame as second input. In this case, \code{condition} must be told what type of data \code{tt} contains, and the data frame will be converted to a truth table with \code{\link{truthTab}}. Data that feature factors taking values 1 or 0 only are called \emph{crisp-set}, in which case the \code{type} argument takes its default value \code{"cs"}. If the data contain at least one factor that takes more than two values, e.g. \{1,2,3\}, the data count as \emph{multi-value}, which is indicated by \code{type = "mv"}. Data featuring at least one factor taking real values from the interval [0,1] count as \emph{fuzzy-set}, which is specified by \code{type = "fs"}. To abbreviate the specification of the data type, the functions \code{cscond(x, tt, ...)}, \code{mvcond(x, tt, ...)}, and \code{fscond(x, tt, ...)} are available as shorthands for \code{condition(x, tt, type = "cs", ...)}, \code{condition(x, tt, type = "mv", ...)}, and \code{condition(x, tt, type = "fs", ...)}, respectively.
 
-If the Boolean expression given to \code{condition} has an \dQuote{\code{->}}, the character strings on both sides of \dQuote{\code{->}} are evaluated and written into a data frame with two columns. Consistency, coverage, and unique coverage are attached to these data frames as attributes along with an additional class attribute \dQuote{cond}. If the Boolean expression does not have an \dQuote{\code{->}}, the character string is evaluated and written into a data frame with one column. Frequency is attached to this data frame as attribute. In both cases, an amended data frame for each character string results, such that the value returned by \code{condition} is a list of such \dQuote{cond}-objects.
+The presupposed Boolean syntax for \code{x} is as follows: conjunction is expressed by \dQuote{\code{*}}, disjunction by \dQuote{\code{+}}, negation---which only applies to crisp-set and fuzzy-set data---by changing upper case into lower case letters and vice versa, implication by \dQuote{\code{->}}, and equivalence by \dQuote{\code{<->}}. Examples are \code{condition("A*b -> C", tt)} or \code{condition(c("A+b*c", "A*B*C", "C -> A*B + a*b",} \code{"A*b <-> C"), tt, type = "fs")}. In case of multi-value data, values are directly assigned to factors with equality signs: A=1, B=3, etc. Examples are \code{condition("A=2*B=4 + C=3*D=1 <-> E=2",} \code{tt, type = "mv")} or \code{mvcond("(A=2*B=4 + A=3*B=1 <-> C=2)*(C=2*D=3 + C=1*D=4 <-> E=3)",} \code{tt)}.
+
+Three types of conditions are distinguished:
+\itemize{
+    \item The type \emph{boolean} comprises Boolean expressions that do not have the syntactic form of causal models, meaning the corresponding character strings in the argument \code{x} do not have an \dQuote{\code{->}} or \dQuote{\code{<->}} as main operator. Examples: \code{"A*B + C"} or \code{-(A*B + -(C+d))}. The expression is evaluated and written into a data frame with one column. Frequency is attached to this data frame as an attribute. 
+    \item The type \emph{atomic} comprises expressions that have the syntactic form of atomic causal models, i.e. asf, meaning the corresponding character strings in the argument \code{x} have an \dQuote{\code{->}} or \dQuote{\code{<->}} as main operator. Examples: \code{"A*B + C -> D"} or \code{"A*B + C <-> D"}. The expressions on both sides of \dQuote{\code{->}} and \dQuote{\code{<->}} are evaluated and written into a data frame with two columns. Consistency, coverage, and unique coverage are attached to these data frames as attributes.
+    \item \emph{Complex} conditions represent complex causal models, i.e. csf. Example: \code{"(A*B -> C)*(C + D -> E)"}. Each component must be a causal model of type \emph{atomic}. These components are evaluated separately and the results stored in a list. Consistency and coverage of the complex expression are then attached to this list.
+  }
+The types of the character strings in the input \code{x} are automatically discerned and thus do not need be specified by the user.
+
+If \code{force.bool = TRUE}, expressions with \dQuote{\code{->}} or \dQuote{\code{<->}} are treated as type \emph{boolean}, i.e. they are analyzed with respect to frequency only. Enclosing a character string representing a causal model in parentheses has the same effect as specifying \code{force.bool = TRUE}. \code{rm.parentheses = TRUE} removes parentheses around the expression prior to evaluation, and thus has the reverse effect of setting \code{force.bool = TRUE}.
 
 The \code{digits} argument of the \code{print} function determines how many digits of consistency and coverage scores are printed. If \code{print.table = FALSE}, the table assigning conditions to configurations and cases is omitted, i.e. only frequencies or consistency and coverage scores are returned. \code{row.names = TRUE} also lists the row names in \code{tt}.
 
-\code{group.by.outcome} combines the \dQuote{cond}-data frames resulting from
-\dQuote{\code{->}}-expressions with the same outcome (data frames with an identical second column)
-into a common data frame with a larger number of columns. The additional
-attributes (consistencies etc.) are thereby removed.
+\code{group.by.outcome} takes a \code{condlist} as input, i.e. a list of \dQuote{cond} objects, as it is returned by \code{condition}, and combines the entries in that lists into a data frame with a larger number of columns. The additional attributes (consistencies etc.) are thereby removed.
 }
 
 \value{
-\code{condition} returns a list of objects, each of them of class \dQuote{cond}. 
-An object of class \dQuote{cond} is a data frame of 0 and 1 with additional
-attributes \dQuote{Consistency}, \dQuote{Coverage}, \dQuote{Unique Coverage}, \dQuote{Frequency}.
+\code{condition} returns a list of objects, each of them corresponding to one element of the input vector \code{x}. Each element of the list is of class \dQuote{cond} and has a more specific class label \dQuote{booleanCond}, \dQuote{atomicCond} or \dQuote{complexCond}, according to its condition type. The components of class \dQuote{booleanCond} or \dQuote{atomicCond} are amended data frames, those of class \dQuote{complexCond} are lists of amended data frames.
 
-\code{group.by.outcome} returns a list of data frames.
+\code{group.by.outcome} returns a list of data frames, one data frame for each factor appearing as an outcome in \code{condlst}.
 }
 
-
+\section{Contributors}{
+Epple, Ruedi: development, testing\cr
+Thiem, Alrik: testing
+}
 
 \references{
+Emmenegger, Patrick. 2011. \dQuote{Job Security Regulations in Western Democracies: 
+A Fuzzy Set Analysis.} \emph{European Journal of Political Research} 50(3):336-64.
+
 Lam, Wai Fung, and Elinor Ostrom. 2010.
 \dQuote{Analyzing the Dynamic Complexity of Development Interventions: Lessons
 from an Irrigation Experiment in Nepal.}
@@ -79,8 +98,6 @@ from an Irrigation Experiment in Nepal.}
 Ragin, Charles. 2008.
 \emph{Redesigning Social Inquiry: Fuzzy Sets and Beyond}. Chicago, IL:
 University of Chicago Press.
-
-
 }
 
 
@@ -88,24 +105,23 @@ University of Chicago Press.
 
 
 \examples{
-
-# Lam and Ostrom (2010) on the impact of development interventions on water adequacy in Nepal
-#--------------------------------------------------------------------------------------------
+# Crisp-set data from Lam and Ostrom (2010) on the impact of development interventions 
+# ------------------------------------------------------------------------------------
 # Load dataset. 
 data(d.irrigate)
 
 # Build a truth table for d.irrigate.
 irrigate.tt <- truthTab(d.irrigate)
 
-# Any Boolean functions involving the factors "A", "R", "F", "L", "C", "W" in d.irrigate can 
-# be tested by condition.
+# Any Boolean functions involving the factors "A", "R", "F", "L", "C", "W" in d.irrigate  
+# can be tested by condition.
 condition("A*r + L*C", irrigate.tt)
 condition(c("A*r + L*C", "A*L -> F", "C -> A*R + C*l"), irrigate.tt)
 condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"), irrigate.tt)
 
 # Group expressions with "->" by outcome.
 irrigate.con <- condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"),
-       irrigate.tt)
+                          irrigate.tt)
 group.by.outcome(irrigate.con)
 
 # Input minimally sufficient conditions inferred by cna into condition.
@@ -132,12 +148,45 @@ print(irrigate.cna2.asf, digits = 2)
 
 # Instead of a truth table as output by truthTab, it is also possible to provide a data
 # frame as second input. 
-condition("A*r + L*C", d.irrigate)
-condition(c("A*r + L*C", "A*L -> F", "C -> A*R + C*l"), d.irrigate)
-condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"), d.irrigate)
+condition("A*r + L*C", d.irrigate, type = "cs")
+condition(c("A*r + L*C", "A*L -> F", "C -> A*R + C*l"), d.irrigate, type = "cs")
+condition(c("A*r + L*C -> W", "A*L*R -> W", "A*R + C*l -> F", "W*a -> F"), d.irrigate, 
+          type = "cs")
+          
+# Fuzzy-set data from Emmenegger (2011) on the causes of high job security regulations
+# ------------------------------------------------------------------------------------
+# Load dataset. 
+data(d.jobsecurity)
 
+# Compare the CNA solutions for outcome JSR to the solution presented by Emmenegger
+# S*R*v + S*L*R*P + S*C*R*P + C*L*P*v -> JSR (p. 349), which he generated by fsQCA as
+# implemented in the fs/QCA software, version 2.5.
+jobsecurity.cna <- fscna(d.jobsecurity, ordering=list("JSR"), strict = TRUE, con=.97, 
+                         cov= .77, maxstep = c(4, 4, 15))
+compare.sol <- fscond(c(asf(jobsecurity.cna)$condition, "S*R*v + S*L*R*P + S*C*R*P + 
+                         C*L*P*v -> JSR"), d.jobsecurity)
+print(compare.sol, print.table = FALSE)
+group.by.outcome(compare.sol)
 
+# There exist even more high quality solutions for JSR.
+jobsecurity.cna2 <- fscna(d.jobsecurity, ordering=list("JSR"), strict = TRUE, con=.95, 
+                          cov= .8, maxstep = c(4, 4, 15))
+compare.sol2 <- fscond(c(asf(jobsecurity.cna2)$condition, "S*R*v + S*L*R*P + S*C*R*P + 
+                         C*L*P*v -> JSR"), d.jobsecurity)
+print(compare.sol2, print.table = FALSE)
+group.by.outcome(compare.sol2)
 
-
-
+# Simulated multi-value data
+# --------------------------
+dat1 <- allCombs(c(3, 3, 2, 3, 3))
+dat2 <- selectCases("(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=2*D=3 <-> E=3)", dat1, 
+                    type = "mv")
+dat3 <- rbind(tt2df(dat2), c(2,1,2,3,2), c(1,1,1,1,3)) # add some inconsistent rows
+dat4 <- some(mvtt(dat3), n = 300, replace = TRUE)
+condition("(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=2*D=3 <-> E=3)", dat4, type = "mv")
+mvcond("(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=2*D=3 <-> E=3)", dat4)
+mvcond("A=2*B=1 + A=3*B=3 <-> C=1", dat4)
+condition("A=2*B=1 + A=3*B=3 <-> C=1", dat4, force.bool = TRUE)
+mvcond("(C=1*D=2 + C=2*D=3 <-> E=3)", dat4)
+mvcond("(C=1*D=2 + C=2*D=3 <-> E=3)", dat4, rm.parentheses = TRUE)
 }
