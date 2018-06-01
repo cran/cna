@@ -6,8 +6,7 @@ Generate all possible value configurations of a given set of factors
 }
 
 \description{
-Generates a data frame of all possible value configurations of \code{length(x)} multi-valued factors, the first factor having \code{x[1]} values, the second \code{x[2]} values etc.
-The factors are labeled\cr \code{LETTERS[seq_along(x)]}.
+Generates a data frame of all possible value configurations of \code{length(x)} multi-valued factors, the first factor having \code{x[1]} values, the second \code{x[2]} values etc. The factors are labeled using capital letters.
 }
 
 \usage{
@@ -18,7 +17,7 @@ allCombs(x)
   \item{x}{integer vector with values >0}
 }
 
-\details{In combination with \code{selectCases} and \code{makeFuzzy}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials that assess the correctness of models output by \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data generating causal structure, and \code{makeFuzzy} introduces noise into that data.
+\details{In combination with \code{selectCases} and \code{makeFuzzy}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials that assess the correctness of models output by \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data-generating causal structure, and \code{makeFuzzy} introduces noise into that data.
 }
 
 \value{
@@ -36,7 +35,7 @@ allCombs(c(2, 2, 2, 2, 2)) - 1
 # every value output by allCombs(c(2, 2, 2, 2, 2)) to yield a Boolean data frame.
 
 # Generate all logically possible configurations of 5 multi-value factors named "A", "B",
-# "C", "D", and "E",  such that A can take on 3 values {1,2,3}, B 4 values {1,2,3,4},
+# "C", "D", and "E", such that A can take on 3 values {1,2,3}, B 4 values {1,2,3,4},
 # C 3 values etc.
 dat0 <- allCombs(c(3, 4, 3, 5, 3))
 head(dat0)
@@ -65,7 +64,7 @@ dat2 <- makeFuzzy(dat1, fuzzvalues = seq(0, 0.45, 0.01))
 # fuzzy-set data with non-perfect consistency and coverage scores.
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
-set.seed(2)
+set.seed(3)
 dat3 <- selectCases1("A*b + a*B + C*D <-> E", con = .8, cov = .8, dat2)
 fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
 }

@@ -1,14 +1,16 @@
 export(allCombs, makeFuzzy, selectCases, selectCases1, some,
        truthTab, some.truthTab, cstt, mvtt, fstt, tt2df,
        condition, cscond, mvcond, fscond,
-       msc, asf, csf, as.condTbl, coherence,
+       msc, asf, csf, condTbl, as.condTbl, coherence, minimalizeCsf,
        cna, cscna, mvcna, fscna,
        group.by.outcome)
 
 useDynLib(cna, .registration = TRUE)
 importFrom(Rcpp, sourceCpp)
-importFrom(utils, head, tail, combn, packageVersion)
+importFrom(utils, head, tail, combn, packageVersion, getFromNamespace)
 importFrom(stats, as.dist, cutree, hclust, setNames)
+importFrom(matrixStats, rowMins, rowMaxs, rowAnys, rowAlls, 
+           colMins, colAnys, colAlls)
 
 S3method(print, truthTab)
 S3method("$<-", truthTab)
@@ -16,7 +18,6 @@ S3method("[", truthTab)
 S3method("[[<-", truthTab)
 S3method("[<-", truthTab)
 S3method(as.data.frame, truthTab) 
-S3method(print, truthTab)
 S3method(some, data.frame)
 S3method(some, truthTab)
 S3method(subset, truthTab)
@@ -27,8 +28,64 @@ S3method(print, cna)
 S3method(print, cond)
 S3method(condition, default)
 
+S3method(as.condTbl, condList)
+S3method(as.condTbl, data.frame)
+
 S3method(print, condTbl)
 S3method(condition, condTbl)
 
+S3method(print, condString)
+S3method("[", condString)
+S3method(format, condString)
+S3method(print, outcomeString)
+S3method("[", outcomeString)
+S3method(format, outcomeString)
+S3method(print, stdBoolean)
+S3method("[", stdBoolean)
+S3method(format, stdBoolean)
+S3method(print, stdAtomic)
+S3method("[", stdAtomic)
+S3method(format, stdAtomic)
+S3method(print, stdComplex)
+S3method("[", stdComplex)
+S3method(format, stdComplex)
+
+S3method(print, condList)
+S3method(summary, condList)
+S3method("[", condList)
+S3method("[[", condList)
+S3method("$", condList)
+
 S3method(print, complexCond)
+S3method(print, invalidCond)
 S3method(print, groupedConds)
+S3method(print, groupedC)
+
+S3method(full.tt, default)
+S3method(full.tt, tti)
+S3method(full.tt, truthTab)
+
+S3method(.det, default)
+S3method(.det, tti)
+
+S3method(.inus, default)
+S3method(.inus, tti)
+S3method(.inus, truthTab)
+
+S3method(.redund, default)
+S3method(.redund, tti)
+S3method(.redund, truthTab)
+
+S3method(exhaust1, default)
+S3method(exhaust1, tti)
+S3method(exhaust1, truthTab)
+
+S3method(exff, default)
+S3method(exff, tti)
+S3method(exff, truthTab)
+
+S3method(print, minimalizeCsf)
+S3method(minimalizeCsf, default)
+S3method(minimalizeCsf, cna)
+
+S3method(print, equivClass)

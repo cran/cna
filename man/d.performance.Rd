@@ -10,7 +10,7 @@
 This dataset is from Greckhammer et al. (2008), who analyze the causal conditions for superior (above average) business-unit performance of corporations in the manufacturing sector during the years 1995 to 1998.
 }
 
-\usage{data(d.performance)}
+\usage{d.performance}
 
 \format{
 The data frame contains 214 rows featuring configurations, one column reporting the frequencies of each configuration, and 8 columns listing the following Boolean factors:

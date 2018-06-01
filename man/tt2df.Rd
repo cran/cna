@@ -2,7 +2,7 @@
 \alias{tt2df}
 
 \title{
-Transform a truth table into a data frame.
+Transform a truth table into a data frame
 }
 
 \description{
@@ -29,7 +29,6 @@ A data frame.
 }
 
 \examples{
-data(d.educate)
 tt.educate <- truthTab(d.educate[1:2])
 tt.educate
 tt2df(tt.educate)

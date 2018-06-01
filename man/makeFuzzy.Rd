@@ -2,7 +2,7 @@
 \alias{makeFuzzy}
 
 \title{
-Generate fuzzy-set data set by simulating noise.
+Generate fuzzy-set data set by simulating noise
 }
 \description{
 Generates fuzzy-set data by simulating the addition of random noise from the uncontrolled causal background to a data frame featuring Boolean factors only.
@@ -55,8 +55,8 @@ condition("(A*b + a*B <-> C)*(C*d + c*D <-> E)", dat3)
 # Inverse search for the data generating causal structure A*b + a*B + C*D <-> E from
 # fuzzy-set data with non-perfect consistency and coverage scores.
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
+set.seed(5)
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
-set.seed(2)
 dat3 <- selectCases1("A*b + a*B + C*D <-> E", con = .8, cov = .8, dat2)
 fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
 }

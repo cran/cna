@@ -4,13 +4,15 @@
 # transforms a fs-tt into a sc-tt
 # Note: fs2cs is designed to work with a data.frame, not a rtuthTab!!
 fs2cs <- function(tt, cutoff = 0.5, border = c("down", "up", "drop")){
+  if (cutoff <= 0 | cutoff >= 1)
+    stop("cutoff must be >0 and <1")
   border <- match.arg(border)
   tt.r <- tt
   tt.r[] <- round(tt.r + (0.5 - cutoff))
   if (border == "up") 
     tt.r[tt%%1 == cutoff] <- tt.r[tt%%1 == cutoff] + 1
   if (border == "drop") 
-    tt.r <- tt.r[!apply(tt%%1 == cutoff, 1, any), , drop = FALSE]
+    tt.r <- tt.r[!rowAnys(tt%%1 == cutoff), , drop = FALSE]
   tt.r
 }
 
@@ -25,40 +27,58 @@ tt.info <- function(tt, cutoff = 0.5, border = c("down", "up", "drop")){
   if (type == "cs") {
     uniqueValues <- lapply(tt, function(x) 1:0)
     resp_nms <- names(tt)
-    factMat <- function(x) 
-      structure(cbind(tt[[x]], 1 - tt[[x]]), 
-                .Dimnames = list(NULL, c(x, tolower(x))))
     valueId <- 2 - as.matrix(tt)
   } else if (type == "mv") {
     uniqueValues <- lapply(tt, function(x) sort(unique.default(x)))
     resp_nms <- mapply(paste, names(tt), uniqueValues, MoreArgs = list(sep = "="), 
                        SIMPLIFY = FALSE)
     resp_nms <- unlist(resp_nms, use.names = FALSE)
-    factMat <- function(x) {
-      v <- eval(parse(text = sub("\\=", "==", x), keep.source = FALSE), tt)
-      matrix(as.integer(v), dimnames = list(NULL, x))
-    }
-    valueId <- mapply(match, tt, uniqueValues)
+    valueId <- mapply(match, tt, uniqueValues, SIMPLIFY = TRUE, USE.NAMES = TRUE)
+    if (!is.matrix(valueId))
+      valueId <- matrix(valueId, nrow = nrow(tt), 
+                        dimnames = list(NULL, names(uniqueValues)))
   } else if (type == "fs") {
     tt.r <- fs2cs(as.data.frame(tt), cutoff = cutoff, border = border)
     uniqueValues <- lapply(tt.r, function(x) 1:0)
     resp_nms <- names(tt)
-    factMat <- function(x) 
-      structure(cbind(tt[[x]], 1 - tt[[x]]), 
-                .Dimnames = list(NULL, c(x, tolower(x))))
     valueId <- 2 - as.matrix(tt.r)
   }
   stopifnot(resp_nms == toupper(resp_nms))
-  nVal <- vapply(uniqueValues, length, integer(1))
-  valueId <- sweep(valueId, 2, c(0, cumsum(nVal[-length(nVal)])), "+")
+  nVal <- lengths(uniqueValues)
+  valueId <- sweep(valueId, 
+                   2, 
+                   c(if (length(nVal)) 0, cumsum(nVal[-length(nVal)])), 
+                   "+")
   stopifnot(valueId%%1 == 0)
   mode(valueId) <- "integer"
   config <- split(seq_len(sum(nVal)), 
                   rep(seq_along(nVal), nVal))
   names(config) <- names(tt)
-  scores <- do.call(cbind, lapply(resp_nms, factMat))
-  mget(c("resp_nms", "nVal", "uniqueValues", "config", "valueId", "scores", "factMat"))
+  if (prod(dim(tt)) == 0){
+    scores <- matrix(numeric(0), 0, 0)
+  } else {
+    scores <- do.call(cbind, lapply(resp_nms, factMat(type), tt = tt))
+  }
+  freq <- attr(tt, "n")
+  structure(mget(c("type", "resp_nms", "nVal", "uniqueValues", "config", 
+                   "valueId", "scores", "freq")),
+            class = "tti")
 }
+# function to build 'scores' matrix
+factMat <- function(type){
+  switch(type, 
+    cs =  function(x, tt){
+      structure(cbind(tt[[x]], 1 - tt[[x]]), 
+                .Dimnames = list(NULL, c(x, tolower(x))))},
+    mv = function(x, tt){
+      v <- eval(parse(text = sub("=", "==", x, fixed = TRUE), keep.source = FALSE), tt)
+      matrix(as.integer(v), dimnames = list(NULL, x))},
+    fs = factMat <- function(x, tt){
+      structure(cbind(tt[[x]], 1 - tt[[x]]), 
+                .Dimnames = list(NULL, c(x, tolower(x))))}
+  )
+}
+  
 
 
 # function check.ordering
@@ -68,7 +88,7 @@ check.ordering <- function(ordering, tt){
   if (!is.list(ordering))
     stop("ordering must be NULL or a list.")
   # set all names to uppercase
-  ordering <- rapply(ordering, toupper, how = "replace")
+  ordering <- happly(ordering, toupper)
   ord.vars <- unlist(ordering, use.names = FALSE)
   if(!all(ord.vars %in% colnames(tt))){
     stop("Factor listed in ordering does not exist: ",
@@ -96,7 +116,7 @@ potential.effects <- function (x, zname, ordering = NULL, strict = FALSE){
     out <- poteff[match(poteff0, poteff, 0)]  # same order as columns in x
   }
   if (attr(x, "type") == "mv"){ # Case mv with expanded truthTab... [nonstandard!!]
-    vname <- sub("\\=[0-9]+$", "", zname)
+    vname <- sub("(.+)=.+", "\\1", zname)
     out <- setdiff(out, vname)
   }
   out
@@ -116,25 +136,6 @@ is.intList <- function(x){
 }
 is.recIntList <- function(x) is.list(x) && all(vapply(x, is.intList, integer(1)))
 
-intList2char <- function(il, nms){
-  conjs <- rapply(il, function(i) paste(nms[i], collapse = "*"),
-                  how = "replace")
-  vapply(conjs, function(l) do.call(paste, c(l, sep = " + ")), character(1))
-}
-
-# Meaningful disjunctions of literals (excluding terms like "A+a")
-simpleDisj <- function(config, k){
-  stopifnot(is.list(config), 
-            vapply(config, is.integer, logical(1)), 
-            k <= length(config))
-  expand_part <- function(x) do.call(expand.grid, config[x])
-  ll <- combn(seq_along(config), k, FUN = expand_part, simplify = FALSE)
-  ll <- lapply(ll, "colnames<-", make.names(seq_len(k)))
-  mm <- do.call(rbind, ll)
-  unname(split.default(as.list(unlist(mm, use.names = FALSE)), row(mm)))
-}
-
-
 # All possible structures of asf 
 # maxstep integer of length 3:
 #   element 1: maximum number of terms in conjunctions
@@ -152,8 +153,8 @@ allStructs <- function(maxstep){
   out <- c(list(list(rep(1L, maxCompl))),
            lapply(one.less, add12each))
   out <- unlist(out, recursive = FALSE)
-  out <- out[sapply(out, max) <= maxnum]
-  out <- out[vapply(out, length, integer(1)) <= maxlen]
+  out <- out[vapply(out, max, integer(1)) <= maxnum]
+  out <- out[lengths(out) <= maxlen]
   out <- lapply(out, sort)
   unique.default(c(one.less, out))
 }

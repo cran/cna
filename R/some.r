@@ -25,6 +25,6 @@ some.truthTab <- function (x, n = 10, replace = TRUE, ...){
   i <- sort(sample(nr, n, replace = replace))
   xx <- x[i, ]
   attr(xx, "cases") <- lapply(attr(xx, "cases"), make.unique)
-  truthTab(xx)
+  truthTab(xx, rm.dup.factors = FALSE, rm.const.factors = FALSE, ...)
 }
 

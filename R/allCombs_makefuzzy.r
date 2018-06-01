@@ -9,7 +9,7 @@
 allCombs <- function(x){    
   stopifnot(x>0, x%%1 == 0)
   out <- do.call(expand.grid, c(lapply(x, seq_len), KEEP.OUT.ATTRS = FALSE))
-  names(out) <- LETTERS[seq_along(out)]
+  names(out) <- make.unique(rep(LETTERS, length.out = ncol(out)))
   out
 }
 
@@ -27,6 +27,6 @@ makeFuzzy <- function(x, fuzzvalues = c(0, .05, .1), ...){
   xfuzzy[, ] <- ifelse(as.logical(ulx),
                        1 - sample(fuzzvalues, length(ulx), replace = TRUE),
                        sample(fuzzvalues, length(ulx), replace = TRUE))
-  truthTab(xfuzzy, type = "fs", ...)
+  truthTab(xfuzzy, type = "fs", rm.dup.factors = FALSE, rm.const.factors = FALSE, ...)
 }
 

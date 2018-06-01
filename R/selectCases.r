@@ -13,10 +13,14 @@ selectCases <- function(cond, x, type, cutoff = 0.5,
     type <- attr(x, "type")
   } else {
     if (missing(type)) type <- "cs"    # "hidden" Default value!
-    x <- truthTab(x, type = type)
+    x <- truthTab(x, type = type, rm.dup.factors = FALSE, 
+                  rm.const.factors = FALSE, verbose = FALSE)
   }
   stopifnot(length(cond) == 1)
   co <- condition.default(cond, x, force.bool = TRUE)[[1]]
+  if (inherits(co, "invalidCond")){
+    stop("The condition is invalid (", reason(co), "): ", format.condString(cond))
+  }
   x[co[[1]] >= cutoff, , rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors]
 }
 
@@ -31,7 +35,8 @@ selectCases1 <- function(cond, x, type, con = 1, cov = 1,
     type <- attr(x, "type")
   } else {
     if (missing(type)) type <- "cs"    # "hidden" Default value!
-    x <- truthTab(x, type = type)
+      x <- truthTab(x, type = type, rm.dup.factors = FALSE, 
+                    rm.const.factors = FALSE, verbose = FALSE)
   }
   stopifnot(length(cond) == 1, con>=0, con<=1, cov>=0, cov<=1)
 

@@ -11,10 +11,11 @@ cna: A Package for Causal Modeling with Coincidence Analysis
 \description{
 The \pkg{cna} package implements the method of \dfn{Coincidence Analysis} (CNA), which was first introduced
 in Baumgartner (2009a, 2009b, 2013). CNA is a
-configurational comparative method related to Qualitative Comparative Analysis (QCA) (Ragin 1987, 2008). Like QCA, CNA processes configurational data, i.e. data consisting of observed cases featuring different factor configurations, it focuses on causal
-complexity rather than on net effects, it searches for redundancy-free sufficient and necessary conditions of causally modeled outcomes, and it draws on the same regularity theoretic notion of causation as QCA, i.e. the notion e.g. developed by Mackie (1974). Contrary to QCA, however, CNA can treat any number of factors in an analyzed factor set as outcomes, and it does not generate causal models from the top down by first building maximal Boolean dependency structures and then gradually eliminating redundant elements (using Quine-McCluskey optimization; cf. Quine 1959, McCluskey 1965); rather, CNA---as implemented in this package---builds causal models from the bottom up by gradually combining single factors to complex dependency structures until pre-defined cutoffs of model fit are met, such that the resulting models are automatically redundancy-free. As a consequence of these differences, CNA can identify common-cause and causal-chain structures and it can avoid the task of redundancy elimination (which creates various problems for QCA). Moreover, the algorithm does not require an input identifying the endogenous factors; it can infer that from the data. Finally, data fragmentation (limited diversity) does not force CNA to resort to counterfactual additions to the data. 
+configurational comparative method related to Qualitative Comparative Analysis (QCA) (Ragin 1987, 2008). Like QCA, CNA processes configurational data, i.e. data consisting of observed cases featuring different factor configurations, it searches for redundancy-free sufficient and necessary conditions of causally modeled outcomes, it places a Boolean ordering over causally relevant factors (instead of quantifying effect sizes in the vein of regression analytic methods), and it draws on the same regularity theoretic notion of causation as QCA, i.e. the notion first introduced by Mackie (1974). Contrary to QCA, however, CNA is custom-built to treat multiple factors as outcomes, and it does not generate causal models from the top down by first building maximal Boolean dependency structures and then gradually eliminating redundant elements (using e.g. Quine-McCluskey optimization; cf. Quine 1959, McCluskey 1965); rather, CNA builds causal models from the bottom up by gradually combining single factors to complex dependency structures until the requested thresholds of model fit are met, such that the resulting models are automatically redundancy-free. As a consequence of these differences, CNA can identify common-cause and causal-chain structures and it can avoid the task of redundancy elimination (which creates various problems for QCA). Moreover, the algorithm does not require an input identifying the endogenous factors; it can infer that from the data. Finally, data fragmentation (limited diversity) does not force CNA to resort to counterfactual reasoning. 
 
-While previous versions of the \pkg{cna} package (cf. e.g. Baumgartner & Thiem 2015) have only been capable of processing dichotomous variables/factors, this package version generalizes CNA for multi-value and continuous variables/factors whose values are interpreted as membership scores in fuzzy sets. Apart from making the whole inferential power of multi-value and fuzzy-set CNA available to end-users, the package also provides valuable functions designed for evaluating the method's correctness and completeness based on data simulations.
+The new functionalities provided by this version of the \pkg{cna} package include various model fit parameters measuring, for instance, the degree of correspondance between the configurations that are, in principle, compatible with causal models and the configurations actually contained in the data. Moreover, multi-outcome models are now tested for structural redundancies and a new function has been added that eliminates such redundancies. Also, algorithmic efficiency has been significantly increased. Finally, the package now comes with an extensive vignette that presents the theoretical background of CNA and introduces to causal modeling with \pkg{cna} on the basis of many concrete examples.
+
+
 
 }
 
@@ -22,8 +23,8 @@ While previous versions of the \pkg{cna} package (cf. e.g. Baumgartner & Thiem 2
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 2.0.0\cr
-Date:    \tab 2017-04-18\cr
+Version: \tab 2.1.0\cr
+Date:    \tab 2018-06-01\cr
 License: \tab GPL (>= 2)\cr
     }
 }
@@ -35,8 +36,8 @@ Mathias Ambuehl\cr
 
 Michael Baumgartner\cr
 Department of Philosophy\cr
-University of Geneva\cr
-\email{michael.baumgartner@unige.ch}
+University of Bergen\cr
+\email{michael.baumgartner@uib.no}
 
 
 \bold{Maintainer}:\cr

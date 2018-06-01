@@ -10,7 +10,7 @@
 This dataset is from Wollebaek (2010), who analyzes the causes of disbandings of grassroots associations in Norway.
 }
 
-\usage{data(d.volatile)}
+\usage{d.volatile}
 
 \format{
 The data frame contains 22 rows (cases) and the following 9 columns featuring Boolean factors taking values 1 and 0 only:

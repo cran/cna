@@ -2,90 +2,134 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 C_isSubsetOf <- function(x, y) {
-    .Call('cna_C_isSubsetOf', PACKAGE = 'cna', x, y)
+    .Call(`_cna_C_isSubsetOf`, x, y)
 }
 
 C_hasSupersetIn <- function(x, y) {
-    .Call('cna_C_hasSupersetIn', PACKAGE = 'cna', x, y)
+    .Call(`_cna_C_hasSupersetIn`, x, y)
 }
 
-C_intList_minimal <- function(x, ref) {
-    .Call('cna_C_intList_minimal', PACKAGE = 'cna', x, ref)
+C_intList_minimal <- function(x, ref, ignore_equals = FALSE) {
+    .Call(`_cna_C_intList_minimal`, x, ref, ignore_equals)
 }
 
-C_minimal <- function(x, ref) {
-    .Call('cna_C_minimal', PACKAGE = 'cna', x, ref)
+C_minimal <- function(x, ref, ignore_equals = FALSE) {
+    .Call(`_cna_C_minimal`, x, ref, ignore_equals)
 }
 
 C_paste_intList <- function(x, y) {
-    .Call('cna_C_paste_intList', PACKAGE = 'cna', x, y)
+    .Call(`_cna_C_paste_intList`, x, y)
 }
 
 C_conCov <- function(x, y, f) {
-    .Call('cna_C_conCov', PACKAGE = 'cna', x, y, f)
+    .Call(`_cna_C_conCov`, x, y, f)
 }
 
 C_subsetMin <- function(x, sub) {
-    .Call('cna_C_subsetMin', PACKAGE = 'cna', x, sub)
+    .Call(`_cna_C_subsetMin`, x, sub)
 }
 
 C_conjScore <- function(x, m) {
-    .Call('cna_C_conjScore', PACKAGE = 'cna', x, m)
+    .Call(`_cna_C_conjScore`, x, m)
 }
 
 C_init_ii <- function(nn, st) {
-    .Call('cna_C_init_ii', PACKAGE = 'cna', nn, st)
+    .Call(`_cna_C_init_ii`, nn, st)
 }
 
 C_set_lim <- function(nn, st) {
-    .Call('cna_C_set_lim', PACKAGE = 'cna', nn, st)
+    .Call(`_cna_C_set_lim`, nn, st)
 }
 
-max_which <- function(x) {
-    .Call('cna_max_which', PACKAGE = 'cna', x)
+C_max_which <- function(x) {
+    .Call(`_cna_C_max_which`, x)
 }
 
 C_increment <- function(ii, nn, st, lim) {
-    .Call('cna_C_increment', PACKAGE = 'cna', ii, nn, st, lim)
+    .Call(`_cna_C_increment`, ii, nn, st, lim)
 }
 
 C_find_asf <- function(conjlen, x, y, f, con = 1.0, cov = 1.0, maxSol = 1e6L) {
-    .Call('cna_C_find_asf', PACKAGE = 'cna', conjlen, x, y, f, con, cov, maxSol)
+    .Call(`_cna_C_find_asf`, conjlen, x, y, f, con, cov, maxSol)
+}
+
+C_concat <- function(x, sep) {
+    .Call(`_cna_C_concat`, x, sep)
+}
+
+C_mconcat <- function(x, sep, sorted = FALSE) {
+    .Call(`_cna_C_mconcat`, x, sep, sorted)
+}
+
+C_charList2string <- function(x, disj = "+", conj = "*", sorted = FALSE) {
+    .Call(`_cna_C_charList2string`, x, disj, conj, sorted)
+}
+
+C_recCharList2char <- function(x, disj = "+", conj = "*", sorted = FALSE) {
+    .Call(`_cna_C_recCharList2char`, x, disj, conj, sorted)
+}
+
+C_find_first_false <- function(x) {
+    .Call(`_cna_C_find_first_false`, x)
+}
+
+C_redund <- function(x) {
+    .Call(`_cna_C_redund`, x)
+}
+
+C_mredund <- function(x, l) {
+    .Call(`_cna_C_mredund`, x, l)
+}
+
+C_relist_Int <- function(x, l) {
+    .Call(`_cna_C_relist_Int`, x, l)
+}
+
+C_relist_Num <- function(x, l) {
+    .Call(`_cna_C_relist_Num`, x, l)
+}
+
+C_relist_Log <- function(x, l) {
+    .Call(`_cna_C_relist_Log`, x, l)
+}
+
+C_relist_Char <- function(x, l) {
+    .Call(`_cna_C_relist_Char`, x, l)
+}
+
+C_relist_List <- function(x, l) {
+    .Call(`_cna_C_relist_List`, x, l)
 }
 
 C_conj_conCov <- function(cols, x, y, f) {
-    .Call('cna_C_conj_conCov', PACKAGE = 'cna', cols, x, y, f)
+    .Call(`_cna_C_conj_conCov`, cols, x, y, f)
 }
 
 C_disj_conCov <- function(cols, x, y, f) {
-    .Call('cna_C_disj_conCov', PACKAGE = 'cna', cols, x, y, f)
-}
-
-C_isSubsetOf1 <- function(x, y) {
-    .Call('cna_C_isSubsetOf1', PACKAGE = 'cna', x, y)
+    .Call(`_cna_C_disj_conCov`, cols, x, y, f)
 }
 
 C_hasSubsetInM <- function(y, x) {
-    .Call('cna_C_hasSubsetInM', PACKAGE = 'cna', y, x)
+    .Call(`_cna_C_hasSubsetInM`, y, x)
 }
 
 C_countUniques <- function(x) {
-    .Call('cna_C_countUniques', PACKAGE = 'cna', x)
+    .Call(`_cna_C_countUniques`, x)
 }
 
 C_duplicatedMat <- function(x) {
-    .Call('cna_C_duplicatedMat', PACKAGE = 'cna', x)
+    .Call(`_cna_C_duplicatedMat`, x)
 }
 
 C_uniqueMat <- function(x) {
-    .Call('cna_C_uniqueMat', PACKAGE = 'cna', x)
+    .Call(`_cna_C_uniqueMat`, x)
 }
 
 C_selectCols <- function(x, idx) {
-    .Call('cna_C_selectCols', PACKAGE = 'cna', x, idx)
+    .Call(`_cna_C_selectCols`, x, idx)
 }
 
 C_uniqueCombs <- function(x, idx) {
-    .Call('cna_C_uniqueCombs', PACKAGE = 'cna', x, idx)
+    .Call(`_cna_C_uniqueCombs`, x, idx)
 }
 

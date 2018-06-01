@@ -1,3 +1,20 @@
+Changes in version 2.1.0 (2018-06-01)
+  * The package now comes with a vignette providing an extensive introduction to the methodological background and the package's usage.
+  * Several functions have a noticeably faster implementation, most notably csf().
+  * cna() has new arguments inus.only and details, and the default value of the argument what has changed from "mac" to "ac".
+  * Various new model fit parameters, which are helpful e.g. in ambiguity reduction, can now be calculated by cna(): exhaustiveness, faithfulness, inus, redundant.
+  * The package now provides functionalities for handling structural redundancies in complex solution formulas (csf).
+  * New functions condTbl() and minimalizeCsf() have been added.
+  * The way the output is displayed has slightly changed for some functions, in particular for truth tables and related tabular displays.
+  * coherence() now returns 1 instead of NA for atomic solution formulas (asf).
+  * condition() has a new argument add.data.
+  * The syntax accepted by condition() has become more flexible. 
+  * msc, asf and csf have a new argument details.
+  * truthTab() has a new argument verbose.
+  * The option spaces is newly available for controlling the spacing in asf and csf.
+  * Data with more than 26 factors can now be processed as well. 
+
+
 Changes in version 2.0.0 (2017-04-11)
   * Most functions in the package have been fundamentally redesigned or revised. Although we tried to maintain backward compatibility where it was reasonably achievable, code compatible with older versions will not work in many cases.
   * Three different types of data are now handled: crisp-set, multi-value, and fuzzy-set. Accordingly, several functions have a type argument with possible values "cs", "mv", "fs".

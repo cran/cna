@@ -11,7 +11,7 @@ This dataset is from Emmenegger (2011), who analyzes the determinants of
 high job security regulations in Western democracies using fsQCA. 
 }
 
-\usage{data(d.jobsecurity)}
+\usage{d.jobsecurity}
 
 \format{
 The data frame contains 19 rows (cases) and the following 7 columns featuring fuzzy-set factors:

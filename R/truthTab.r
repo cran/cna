@@ -6,25 +6,36 @@
 #   - Behaviour if x already is a truthTab
 truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
                      case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
-                     .cases = NULL){
+                     .cases = NULL, verbose = TRUE){
   nm.x <- deparse(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x), length(case.cutoff) == 1)
   if (is.matrix(x)) {
     if (is.null(colnames(x)))
-        colnames(x) <- LETTERS[seq_len(ncol(x))]
+      colnames(x) <- make.unique(rep(LETTERS, length.out = ncol(x)))
     x <- as.data.frame(x)
   } else if (inherits(x, "truthTab")){
     if (!is.null(frequency))
       stop(nm.x, " already is a truthTab - argument frequency is not admissable in this case!")
-    frequency <- attr(x, "n")
+    frequency <- attr(x, "n", exact = TRUE)
     .cases <- attr(x, "cases")
     type <- attr(x, "type")
     x <- as.data.frame(x)
   }
   type <- tolower(type)
   type <- match.arg(type)
-  if (is.null(.cases))
-    .cases <- as.list(rownames(x))
+  if (is.null(.cases)){
+    .cases <- try(as.character(rownames(x)))
+    #if (inherits(.cases, "try-error")){
+    if (anyNA(iconv(.cases, "", "ASCII"))){
+      warning("The row names contain special (non-ASCII) characters and are therefore not used.")
+      .cases <- seq_len(nrow(x))
+    }
+    .cases <- as.list(.cases)
+  } else {
+    if (length(.cases) != nrow(x)) stop("length(.cases) must be the same as nrow(x)")
+    if (is.atomic(.cases)) .cases <- as.character(.cases)
+  }
+    
   # check if data entries are correct
   datatype <- switch(type, cs = "integer",
                            mv = "integer",
@@ -33,45 +44,35 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
   xvalues <- unlist(x, use.names = FALSE, recursive = FALSE)
   if (type == "cs" & !all(xvalues %in% 0:1))
     stop("Only values 0 and 1 are allowed in x with type=\"cs\".")
-  if (type == "mv" & !all(xvalues %% 1 == 0))
-    stop("Only integer values are allowed in x with type=\"mv\".")
+  if (type == "mv" & !all(xvalues %% 1 == 0 & xvalues >= 0))
+    stop("Only integer values >=0 are allowed in x with type=\"mv\".")
   if (type == "fs" & !all(xvalues >= 0 & xvalues <= 1))
     stop("Only values >=0 and <=1 are allowed in x with type=\"fs\".")
   for (i in seq_along(x)) mode(x[[i]]) <- datatype
-  if (nrow(x) > 0){
-    # split rows into groups of identical rows and eliminate duplicates rows
-    cx <- combine(x, sep = "\r")
-    splitInput <- unname(split.data.frame(as.data.frame(x), cx))
-    tt <- do.call(rbind, lapply(splitInput, "[", 1, , drop = FALSE))
-    f <- if (is.null(frequency)){
-      vapply(splitInput, nrow, integer(1))
-    }  else {
-      as.vector(tapply(frequency, cx, sum))
-    }  
-  } else {
-    cx <- factor(character(0))
-    splitInput <- list()
-    tt <- x
-    f <- integer(0)
-  }
+  cx <- do.call(paste, c(x, list(sep = "\r")))
+  cx <- factor(cx, levels = unique(cx))
+  tt <- x[!duplicated(cx), , drop = FALSE]
   rownames(tt) <- NULL
-  # frequencies
-  if (length(f) != nrow(tt) || any(f < 0) || any(is.na(f)) || 
-      !isTRUE(all.equal(f, as.integer(f), check.attributes = FALSE)))
-    stop("Inadmissible frequency argument")
-  f <- as.integer(f)  
+  if (is.null(frequency)){
+    f <- tabulate(cx)
+  } else {
+    # frequencies
+    if (length(frequency) != nrow(x) || any(frequency < 0) || any(is.na(frequency)))
+      stop("Inadmissible frequency argument")
+    f <- as.integer(as.vector(rowsum(frequency, cx)))
+  }
   .cases <- lapply(split(.cases, as.integer(cx)), unlist, recursive = FALSE, use.names = FALSE)
-  ll <- vapply(.cases, length, integer(1))
+  ll <- lengths(.cases)
   if (!isTRUE(all.equal(f, ll, check.attributes = FALSE)) && length(ll) > 0){
-    .cases <- mapply(rep_len, .cases, f)
+    .cases <- mapply(rep_len, .cases, f, SIMPLIFY = FALSE, USE.NAMES = FALSE)
     .cases <-
       split.default(make.unique(unlist(.cases, use.names = FALSE)),
                     rep(seq_along(.cases), f))
   }
   # case.cutoff
   del.cases <- f < case.cutoff
-  if (any(del.cases)){
-    message("Note: ", sum(f[del.cases]), " of ", sum(f),
+  if (any(del.cases) && verbose){
+    message(sum(f[del.cases]), " of ", sum(f),
         " cases are removed due to case.cutoff = ", case.cutoff,
         ".")
     tt <- tt[!del.cases, , drop = FALSE]
@@ -84,16 +85,16 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     f <- f[!rm.rows]
   }
   # constant columns
-  constcols <- vapply(tt, function(col) length(unique(col)) == 1, logical(1))
+  constcols <- vapply(tt, isConstant, logical(1))
   if (any(constcols)){
     nms.constcols <- names(tt)[constcols]
     if (rm.const.factors){
       tt <- tt[, !constcols, drop = FALSE]
-      message("Note: The following factors are constant and therefore eliminated: ",
-        paste(nms.constcols, collapse = ", "))
-    } else {
-    message("Note: The following factors are constant: ",
-            paste(nms.constcols, collapse = ", "))
+      if (verbose) message("The following factors are constant and therefore eliminated: ",
+                           C_concat(nms.constcols, sep = ", "))
+    } else if (verbose){
+    message("The following factors are constant: ",
+            C_concat(nms.constcols, sep = ", "))
     }        
   }          
   # eliminate duplicated columns
@@ -102,15 +103,17 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     nms.dupcols <- names(tt)[dupcols]
     if (rm.dup.factors){
       tt <- tt[, !dupcols, drop = FALSE]
-      message("Note: The following factors are duplicated and therefore eliminated: ",
-        paste(nms.dupcols, collapse = ", "))
-    } else {
-    message("Note: The following factors are duplicated: ",
-            paste(nms.dupcols, collapse = ", "))
+      if (verbose)
+        message("The following factors are duplicates of factors in preceding columns of the data table: ",
+                C_concat(nms.dupcols, sep = ", "),
+                "\nThey are eliminated (because rm.dup.factors = TRUE).")
+    } else if (verbose){
+    message("The following factors are duplicates of factors in preceding columns of the data table: ",
+            C_concat(nms.dupcols, sep = ", "))
     } 
   }
   # Warn if names are not syntactically valid
-  nms <- names(tt)
+  nms <- names(tt) <- toupper(names(tt))
   if (!identical(nms, make.names(nms, unique = TRUE))){
     warning("truthTab has syntactically invalid names. condition(), cna() and other functions may not work.",
             call. = FALSE)
@@ -123,28 +126,28 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
   tt
 }
 
-
-# Amended print-method for truthTab
-# =================================
+# print-method for truthTab
+# =========================
 # New: Type is displayed
 # cases now shown as rownames
 #   Default show.cases: TRUE, if all rownames shorter than 20 characters
 #   ...  digits, quote, right passed to print.data.frame
 print.truthTab <- function(x, show.cases = NULL, ...){ 
-  if (is.null(attr(x, "n")))
+  if (is.null(attr(x, "n", exact = TRUE)))
       warning("Attribute \"n\" is missing")
   if (is.null(attr(x, "cases")))
       warning("Attribute \"cases\" is missing")
-  df.args <- list(as.data.frame(x), n.obs = attr(x, "n"), check.names = FALSE)
+  df.args <- list(as.data.frame(x), n.obs = attr(x, "n", exact = TRUE), check.names = FALSE)
+  ncols <- length(df.args[[1]])
   prntx <- do.call(data.frame, df.args)
-  rownames(prntx) <- vapply(lapply(attr(x, "cases"), sort), paste0, character(1), collapse = ",")
+  rownames(prntx) <- C_mconcat(lapply(attr(x, "cases"), sort), sep = ",")
   cat(paste0("truthTab of type \"", attr(x, "type"), "\"\n"))
   if (is.null(show.cases) && nrow(x) > 0){
     show.cases <- max(nchar(rownames(prntx))) <= 20
     labels.suppressed <- !show.cases
   }  
-  print(prntx, row.names = show.cases, ...)
-  cat("Total no.of.cases:", sum(attr(x, "n")), "\n")
+  printDfwithBars(prntx, row.names = show.cases, ..., bar.after = ncols)
+  cat("Total no.of.cases:", sum(attr(x, "n", exact = TRUE)), "\n")
   if (exists("labels.suppressed", inherits = FALSE) && labels.suppressed)
     message("Printing of case labels is suppressed because some labels are longer than 20 characters.\n",
             "Use print with show.cases=TRUE to display them.")
@@ -154,7 +157,7 @@ print.truthTab <- function(x, show.cases = NULL, ...){
 # "["-method for truthTab:
 # ========================
 #  Note that default of argument 'drop' differs from that in "[.data.frame"
-`[.truthTab` <- function(x, i, j, drop = FALSE, rm.dup.factors = TRUE, rm.const.factors = FALSE){
+`[.truthTab` <- function(x, i, j, drop = FALSE, rm.dup.factors = FALSE, rm.const.factors = FALSE){
   cl <- sys.call()
   cl$rm.dup.factors <- cl$rm.const.factors <- NULL
   len <- length(cl)
@@ -173,10 +176,9 @@ print.truthTab <- function(x, show.cases = NULL, ...){
   xx <- eval.parent(cl1)
   truthTab(xx,
            type = attr(x, "type"),
-           frequency = attr(x, "n")[i],
+           frequency = attr(x, "n", exact = TRUE)[i],
            .cases = attr(x, "cases")[i],
-           rm.dup.factors = rm.dup.factors,
-           rm.const.factors = rm.const.factors)
+           rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors, verbose = FALSE)
 }
 
 
@@ -193,24 +195,27 @@ as.data.frame.truthTab <- function(x, ...){
   rows <- if (row.sel) i else TRUE
   out <- truthTab(out,
            type = attr(x, "type"),
-           frequency = attr(x, "n"),
-           .cases = attr(x, "cases")[rows])
+           frequency = attr(x, "n", exact = TRUE),
+           .cases = attr(x, "cases")[rows],
+           rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
 `$<-.truthTab` <- function(x, name, value){
   out <- as.data.frame(NextMethod("$<-", x))
   out <- truthTab(out,
            type = attr(x, "type"),
-           frequency = attr(x, "n"),
-           .cases = attr(x, "cases"))
+           frequency = attr(x, "n", exact = TRUE),
+           .cases = attr(x, "cases"),
+           rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
 `[[<-.truthTab` <- function(x, i, j, value){
   out <- as.data.frame(NextMethod("[[<-", x))
   out <- truthTab(out,
            type = attr(x, "type"),
-           frequency = attr(x, "n"),
-           .cases = attr(x, "cases"))
+           frequency = attr(x, "n", exact = TRUE),
+           .cases = attr(x, "cases"),
+           rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
 subset.truthTab <- function(x, subset, ...){
@@ -248,10 +253,10 @@ tail.truthTab <- function (x, n = 6L, ...)
 # combine:
 # ========
 # Neu ist der Parameter sep
-combine <- function (x, rows = rownames(x), sep = ""){
-  rows <- do.call(paste, c(x, sep = sep))
-  factor(rows, levels = unique(rows))
-}
+# combine <- function (x, rows = rownames(x), sep = ""){
+#   rows <- do.call(paste, c(x, sep = sep))
+#   factor(rows, levels = unique(rows))
+# }
 
 ################################################################################
 

@@ -11,7 +11,7 @@ This dataset is from Hartmann and Kemmerzell (2010), who, among other things, an
 the emergence of party ban provisions in sub-Saharan Africa.
 }
 
-\usage{data(d.pban)}
+\usage{d.pban}
 
 \format{
 The data frame contains 48 rows (cases) and the following 5 columns, some of which feature multi-value factors:

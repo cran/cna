@@ -10,7 +10,7 @@
 This artifical dataset of macrosociological factors on high levels of education is from Baumgartner (2009).
 }
 
-\usage{data(d.educate)}
+\usage{d.educate}
 
 \format{
 The data frame contains 8 rows (cases) and the following 5 columns featuring Boolean factors taking values 1 and 0 only:

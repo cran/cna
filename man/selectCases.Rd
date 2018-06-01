@@ -21,7 +21,7 @@ selectCases1(cond, x, type, con = 1, cov = 1,
 }
 
 \arguments{
-  \item{cond}{Character string specifying the Boolean function for which compatible cases are to be selected.}
+  \item{cond}{A character string specifying the Boolean function for which compatible cases are to be selected.}
   \item{x}{A data frame or \code{truthTab}.}
   \item{type}{A character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). Defaults to the type of \code{x}, if \code{x} is a \code{truthTab} or to \code{"cs"} otherwise.}
   \item{cutoff}{Cutoff value in case of \code{"fs"} data.}
@@ -34,7 +34,7 @@ selectCases1(cond, x, type, con = 1, cov = 1,
 
 \code{selectCases} draws those cases/configurations from a given data frame or \code{truthTab} that are compatible with a data generating causal structure (or any other Boolean or set-theoretic function), which is given to \code{selectCases} as a character string \code{cond}. \code{cond} can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link{condition}}). To illustrate, if the data generating structure is "A + B <-> C", then a case featuring A=1, B=0, and C=1 is selected by \code{selectCases}, whereas a case featuring A=1, B=0, and C=0 is not (because according to the data generating structure, A=1 must be associated with C=1, which is violated in the latter case). The type of the data frame is specified by the argument \code{type} taking \code{"cs"} (crisp-set), \code{"mv"} (multi-value), and \code{"fs"} (fuzzy-set) as values.
 
-\code{selectCases1} allows for providing consistency (\code{con}) and coverage (\code{cov}) thresholds, such that some cases that are incompatible with \code{cond} are also drawn, as long as \code{con} and \code{cov} are not violated. The solution is identified by an algorithm aiming at finding a subset of maximal size meeting the \code{con} and \code{cov} requirements. In contrast to  \code{selectCases}, \code{selectCases1} only accepts a condition of type \emph{atomic} as its \code{cond} argument, i.e. an atomic solution formula. Data drawn by \code{selectCases1} can only be modeled with consistency = \code{con} and coverage = \code{cov}. 
+\code{selectCases1} allows for providing consistency (\code{con}) and coverage (\code{cov}) thresholds, such that some cases that are incompatible with \code{cond} are also drawn, as long as \code{con} and \code{cov} remain satisfied. The solution is identified by an algorithm aiming at finding a subset of maximal size meeting the \code{con} and \code{cov} requirements. In contrast to  \code{selectCases}, \code{selectCases1} only accepts a condition of type \emph{atomic} as its \code{cond} argument, i.e. an atomic solution formula. Data drawn by \code{selectCases1} can only be modeled with consistency = \code{con} and coverage = \code{cov}. 
 
 }
 
@@ -68,24 +68,23 @@ condition("A*b + C*D <-> E", dat3)
 # Inverse search for the data generating causal structure A*b + a*B + C*D <-> E from
 # fuzzy-set data with non-perfect consistency and coverage scores.
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
+set.seed(9)
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
-set.seed(7)
 dat3 <- selectCases1("A*b + a*B + C*D <-> E", con = .8, cov = .8, dat2)
 fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
 
 # Draw cases satisfying specific conditions from real-life fuzzy-set data.
-data(d.jobsecurity)
 tt.js <- fstt(d.jobsecurity)
-selectCases("S -> C", tt.js)  # Cases with higher membership scores in C than in S
-selectCases("S -> C", d.jobsecurity, type = "fs")  # Same
-selectCases("S <-> C", tt.js) # Cases with identical membership scores in C and in S
+selectCases("S -> C", tt.js)  # Cases with higher membership scores in C than in S.
+selectCases("S -> C", d.jobsecurity, type = "fs")  # Same.
+selectCases("S <-> C", tt.js) # Cases with identical membership scores in C and in S.
 selectCases1("S -> C", con = .8, cov = .8, tt.js)  # selectCases1 makes no distinction 
-              #  between "->" and "<->"
+              #  between "->" and "<->".
 condition("S -> C", selectCases1("S -> C", con = .8, cov = .8, tt.js))
 
 # selectCases not only draws cases compatible with Boolean causal models. Any Boolean or 
 # set-theoretic function can be given as cond.
 selectCases("C > B", allCombs(2:4), type = "mv")
-selectCases("C=2 | !B=3", allCombs(2:4), type = "mv")
-selectCases("A=1 * !(C=2 + !B=3)", allCombs(2:4), type = "mv")
+selectCases("C=2 | B!=3", allCombs(2:4), type = "mv")
+selectCases("A=1 * !(C=2 + B!=3)", allCombs(2:4), type = "mv")
 }

@@ -3,10 +3,11 @@ cna <- function (x, type,
     ordering = NULL, strict = FALSE,
     con = 1, cov = 1, con.msc = con, 
     notcols = NULL, rm.const.factors = TRUE, rm.dup.factors = TRUE,  
-    maxstep = c(3, 3, 9),
+    maxstep = c(3, 3, 9), inus.only = FALSE,
     only.minimal.msc = TRUE, maxSol = 1e6, 
-    suff.only = FALSE, what = "mac",
-    cutoff = 0.5, border = c("down", "up", "drop")
+    suff.only = FALSE, what = if (suff.only) "m" else "ac",
+    cutoff = 0.5, border = c("down", "up", "drop"),
+    details = FALSE
     )
 {
 
@@ -18,17 +19,21 @@ cna <- function (x, type,
   # variable names  
   tt <- truthTab(x, type = type, rm.const.factors = rm.const.factors, 
                  rm.dup.factors = rm.dup.factors)
-  if (any(!grepl("[[:alpha:]]", names(tt)))) stop("All column names must contain a letter.")
+  if (any(!grepl("[[:alpha:]]", names(tt)))) 
+    stop("All column names must contain a letter.")
   if (anyDuplicated(tolower(names(tt))) != 0L)
     stop("Inadmissable column names: names must be unique when case is ignored!")
   names(tt) <- toupper(names(tt))
 
   # more formal requirements  
-  if (nrow(tt) <= 1)
-    stop("Truth table must have at least two rows.")
-  if (ncol(tt) < 2 || ncol(tt) > 26)
-    stop("Truth table must have between 2 and 26 columns.")  # so belassen??
+  if (nrow(tt) <= 1 || ncol(tt) <= 1)
+    stop("Truth table must have at least two rowsand two columns.")
   ordering <- check.ordering(ordering, tt)
+  details <- details0 <- details1 <- clarify_details(details)
+  if (inus.only){
+    details <- union(details, c("inus", "redundant"))
+  }
+  details1 <- setdiff(details0, c("coherence", "redundant"))
 
   # notcols and tt.out
   if (!is.null(notcols)){
@@ -60,13 +65,12 @@ cna <- function (x, type,
   cov <- cov - d.eps
 
   # maxstep
-  stopifnot(length(maxstep) == 3L)
-  if (maxstep[[2L]] < 1) suff.only <- FALSE
+  stopifnot(length(maxstep) == 3, maxstep > 0)
   maxstep[1:2] <- pmin(maxstep[1:2], maxstep[3])
 
   # Define config, uniqueValues, resp_nms, factMat, nVal, valueId, scores
   tti <- tt.info(tt, cutoff = cutoff, border = match.arg(border))
-  
+  vnms <- colnames(tti$scores)
   f <- attr(tt, "n")
   
   # setup output object
@@ -78,7 +82,7 @@ cna <- function (x, type,
     # Identify minimal sufficient conditions
     # --------------------------------------
     # Initialize minSuff, list of minimal sufficient combinations
-    .znm <- if (grepl("=", zname)) strsplit(zname, "=")[[c(1L, 1L)]] else zname
+    .znm <- sub("(.+)=.+", "\\1", zname)
     poteff <- potential.effects(tt, .znm, ordering, strict)
     if (length(poteff) == 0L) next
     
@@ -116,15 +120,29 @@ cna <- function (x, type,
                                       conCov = cons[, isSuff, drop = FALSE])
       }  
     }
-    if (all(vapply(minSuff, is.null, logical(1)))) next
+    if (all(m_is.null(minSuff))) next
     
-    msc <- lapply(minSuff, function(x) if (!is.null(x)) 
-      data.frame(condition = apply(x, 1, function(r) paste(colnames(tti$scores)[r], collapse = "*")),
-                 setNames(data.frame(t(attr(x, "conCov"))), c("consistency", "coverage")),
-                 stringsAsFactors = FALSE))
+    make.msc <- function(x, outcome, tti, details){
+      if (is.null(x)) return(NULL)
+      vnms <- colnames(tti$scores)
+      out <- data.frame(
+        outcome,
+        condition = C_mconcat(C_relist_Char(vnms[t(x)], 
+                                            rep(ncol(x), nrow(x))), 
+                              sep = "*"),
+        setNames(data.frame(t(attr(x, "conCov"))), c("consistency", "coverage")),
+        stringsAsFactors = FALSE)
+      if (length(details))
+        out <- cbind(out, 
+                     .det.tti(tti, paste0(out$condition, "->", out$outcome), 
+                              what = details))
+      rownames(out) <- NULL
+      out
+    }
+    msc <- lapply(minSuff, make.msc, outcome = zname, tti = tti, details = details1)
     msc <- do.call(rbind, msc)
-    nstars <- gregexpr("\\*", msc$condition)
-    msc$complexity <- vapply(nstars, length, integer(1)) + 1L - (vapply(nstars, "[[", integer(1), 1L) == -1L)
+    nstars <- gregexpr("*", msc$condition, fixed = TRUE)
+    msc$complexity <- lengths(nstars) + 1L - (vapply(nstars, "[[", integer(1), 1L) == -1L)
     msc <- msc[order(msc$complexity, -msc$consistency * msc$coverage, msc$condition), , drop = FALSE]
     rownames(msc) <- NULL
     sol[[zname]] <- list(msc = msc)
@@ -134,7 +152,7 @@ cna <- function (x, type,
     # Find asf's
     # ----------
     .conjList <- lapply(minSuff, "attr<-", "conCov", NULL)
-    noMsc <- vapply(.conjList, is.null, logical(1))
+    noMsc <- m_is.null(.conjList)
     .conjList[noMsc] <- lapply(which(noMsc), function(i) matrix(integer(0), 0, i))
 
     .conSc <- lapply(seq_along(.conjList), function(i) C_conjScore(tti$scores, .conjList[[i]]))
@@ -169,16 +187,23 @@ cna <- function (x, type,
     
     stopifnot(length(.sol) == 0 || vapply(.sol, is.intList, logical(1)))
     if (length(.sol)){
-      asf <- quickCondTbl(intList2char(.sol, colnames(tti$scores)), zname, tt)
+      .lhs <- hconcat(.sol, c("+", "*"), f = function(i) vnms[i])
+      asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), 
+                          tti$scores, tti$freq)  
+      asf$condition[] <- .lhs
       n_plus_stars <- gregexpr("[\\*\\+]", asf$condition)
       asf$complexity <- 
-        vapply(n_plus_stars, length, integer(1)) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
-      
+        lengths(n_plus_stars) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
       asf <- asf[order(asf$complexity, -asf$consistency * asf$coverage), , drop = FALSE]
+      if (length(details))
+        asf <- cbind(asf, 
+                     .det.tti(tti, paste0(asf$condition, "<->", asf$outcome), 
+                              what = details))
+      if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
       rownames(asf) <- NULL
   
       sol[[c(zname, "asf")]] <- asf
-    }  
+    }
   }
 
   out <- structure(list(), class = "cna")
@@ -189,6 +214,7 @@ cna <- function (x, type,
   out$truthTab_out <- tt.out
   out$solution <- sol
   out$what <- what
+  out$details <- details0
 
   return(out)
 }

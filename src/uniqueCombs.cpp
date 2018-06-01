@@ -7,7 +7,7 @@ IntegerVector C_countUniques(IntegerMatrix x){
   int n=x.nrow(), p=x.ncol();
   IntegerVector nVals(p);
   for (int j=0; j<p; j++){
-    int cnt=n - sum(static_cast<IntegerVector>(duplicated(x(_, j))));
+    int cnt=n - sum(as<IntegerVector>(duplicated(x(_, j))));
 //    Rcpp::Rcout << "[Rcpp::Rcout] " << cnt << std::endl;
     nVals[j]=cnt;
     }
@@ -43,7 +43,7 @@ LogicalVector C_duplicatedMat(IntegerMatrix x){
 // [[Rcpp::export]]
 IntegerMatrix C_uniqueMat(IntegerMatrix x){
   LogicalVector keep=!C_duplicatedMat(x);
-  int n=x.nrow(), p=x.ncol(), m=sum(static_cast<IntegerVector>(keep));
+  int n=x.nrow(), p=x.ncol(), m=sum(as<IntegerVector>(keep));
   IntegerMatrix out(m, p);
   int ii=0;
   for (int i=0; i<n; i++){

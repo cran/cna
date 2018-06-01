@@ -1,34 +1,50 @@
 
 #include <Rcpp.h>
-using namespace Rcpp;
+#include "typedefs.h"
 
-typedef ListOf<IntegerVector> intList;
-typedef ListOf<intList> recIntList; // recursive intList = list of intList
-typedef ListOf<NumericMatrix> numMatList;
+using namespace Rcpp;
 
 //=============================================================================
 
 // Functions to manipulate intList's
 // ---------------------------------
 
+// Auxiliary fun used in isSubsetOf 
+IntegerVector rmFirst(IntegerVector x) {
+  int n = x.size();
+  IntegerVector out(n-1);
+  if (n>1) out = x[Range(1, n-1)];
+  return out;
+}
+
 // [[Rcpp::export]]
 bool C_isSubsetOf(IntegerVector x, IntegerVector y) {
-  int lx=x.size(), ly=y.size();
+  int nx = x.size();
+  int ny = y.size();
+  int i=0, j=0;
   bool out;
-  out=TRUE;
-  bool found;
-  for (int i=0; i < lx; i++) {
-    found=FALSE;
-    for (int j=0; j < ly; j++) {
-      if (x[i]==y[j]){
-        found=TRUE;
-        break;
-      }
-    }
-    if (!found){
-      out=FALSE;
+  while (true) {
+    if (nx == i){
+      out = true;
       break;
     }
+    if (ny == j){
+      out = false;
+      break;
+    }
+    if (nx-i > ny-j){
+      out = false;
+      break;
+    }
+    int x1=x[i], y1=y[j];
+    if (x1 < y1){
+      out = false;
+      break;
+    }
+    if (x1 == y1){
+      ++i;
+    }
+    ++j;
   }
   return(out);
 }
@@ -41,10 +57,10 @@ LogicalVector C_hasSupersetIn(intList x, intList y){
   //  Rcpp::Rcout << "The length of the 2nd list is: " << xlen << std::endl;
   LogicalVector out(xlen);
   for (int ix=0; ix<xlen; ix++) {
-    bool foundSuperset=FALSE;
+    bool foundSuperset=false;
     for (int iy=0; iy<ylen; iy++) {
       if (C_isSubsetOf(x[ix], y[iy])){
-        foundSuperset=TRUE;
+        foundSuperset=true;
         break;
       }
     }    
@@ -53,17 +69,52 @@ LogicalVector C_hasSupersetIn(intList x, intList y){
   return out;
 }
 
+//// [[Rcpp::export]]
+bool C_allTRUE(LogicalVector x){
+  int len = x.size();
+  bool out = true;
+  for (int i=0; i<len; i++){
+    if (!x[i]){
+      out = false;
+      break;
+    }
+  }
+  return out;
+}
+//// [[Rcpp::export]]
+bool C_allFALSE(LogicalVector x){
+  int len = x.size();
+  bool out = true;
+  for (int i=0; i<len; i++){
+    if (x[i]){
+      out = false;
+      break;
+    }
+  }
+  return out;
+}
 
 // Determine if an intList x is minimal with respect to a reference intList
 // (ref contains existing solutions)
 // [[Rcpp::export]]
-bool C_intList_minimal(intList x, intList ref){
+bool C_intList_minimal(intList x, recIntList ref, bool ignore_equals=false){
   int lenr = ref.size();
-  bool is_minimal = TRUE;
+  bool is_minimal = true;
   for (int j=0; j<lenr; j++){
+    //Rcpp::Rcout << "j: " << j << std::endl;
     LogicalVector lv = C_hasSupersetIn(as<intList>(ref[j]), x);
-    is_minimal = sum(as<IntegerVector>(lv)) < lv.size();
-    if (!is_minimal) break;
+    //Rcpp::Rcout << "lv: " << lv << std::endl;
+    if (C_allTRUE(lv)){ 
+      is_minimal = false;
+      if (ignore_equals){
+        bool eq = C_allTRUE(C_hasSupersetIn(x, as<intList>(ref[j])));
+        if (eq){ 
+          is_minimal = true;
+        }
+      }
+      //Rcpp::Rcout << "is_minimal: " << is_minimal << std::endl;
+      if (!is_minimal) break;
+    }
   }
   return(is_minimal);
 }
@@ -71,18 +122,11 @@ bool C_intList_minimal(intList x, intList ref){
 
 // Determine the intLists in x that are minimal with respect to existing solutions ref
 // [[Rcpp::export]]
-LogicalVector C_minimal(recIntList x, recIntList ref){
-  int lenx = x.size(), lenr = ref.size();
+LogicalVector C_minimal(recIntList x, recIntList ref, bool ignore_equals=false){
+  int lenx = x.size();
   LogicalVector out(lenx);
   for (int i=0; i<lenx; i++){
-    intList intLst1 = as<intList>(x[i]);
-    bool is_minimal = TRUE;
-    for (int j=0; j<lenr; j++){
-      LogicalVector lv = C_hasSupersetIn(as<intList>(ref[j]), intLst1);
-      is_minimal = sum(as<IntegerVector>(lv)) < lv.size();
-      if (!is_minimal) break;
-    }
-    out[i] = is_minimal;  
+    out[i] = C_intList_minimal(as<intList>(x[i]), ref, ignore_equals);  
   }
   return(out);
 }
@@ -94,7 +138,7 @@ void C_show_intList(intList x){
   for (int i=0; i<lenx; i++){
     IntegerVector xi = x[i];
     Rcpp::Rcout << xi << " ";
-    if (i<lenx-1L) Rcpp::Rcout << "/ ";
+    if (i<lenx-1) Rcpp::Rcout << "/ ";
   }
   Rcpp::Rcout << std::endl;
   return;
@@ -177,10 +221,10 @@ NumericMatrix C_conjScore(NumericMatrix x, IntegerMatrix m){
 IntegerVector C_init_ii(IntegerVector nn, LogicalVector st){
   int l=nn.size();
   IntegerVector ini(l);
-  ini.fill(0L);
-  for (int j=0L; j<l-1L; j++){
+  ini.fill(0);
+  for (int j=0; j<l-1; j++){
     if (st[j]){
-      ini[j+1L] = ini[j] + 1L;
+      ini[j+1] = ini[j] + 1;
     }
   }
   return(ini);
@@ -191,25 +235,25 @@ IntegerVector C_init_ii(IntegerVector nn, LogicalVector st){
 IntegerVector C_set_lim(IntegerVector nn, LogicalVector st){
   int l=nn.size();
   IntegerVector lim(l);
-  lim = nn - 1L; 
+  lim = nn - 1; 
   if (l<=1) return(lim);
-  for (int j=l-2L; j>=0L; j--){
+  for (int j=l-2; j>=0; j--){
     if (st[j]){
-      lim[j] = lim[j+1L] - 1L;
+      lim[j] = lim[j+1] - 1;
     }
   }
   return(lim);
 }
 
-// max_which
+// C_max_which
 // [[Rcpp::export]]
-int max_which(LogicalVector x) {
+int C_max_which(LogicalVector x) {
   int n = x.size();
   int i;
-  for (i=n-1L; i >= 0L; i--) {
+  for (i=n-1; i >= 0; i--) {
     if (x[i]) break;
   }
-  return(i+1L);
+  return(i+1);
 }
 
 
@@ -217,28 +261,28 @@ int max_which(LogicalVector x) {
 // [[Rcpp::export]]
 IntegerVector C_increment(IntegerVector ii, IntegerVector nn, LogicalVector st, IntegerVector lim){
   int l = ii.size();
-  if (ii[l-1L] < lim[l-1L]){    // end of loop not yet reached in last position
-    ii[l-1L] += 1L;
+  if (ii[l-1] < lim[l-1]){    // end of loop not yet reached in last position
+    ii[l-1] += 1;
     return(ii);
   } 
   // p = first position with increment in index
-  int p=max_which(ii < lim);
-  if (p == 0L){
-    ii.fill(0L);
+  int p=C_max_which(ii < lim);
+  if (p == 0){
+    ii.fill(0);
     return(ii);
   }
   // increment index positions < p
-  if (p==1L){
-    ii[0L] += 1L; 
+  if (p==1){
+    ii[0] += 1; 
   } else {
-    ii[Range(0, p-1L)] = C_increment(ii[Range(0, p-1L)], nn[Range(0, p-1L)], st[Range(0, p-2L)], lim[Range(0, p-1L)]);
+    ii[Range(0, p-1)] = C_increment(ii[Range(0, p-1)], nn[Range(0, p-1)], st[Range(0, p-2)], lim[Range(0, p-1)]);
   }
   // reset index positions >= p
   for (int j=p; j<l; j++){
-    if (st[j-1L]){
-      ii[j] = ii[j-1L] + 1L;
+    if (st[j-1]){
+      ii[j] = ii[j-1] + 1;
     } else {
-      ii[j] = 0L;
+      ii[j] = 0;
     } 
   }
   return(ii);
@@ -296,7 +340,7 @@ IntegerMatrix C_find_asf(IntegerVector conjlen, numMatList x, NumericVector y, I
   int n_conj = conjlen.size();
 
   // st = indicator, =true if conj hast same length as precedent conj
-  LogicalVector st(n_conj - 1L);
+  LogicalVector st(n_conj - 1);
   st = (Rcpp::diff(conjlen) == 0);
   
   // nn = number of conjunctions
@@ -342,6 +386,10 @@ IntegerMatrix C_find_asf(IntegerVector conjlen, numMatList x, NumericVector y, I
       break;
     }
   } while (as<bool>(any(ii>0)));
+  
+  // if (count > 0){
+  //   Rcpp::Rcout << "count="<< count << std::endl;
+  // }
   
   // Return matrix with 0 rows if count=0:
   if (count == 0){ 

@@ -1,28 +1,8 @@
 
 #include <Rcpp.h>
-using namespace Rcpp;
+#include "headers.h"
 
-// [[Rcpp::export]]
-bool C_isSubsetOf1(IntegerVector x, IntegerVector y) {
-  int lx=x.size(), ly=y.size();
-  bool out;
-  out=TRUE;
-  bool found;
-  for (int i=0; i < lx; i++) {
-    found=FALSE;
-    for (int j=0; j < ly; j++) {
-      if (x[i]==y[j]){
-        found=TRUE;
-        break;
-      }
-    }
-    if (!found){
-      out=FALSE;
-      break;
-    }
-  }
-  return(out);
-}
+using namespace Rcpp;
 
 // [[Rcpp::export]]
 LogicalVector C_hasSubsetInM(IntegerMatrix y, IntegerMatrix x) { 
@@ -31,11 +11,11 @@ LogicalVector C_hasSubsetInM(IntegerMatrix y, IntegerMatrix x) {
   LogicalVector out(nry);
   for (int iy=0; iy < nry; iy++) {
     IntegerVector y1 = y(iy, _);
-    bool foundSubset=FALSE;
+    bool foundSubset=false;
     for (int ix=0; ix < nrx; ix++) {
       IntegerVector x1 = x(ix, _);
-      if (C_isSubsetOf1(x1, y1)){
-        foundSubset=TRUE;
+      if (C_isSubsetOf(x1, y1)){
+        foundSubset=true;
         break;
       }
     }    

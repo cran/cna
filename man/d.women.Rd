@@ -10,7 +10,7 @@
 This dataset is from Krook (2010), who analyzes the causal conditions for high women's representation in western-democratic parliaments.
 }
 
-\usage{data(d.women)}
+\usage{d.women}
 
 \format{
 The data frame contains 22 rows (cases) and the following 6 columns featuring Boolean factors taking values 1 and 0 only:

@@ -10,7 +10,7 @@
 This dataset is from Aleman (2009), who analyzes the causes of the emergence of tripartite labor agreements among unions, employers, and government representatives in new democracies in Europe, Latin America, Africa, and Asia between 1994 and 2004.
 }
 
-\usage{data(d.pacts)}
+\usage{d.pacts}
 
 \format{
 The data frame contains 78 rows (cases) and the following 5 columns listing membership scores in 5 fuzzy sets:

@@ -2,16 +2,14 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <Rcpp.h>
+#include "typedefs.h"
+#include "headers.h"
 
 using namespace Rcpp;
 
-typedef ListOf<IntegerVector> intList;
-typedef ListOf<intList> recIntList; // recursive intList = list of intList
-typedef ListOf<NumericMatrix> numMatList;
-
 // C_isSubsetOf
 bool C_isSubsetOf(IntegerVector x, IntegerVector y);
-RcppExport SEXP cna_C_isSubsetOf(SEXP xSEXP, SEXP ySEXP) {
+RcppExport SEXP _cna_C_isSubsetOf(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,7 +21,7 @@ END_RCPP
 }
 // C_hasSupersetIn
 LogicalVector C_hasSupersetIn(intList x, intList y);
-RcppExport SEXP cna_C_hasSupersetIn(SEXP xSEXP, SEXP ySEXP) {
+RcppExport SEXP _cna_C_hasSupersetIn(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,32 +32,34 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_intList_minimal
-bool C_intList_minimal(intList x, intList ref);
-RcppExport SEXP cna_C_intList_minimal(SEXP xSEXP, SEXP refSEXP) {
+bool C_intList_minimal(intList x, recIntList ref, bool ignore_equals);
+RcppExport SEXP _cna_C_intList_minimal(SEXP xSEXP, SEXP refSEXP, SEXP ignore_equalsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< intList >::type x(xSEXP);
-    Rcpp::traits::input_parameter< intList >::type ref(refSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_intList_minimal(x, ref));
+    Rcpp::traits::input_parameter< recIntList >::type ref(refSEXP);
+    Rcpp::traits::input_parameter< bool >::type ignore_equals(ignore_equalsSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_intList_minimal(x, ref, ignore_equals));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_minimal
-LogicalVector C_minimal(recIntList x, recIntList ref);
-RcppExport SEXP cna_C_minimal(SEXP xSEXP, SEXP refSEXP) {
+LogicalVector C_minimal(recIntList x, recIntList ref, bool ignore_equals);
+RcppExport SEXP _cna_C_minimal(SEXP xSEXP, SEXP refSEXP, SEXP ignore_equalsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< recIntList >::type x(xSEXP);
     Rcpp::traits::input_parameter< recIntList >::type ref(refSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_minimal(x, ref));
+    Rcpp::traits::input_parameter< bool >::type ignore_equals(ignore_equalsSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_minimal(x, ref, ignore_equals));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_paste_intList
 intList C_paste_intList(intList x, intList y);
-RcppExport SEXP cna_C_paste_intList(SEXP xSEXP, SEXP ySEXP) {
+RcppExport SEXP _cna_C_paste_intList(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,7 +71,7 @@ END_RCPP
 }
 // C_conCov
 NumericVector C_conCov(NumericVector x, NumericVector y, IntegerVector f);
-RcppExport SEXP cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+RcppExport SEXP _cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -84,7 +84,7 @@ END_RCPP
 }
 // C_subsetMin
 double C_subsetMin(NumericVector x, IntegerVector sub);
-RcppExport SEXP cna_C_subsetMin(SEXP xSEXP, SEXP subSEXP) {
+RcppExport SEXP _cna_C_subsetMin(SEXP xSEXP, SEXP subSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -96,7 +96,7 @@ END_RCPP
 }
 // C_conjScore
 NumericMatrix C_conjScore(NumericMatrix x, IntegerMatrix m);
-RcppExport SEXP cna_C_conjScore(SEXP xSEXP, SEXP mSEXP) {
+RcppExport SEXP _cna_C_conjScore(SEXP xSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -108,7 +108,7 @@ END_RCPP
 }
 // C_init_ii
 IntegerVector C_init_ii(IntegerVector nn, LogicalVector st);
-RcppExport SEXP cna_C_init_ii(SEXP nnSEXP, SEXP stSEXP) {
+RcppExport SEXP _cna_C_init_ii(SEXP nnSEXP, SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -120,7 +120,7 @@ END_RCPP
 }
 // C_set_lim
 IntegerVector C_set_lim(IntegerVector nn, LogicalVector st);
-RcppExport SEXP cna_C_set_lim(SEXP nnSEXP, SEXP stSEXP) {
+RcppExport SEXP _cna_C_set_lim(SEXP nnSEXP, SEXP stSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -130,20 +130,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// max_which
-int max_which(LogicalVector x);
-RcppExport SEXP cna_max_which(SEXP xSEXP) {
+// C_max_which
+int C_max_which(LogicalVector x);
+RcppExport SEXP _cna_C_max_which(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< LogicalVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(max_which(x));
+    rcpp_result_gen = Rcpp::wrap(C_max_which(x));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_increment
 IntegerVector C_increment(IntegerVector ii, IntegerVector nn, LogicalVector st, IntegerVector lim);
-RcppExport SEXP cna_C_increment(SEXP iiSEXP, SEXP nnSEXP, SEXP stSEXP, SEXP limSEXP) {
+RcppExport SEXP _cna_C_increment(SEXP iiSEXP, SEXP nnSEXP, SEXP stSEXP, SEXP limSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -157,7 +157,7 @@ END_RCPP
 }
 // C_find_asf
 IntegerMatrix C_find_asf(IntegerVector conjlen, numMatList x, NumericVector y, IntegerVector f, double con, double cov, int maxSol);
-RcppExport SEXP cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
+RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -172,9 +172,156 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_concat
+std::string C_concat(CharacterVector x, std::string sep);
+RcppExport SEXP _cna_C_concat(SEXP xSEXP, SEXP sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type sep(sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_concat(x, sep));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_mconcat
+CharacterVector C_mconcat(charList x, std::string sep, bool sorted);
+RcppExport SEXP _cna_C_mconcat(SEXP xSEXP, SEXP sepSEXP, SEXP sortedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< charList >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type sep(sepSEXP);
+    Rcpp::traits::input_parameter< bool >::type sorted(sortedSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_mconcat(x, sep, sorted));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_charList2string
+std::string C_charList2string(charList x, std::string disj, std::string conj, bool sorted);
+RcppExport SEXP _cna_C_charList2string(SEXP xSEXP, SEXP disjSEXP, SEXP conjSEXP, SEXP sortedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< charList >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type disj(disjSEXP);
+    Rcpp::traits::input_parameter< std::string >::type conj(conjSEXP);
+    Rcpp::traits::input_parameter< bool >::type sorted(sortedSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_charList2string(x, disj, conj, sorted));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_recCharList2char
+CharacterVector C_recCharList2char(recCharList x, std::string disj, std::string conj, bool sorted);
+RcppExport SEXP _cna_C_recCharList2char(SEXP xSEXP, SEXP disjSEXP, SEXP conjSEXP, SEXP sortedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< recCharList >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type disj(disjSEXP);
+    Rcpp::traits::input_parameter< std::string >::type conj(conjSEXP);
+    Rcpp::traits::input_parameter< bool >::type sorted(sortedSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_recCharList2char(x, disj, conj, sorted));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_find_first_false
+int C_find_first_false(LogicalVector x);
+RcppExport SEXP _cna_C_find_first_false(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_find_first_false(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_redund
+LogicalVector C_redund(LogicalMatrix x);
+RcppExport SEXP _cna_C_redund(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_redund(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_mredund
+List C_mredund(LogicalMatrix x, IntegerVector l);
+RcppExport SEXP _cna_C_mredund(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_mredund(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_relist_Int
+List C_relist_Int(IntegerVector x, IntegerVector l);
+RcppExport SEXP _cna_C_relist_Int(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_relist_Int(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_relist_Num
+List C_relist_Num(NumericVector x, IntegerVector l);
+RcppExport SEXP _cna_C_relist_Num(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_relist_Num(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_relist_Log
+List C_relist_Log(LogicalVector x, IntegerVector l);
+RcppExport SEXP _cna_C_relist_Log(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_relist_Log(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_relist_Char
+List C_relist_Char(CharacterVector x, IntegerVector l);
+RcppExport SEXP _cna_C_relist_Char(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_relist_Char(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_relist_List
+List C_relist_List(List x, IntegerVector l);
+RcppExport SEXP _cna_C_relist_List(SEXP xSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_relist_List(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_conj_conCov
 NumericVector C_conj_conCov(IntegerVector cols, NumericMatrix x, NumericVector y, IntegerVector f);
-RcppExport SEXP cna_C_conj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+RcppExport SEXP _cna_C_conj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -188,7 +335,7 @@ END_RCPP
 }
 // C_disj_conCov
 NumericVector C_disj_conCov(IntegerVector cols, NumericMatrix x, NumericVector y, IntegerVector f);
-RcppExport SEXP cna_C_disj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+RcppExport SEXP _cna_C_disj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -200,21 +347,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// C_isSubsetOf1
-bool C_isSubsetOf1(IntegerVector x, IntegerVector y);
-RcppExport SEXP cna_C_isSubsetOf1(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(C_isSubsetOf1(x, y));
-    return rcpp_result_gen;
-END_RCPP
-}
 // C_hasSubsetInM
 LogicalVector C_hasSubsetInM(IntegerMatrix y, IntegerMatrix x);
-RcppExport SEXP cna_C_hasSubsetInM(SEXP ySEXP, SEXP xSEXP) {
+RcppExport SEXP _cna_C_hasSubsetInM(SEXP ySEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -226,7 +361,7 @@ END_RCPP
 }
 // C_countUniques
 IntegerVector C_countUniques(IntegerMatrix x);
-RcppExport SEXP cna_C_countUniques(SEXP xSEXP) {
+RcppExport SEXP _cna_C_countUniques(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -237,7 +372,7 @@ END_RCPP
 }
 // C_duplicatedMat
 LogicalVector C_duplicatedMat(IntegerMatrix x);
-RcppExport SEXP cna_C_duplicatedMat(SEXP xSEXP) {
+RcppExport SEXP _cna_C_duplicatedMat(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -248,7 +383,7 @@ END_RCPP
 }
 // C_uniqueMat
 IntegerMatrix C_uniqueMat(IntegerMatrix x);
-RcppExport SEXP cna_C_uniqueMat(SEXP xSEXP) {
+RcppExport SEXP _cna_C_uniqueMat(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -259,7 +394,7 @@ END_RCPP
 }
 // C_selectCols
 IntegerMatrix C_selectCols(IntegerMatrix x, IntegerVector idx);
-RcppExport SEXP cna_C_selectCols(SEXP xSEXP, SEXP idxSEXP) {
+RcppExport SEXP _cna_C_selectCols(SEXP xSEXP, SEXP idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -271,7 +406,7 @@ END_RCPP
 }
 // C_uniqueCombs
 IntegerMatrix C_uniqueCombs(IntegerMatrix x, IntegerVector idx);
-RcppExport SEXP cna_C_uniqueCombs(SEXP xSEXP, SEXP idxSEXP) {
+RcppExport SEXP _cna_C_uniqueCombs(SEXP xSEXP, SEXP idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;

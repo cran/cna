@@ -10,7 +10,7 @@
 This dataset is from Basurto (2013), who analyzes the causes of the emergence and endurance of autonomy among local institutions for biodiversity conservation in Costa Rica between 1986 and 2006. 
 }
 
-\usage{data(d.autonomy)}
+\usage{d.autonomy}
 
 \format{
 The data frame contains 30 rows (cases), which are divided in two halfs: rows 1 to 14 comprise data on the emergence of local autonomy between 1986 and 1998, rows 15 to 30 comprise data on the endurance of local autonomy between 1998 and 2006. The data has the following 9 columns featuring fuzzy-set factors:

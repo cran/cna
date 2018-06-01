@@ -8,7 +8,7 @@ Randomly select configurations from a data frame or \code{truthTab}
 }
 
 \description{
-Randomly select configurations from a data frame or \code{truthTab} by selecting a random sample with or without replacement.
+Randomly select configurations from a data frame or \code{truthTab} with or without replacement.
 }
 
 \usage{
@@ -50,7 +50,6 @@ Krook, Mona Lena. 2010.
 
 \examples{
 # Randomly sample configurations from the dataset analyzed by Krook (2010).
-data(d.women)
 tt.women <- truthTab(d.women)
 some(tt.women, 20)
 some(tt.women, 5, replace = FALSE)

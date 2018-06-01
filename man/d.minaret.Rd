@@ -11,7 +11,7 @@ This dataset is from Baumgartner and Epple (2014), who analyze the determinants
 of the outcome of the vote on the 2009 Swiss Minaret Initative.
 }
 
-\usage{data(d.minaret)}
+\usage{d.minaret}
 
 \format{
 The data frame contains 26 rows (cases) and the following 6 columns featuring raw data:

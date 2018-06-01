@@ -11,7 +11,7 @@ This dataset is from Lam and Ostrom (2010), who analyze the effects of an irriga
 experiment in Nepal.
 }
 
-\usage{data(d.irrigate)}
+\usage{d.irrigate}
 
 \format{
 The dataset contains 15 rows (cases) and the following 6 columns featuring Boolean factors taking values 1 and 0 only:
