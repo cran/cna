@@ -79,7 +79,8 @@ minimalizeCsf <- function(x, ...){
 minimalizeCsf.default <- function(x, data, verbose = FALSE, ...){
   x <- noblanks(x)
   extract_asf <- extract_asf
-  tt <- truthTab(data)
+  tt <- truthTab(data, verbose = verbose, 
+                 rm.dup.factors = FALSE, rm.const.factors = FALSE)
   minim <- .minCsf(x, tt.info(tt), verbose = verbose)
   redundantParts <- vector("list", length(minim))
   for (i in seq_along(minim)){

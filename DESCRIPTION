@@ -1,8 +1,8 @@
 Package: cna
 Type: Package
 Title: Causal Modeling with Coincidence Analysis
-Version: 2.1.0
-Date: 2018-06-01
+Version: 2.1.1
+Date: 2018-06-13
 Authors@R: c(person("Mathias", "Ambuehl", role = c("aut", "cre", "cph"), 
                     email = "mathias.ambuehl@consultag.ch"),
              person("Michael", "Baumgartner", role = c("aut", "cph"),
@@ -19,11 +19,11 @@ LinkingTo: Rcpp
 Suggests: dplyr
 NeedsCompilation: yes
 LazyData: yes
-Packaged: 2018-06-01 07:39:42 UTC; MAM
+Packaged: 2018-06-13 07:22:17 UTC; MAM
 Author: Mathias Ambuehl [aut, cre, cph],
   Michael Baumgartner [aut, cph],
   Ruedi Epple [ctb],
   Alrik Thiem [ctb]
 Maintainer: Mathias Ambuehl <mathias.ambuehl@consultag.ch>
 Repository: CRAN
-Date/Publication: 2018-06-01 12:30:16 UTC
+Date/Publication: 2018-06-13 10:02:55 UTC

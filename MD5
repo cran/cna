@@ -1,4 +1,4 @@
-c3504689a7262632f75b371c1ad56d2a *DESCRIPTION
+3779c1fae7c0b92e625b7a919f9ad880 *DESCRIPTION
 c5f0c3600b0827a88d715c89431f3856 *NAMESPACE
 7f57ad009e8342b5f106ef5f23349dfd *R/RcppExports.R
 e42bff00542db29bf8c743578f784310 *R/allCombs_makefuzzy.r
@@ -20,7 +20,7 @@ adb78cb1cb7ffb0cfeba0c170838d33d *R/full.tt.R
 6da87a3c42ce4465cf6bc587aa1a8621 *R/is.inus.R
 60d871b0060e8e14000320e77fe5e085 *R/is.minimal.R
 5c7a851752288dc64a4ab83db1bc4267 *R/minimalize.R
-5509af7d76ea07618ad98520a5c75cf5 *R/minimalizeCsf.R
+cefe9daf3db30b5e586a8b6f9ca67426 *R/minimalizeCsf.R
 612e88bea1fd30dc768b20e54187e458 *R/misc_aux.R
 a74bfe5c409ac3a738651032ab3eb286 *R/onLoad.R
 a47973015a8faec826e630053d36c5f9 *R/onUnload.R
@@ -49,9 +49,9 @@ f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 4d21a7c539fe2ed9b7aa5c66ebcc81ec *inst/NEWS
 3fcafe5e4a142c1f1d338cdc5ca9b3d0 *inst/doc/cna_vignette.R
 ba13249a06f09c22c87bed9a42fd311a *inst/doc/cna_vignette.Rnw
-11265282cb5432b0371e7c1be1aa18ad *inst/doc/cna_vignette.pdf
+b4fa72161d982e190fcd4f22b8bd4796 *inst/doc/cna_vignette.pdf
 1fc6c90d5647405a5584cd9d887572b1 *man/allCombs.Rd
-424dac6a6f73284c3ecd70f32d2a23ea *man/cna-package.Rd
+585f6690643e943cd0c4352ffecc0722 *man/cna-package.Rd
 d70fd82f4ba4c258cb57b723fba5ee36 *man/cna.Rd
 45e5cbcffedf1da691999a882a574636 *man/coherence.Rd
 9dbc6d448ea8db59c435b2f3eabbabe3 *man/condTbl.Rd
