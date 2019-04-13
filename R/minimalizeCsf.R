@@ -76,9 +76,9 @@ minimalizeCsf <- function(x, ...){
   UseMethod("minimalizeCsf")
 }
 # Default method (for character vector)
-minimalizeCsf.default <- function(x, data, verbose = FALSE, ...){
+minimalizeCsf.default <- function(x, data = full.tt(x), verbose = FALSE, ...){
+  if (length(x) == 0) stop("Input has length 0.")
   x <- noblanks(x)
-  extract_asf <- extract_asf
   tt <- truthTab(data, verbose = verbose, 
                  rm.dup.factors = FALSE, rm.const.factors = FALSE)
   minim <- .minCsf(x, tt.info(tt), verbose = verbose)
@@ -101,6 +101,8 @@ minimalizeCsf.default <- function(x, data, verbose = FALSE, ...){
 # Method for class cna
 minimalizeCsf.cna <- function(x, n = 20, verbose = FALSE, ...){
   csfs <- csf(x, max(n))$condition
+  if (length(csfs) == 0)
+    stop("cna object has no complex solutions")
   if (length(n)>1){
     n <- n[n<length(csfs)]
     csfs <- csfs[n]
@@ -108,7 +110,7 @@ minimalizeCsf.cna <- function(x, n = 20, verbose = FALSE, ...){
   minimalizeCsf.default(csfs, data = x$truthTab, verbose = verbose, ...)
 }
 
-# Clearer display of solutions:
+# print method
 print.minimalizeCsf <- function(x, subset = 1:5, ...){
   n <- nrow(x)
   subset <- intersect(subset, seq_len(n))

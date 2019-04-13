@@ -14,7 +14,7 @@ tt2df(tt)
 }
 
 \arguments{
-  \item{tt}{A \code{truthTab}}
+  \item{tt}{A \code{truthTab}.}
 }
 
 \details{

@@ -5,7 +5,8 @@ using namespace Rcpp;
 
 // Calculate con and cov of conjunctions
 // [[Rcpp::export]]
-NumericVector C_conj_conCov(IntegerVector cols, NumericMatrix x, NumericVector y, IntegerVector f){
+NumericVector C_conj_conCov(const IntegerVector cols, const NumericMatrix x, 
+                            const NumericVector y, const IntegerVector f){
   int n=x.nrow(), p=cols.size();
   NumericVector Sums(3), conCov(2);
   for (int i=0; i<n; i++){
@@ -27,7 +28,8 @@ NumericVector C_conj_conCov(IntegerVector cols, NumericMatrix x, NumericVector y
 
 // Calculate con and cov of disjunctions
 // [[Rcpp::export]]
-NumericVector C_disj_conCov(IntegerVector cols, NumericMatrix x, NumericVector y, IntegerVector f){
+NumericVector C_disj_conCov(const IntegerVector cols, const NumericMatrix x, 
+                            const NumericVector y, const IntegerVector f){
   int n=x.nrow(), p=cols.size();
   NumericVector Sums(3), conCov(2);
   for (int i=0; i<n; i++){

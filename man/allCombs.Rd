@@ -2,11 +2,11 @@
 \alias{allCombs}
 
 \title{
-Generate all possible value configurations of a given set of factors
+Generate all logically possible value configurations of a given set of factors
 }
 
 \description{
-Generates a data frame of all possible value configurations of \code{length(x)} multi-valued factors, the first factor having \code{x[1]} values, the second \code{x[2]} values etc. The factors are labeled using capital letters.
+The function \code{allCombs} generates a data frame of all possible value configurations of \code{length(x)} factors, the first factor having \code{x[1]} values, the second \code{x[2]} values etc. The factors are labeled using capital letters. 
 }
 
 \usage{
@@ -14,17 +14,19 @@ allCombs(x)
 }
 
 \arguments{
-  \item{x}{integer vector with values >0}
+  \item{x}{Integer vector with values >0}
 }
 
-\details{In combination with \code{selectCases} and \code{makeFuzzy}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials that assess the correctness of models output by \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data-generating causal structure, and \code{makeFuzzy} introduces noise into that data.
+\details{In combination with \code{selectCases} and \code{makeFuzzy}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials benchmarking the output of \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data-generating causal structure (i.e. the ground truth, which can be randomly generated using \code{randomConds}), \code{makeFuzzy} introduces noise into that data, and \code{is.submodel} checks whether the models returned by \code{cna} are true of the ground truth.
+
+The \pkg{cna} package provides another function to the same effect, \code{\link{full.tt}}, which is more flexible than \code{allCombs}.
 }
 
 \value{
 A data frame.
 }
 
-\seealso{\code{\link{selectCases}}, \code{\link{makeFuzzy}}}
+\seealso{\code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link{is.submodel}}, \code{\link{randomConds}}, \code{\link{full.tt}}}
 
 \examples{
 # Generate all logically possible configurations of 5 dichotomous factors named "A", "B",
@@ -62,9 +64,11 @@ dat2 <- makeFuzzy(dat1, fuzzvalues = seq(0, 0.45, 0.01))
 
 # Inverse search for the data generating causal structure A*b + a*B + C*D <-> E from
 # fuzzy-set data with non-perfect consistency and coverage scores.
+set.seed(3)
+groundTruth <- "A*b + a*B + C*D <-> E"
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
-set.seed(3)
-dat3 <- selectCases1("A*b + a*B + C*D <-> E", con = .8, cov = .8, dat2)
-fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
+dat3 <- selectCases1(groundTruth, con = .8, cov = .8, dat2)
+ana1 <- fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
+any(is.submodel(asf(ana1)$condition, groundTruth))
 }

@@ -22,7 +22,10 @@ allCombs <- function(x){
 #   fuzzvalues values to add/substract at random from elements of x
 # Value: resulting truthTab of type "fs"
 makeFuzzy <- function(x, fuzzvalues = c(0, .05, .1), ...){
-  xfuzzy <- x
+  if (is.null(colnames(x))){
+    colnames(x) <- make.unique(LETTERS[seq_len(ncol(x))])
+  }
+  xfuzzy <- tt2df(x)
   ulx <- unlist(x, use.names = FALSE)
   xfuzzy[, ] <- ifelse(as.logical(ulx),
                        1 - sample(fuzzvalues, length(ulx), replace = TRUE),

@@ -48,8 +48,9 @@ minimalize <- function(cond, x = NULL, maxstep = c(4, 4, 12)){
   cond1[!dnf] <- vapply(cond[!dnf], make.dnf, x,
                         FUN.VALUE = character(1), USE.NAMES = FALSE)
   out[] <- lapply(cond1, .minim1, x = x, maxstep = maxstep)
-  if (any(lengths(out) == 0))
-    warning("No minimal solution found for one or several non-INUS condition(s).\n",
-            "  You may try to increase maxsteps.")
+  if (any(noOutput <- lengths(out) == 0))
+    warning("No minimal solution found for condition(s):\n",
+            paste0("  ", cond[noOutput], "\n"),
+            "You may try to increase maxstep.", call. = FALSE)
   out
 }

@@ -11,8 +11,8 @@ condition <- function(x, ...)
 condition.default <- function(x, tt, type, add.data = FALSE,
                               force.bool = FALSE, rm.parentheses = FALSE, ...){
   stopifnot(is.character(x.in <- x))
-  x <- noblanks(x)   # remove blanks
-  x <- gsub(",", "*", x, fixed = TRUE)
+  x[] <- noblanks(x)   # remove blanks
+  x[] <- gsub(",", "*", x, fixed = TRUE)
   if (inherits(tt, "truthTab")){
     type <- attr(tt, "type")
   } else {
@@ -36,6 +36,7 @@ condition.default <- function(x, tt, type, add.data = FALSE,
   } else {
     condTypes <- qct <- .qcondType(x, vnms, type)
     x <- names(qct)
+    names(qct) <- names(condTypes) <- NULL
     if (any(noqct <- qct == "unknown")){
       px <- lapply(x[noqct], tryparse)
       px_ind <- which(noqct)
@@ -55,7 +56,7 @@ condition.default <- function(x, tt, type, add.data = FALSE,
       if (any(syntax_ok)){
         vars_ok <- checkVariableNames(px[syntax_ok], if (type == "mv") names(tt) else vnms)
         ct <- character(sum(vars_ok))
-        ct_inPar <- !rm.parentheses && inPar_px[syntax_ok][vars_ok]
+        ct_inPar <- !rm.parentheses & inPar_px[syntax_ok][vars_ok]
         if (any(ct_inPar)) ct[ct_inPar] <- "boolean"
         if (!all(ct_inPar))
           ct[!ct_inPar] <- .condType(px[syntax_ok][vars_ok][!ct_inPar], force.bool)
@@ -68,10 +69,8 @@ condition.default <- function(x, tt, type, add.data = FALSE,
   reshaped <- !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
                       x, noblanks(x.in), 
                       SIMPLIFY = TRUE, USE.NAMES = FALSE)
-    # (grepl("^std", qct) & x != noblanks(x.in)) |
-    # (noqct & !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
-    #                 x, noblanks(x.in), 
-    #                 SIMPLIFY = TRUE, USE.NAMES = FALSE))
+  # if (rm.parentheses && exists("inPar") && any(inPar))
+  #   reshaped[inPar & rm.parentheses] <- TRUE
   forced <- force.bool | (condTypes == "boolean" & grepl("->", x, fixed = TRUE))
   
   # treat conditions according to their condition-type
@@ -129,7 +128,9 @@ condition.default <- function(x, tt, type, add.data = FALSE,
   ok <- condTypes %in% c("stdBoolean", "stdAtomic", "stdComplex", "boolean", "atomic", "complex")
   out[!ok] <- rep(list(invalidCond()), sum(!ok))
   names(out) <- x
-  if (any(forced)) names(out)[forced] <- paste0("(", x[forced], ")")
+  if (any(forced)){
+    names(out)[forced] <- info$condition[forced] <- paste0("(", x[forced], ")")
+  }
   attr(out, "type") <- type
   attr(out, "n") <- n.cases
   attr(out, "cases") <- attr(tt, "cases")

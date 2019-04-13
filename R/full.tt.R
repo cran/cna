@@ -50,24 +50,25 @@ full.tt.default  <- function(x, type = c("cs", "mv", "fs"), ...){
     x <- LETTERS[seq_len(x)]
   }
   if (is.character(x)){
-    px <- visible2parsed(x)
-    type <- if ('==' %in% unlist(lapply(px, all.names))) "mv" else "cs"
+    type <- if (any(grepl("=", x))) "mv" else "cs"
+    px <- lapply(x, tryparse)
+    if (!all(ok <- !vapply(px, is.null, logical(1))))
+      stop("Invalid input to full.tt:\n", paste0("  ", x[!ok], collapse = "\n"),
+           call. = FALSE)
     if (type == "cs"){
       nms <- unique(toupper(unlist(lapply(px, all.vars))))
       x <- setNames(rep(list(0:1), length(nms)), nms)
     } else {
-      px <- visible2parsed(x)
       vals <- rapply(px, .call2list, how = "unlist",
                      stopOps = c("==", "<", ">", "<=", ">="), 
                      validOps = c("<-", "<<-", "=", "&", "|", "(", "-"))
       vals <- vals[!vapply(vals, is.symbol, FUN.VALUE = TRUE)]
       if (any(lengths(vals) != 3)) stop("Check the conditions")
-      vals <- lapply(vals, "[", -1L)
-      var <- vapply(vals, function(x) as.character(x[[1]]), character(1))
-      val <- vapply(vals, "[[", 2, FUN.VALUE = numeric(1))
+      vals <- unique.default(vals)
+      var <- vapply(vals, function(x) as.character(x[[2]]), character(1))
+      val <- vapply(vals, "[[", 3, FUN.VALUE = numeric(1))
       x <- lapply(split(val, var), sort)
     }
-    # message("It is assumed that all factors have valid values 0 and 1")
   }
   if (!is.data.frame(x) && is.list(x) && !is.null(names(x))){
     x <- .expandUniqvals(x)

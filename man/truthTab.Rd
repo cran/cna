@@ -9,7 +9,7 @@
 \title{Assemble cases with identical configurations in a truth table}
 
 \description{
-This function assembles cases with identical configurations from a crisp-set (cs), multi-value (mv), or fuzzy-set (fs) data frame in a table called a \emph{truth table} (which is a very different type of object for CNA than for the related method of QCA).
+The \code{truthTab} function assembles cases with identical configurations from a crisp-set (cs), multi-value (mv), or fuzzy-set (fs) data frame in a table called a \emph{truth table} (which is a very different type of object for CNA than for the related method of QCA).
 }
 
 \usage{
@@ -24,8 +24,8 @@ fstt(...)
 }
 
 \arguments{
-  \item{x}{A data frame or matrix.}
-  \item{type}{A character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
+  \item{x}{Data frame or matrix.}
+  \item{type}{Character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
   \item{frequency}{Numeric vector of length \code{nrow(x)}. All elements must be
         non-negative.}
   \item{case.cutoff}{Minimum number of occurrences (cases) of a configuration
@@ -34,7 +34,7 @@ fstt(...)
   \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical values in \code{x} are eliminated.}
   \item{rm.const.factors}{Logical; if \code{TRUE}, factors with constant values in \code{x} are eliminated.}
   \item{.cases}{Set case labels (row names): optional character vector of length \code{nrow(x)}.}
-  \item{verbose}{Logical; if \code{TRUE}, some informative messages on the truth table are printed.}
+  \item{verbose}{Logical; if \code{TRUE}, some messages on the truth table are printed.}
   \item{show.cases}{Logical; if \code{TRUE}, the attribute \dQuote{cases}
         is printed.}
   \item{\dots}{
@@ -65,7 +65,7 @@ The \code{row.names} argument of the \code{print} function determines whether th
 
 
 \value{
-A \dQuote{truthTab}, i.e. a data.frame with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
+An object of type \dQuote{truthTab}, i.e. a data.frame with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
 }
 
 \note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{truth table} is a very different type of object in the context of CNA than it is in the context of QCA. While a QCA truth table is a list indicating whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a CNA truth table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A CNA truth table does not express any relations of sufficiency whatsoever.
@@ -127,6 +127,7 @@ dat1.tt <- truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3))
 dat1.tt <- truthTab(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3), case.cutoff = 2)
 \donttest{cna(dat1.tt, details = TRUE)}
 
+
 # Simulating multi-value data with biased samples (exponential distribution)
 # --------------------------------------------------------------------------
 dat1 <- allCombs(c(3,3,3,3,3))
@@ -135,13 +136,13 @@ m <- nrow(dat1)
 wei <- rexp(m)
 dat2 <- dat1[sample(nrow(dat1), 100, replace = TRUE, prob = wei),]
 truthTab(dat2, type = "mv") # 100 cases with 46 configurations instantiated only once.
-dat3 <- mvtt(dat2, case.cutoff = 2) # removing the single instances.
-mvcna(dat3)
+mvtt(dat2, case.cutoff = 2) # removing the single instances.
 
 # Duplicated factors are not eliminated, constant factors are not eliminated.
-dat4 <- selectCases("(A=1+A=2+A=3 <-> C=2)*(B=3<->D=3)*(B=2<->D=2)*(A=2 + B=1 <-> E=2)",
+dat3 <- selectCases("(A=1+A=2+A=3 <-> C=2)*(B=3<->D=3)*(B=2<->D=2)*(A=2 + B=1 <-> E=2)",
                     dat1, type = "mv")
-\donttest{mvtt(dat4, rm.dup.factors = FALSE, rm.const.factors = FALSE)}
+\donttest{mvtt(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE)}
+
 
 # truthTab with fuzzy-set data from Aleman (2009)
 # -----------------------------------------------
@@ -152,6 +153,7 @@ tt.pacts <- fstt(d.pacts)
 # Only include configurations with at least 3 cases.
 tt.pacts2 <- fstt(d.pacts, case.cutoff = 3) 
 \donttest{fscna(tt.pacts2, con = .93, cov = .86, details = TRUE)}
+
 
 # Large-N data with crisp sets from Greckhamer et al. (2008)
 #-----------------------------------------------------------

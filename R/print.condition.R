@@ -54,6 +54,11 @@ print.cond <- function (x, digits = 3, print.table = TRUE,
     } else {
       C_mconcat(attr(x, "cases"), sep = ",")
     }
+    if (any(longName <- nchar(colnames(dfr))>23)){
+      cnms <- colnames(dfr)
+      cnms[longName] <- paste0(substring(cnms[longName], 1, 20), "...")
+      colnames(dfr) <- cnms
+    }    
     if (is.null(add.data) & !is.null(attr(x, "tt")))
       add.data <- attr(x, "tt")
     if (!is.null(add.data)){

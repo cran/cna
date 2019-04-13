@@ -42,7 +42,7 @@ is.minimal <- function(cond, ref = cond, nms = NULL, ignore.equals = missing(ref
   }
   out <- C_minimal(hrelist(ril, attr(rcl, "lengths")),
                    hrelist(ril_ref, attr(rcl_ref, "lengths")),
-                   ignore_equals = ignore.equals)
+                   strict = ignore.equals)
   if (use.names){
     setNames(out, cond)
   } else {

@@ -3,10 +3,13 @@ using namespace Rcpp;
 
 typedef ListOf<CharacterVector> charList;
 
-// relist a character vector x
+// C++  relisting functions
+// ------------------------
+
+// relist a vector x
 // l specifies the lengths of the CharacterVectors in the resulting list
 template <typename T>
-List C_relist(T& x, IntegerVector l){
+List C_relist(const T& x, const IntegerVector l){
   if (x.size() != sum(l)){
     stop("length(x) and sum(l) must be equal.");
   }
@@ -28,22 +31,22 @@ List C_relist(T& x, IntegerVector l){
 
 // Exported "methods"
 // [[Rcpp::export]]
-List C_relist_Int(IntegerVector x, IntegerVector l){
+List C_relist_Int(IntegerVector x, const IntegerVector l){
   return C_relist(x, l);
 }
 // [[Rcpp::export]]
-List C_relist_Num(NumericVector x, IntegerVector l){
+List C_relist_Num(const NumericVector x, const IntegerVector l){
   return C_relist(x, l);
 }
 // [[Rcpp::export]]
-List C_relist_Log(LogicalVector x, IntegerVector l){
+List C_relist_Log(const LogicalVector x, const IntegerVector l){
   return C_relist(x, l);
 }
 // [[Rcpp::export]]
-List C_relist_Char(CharacterVector x, IntegerVector l){
+List C_relist_Char(const CharacterVector x, const IntegerVector l){
   return C_relist(x, l);
 }
 // [[Rcpp::export]]
-List C_relist_List(List x, IntegerVector l){
+List C_relist_List(const List x, const IntegerVector l){
   return C_relist(x, l);
 }

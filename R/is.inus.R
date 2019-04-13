@@ -18,8 +18,10 @@ is.inus <- function(cond, x = NULL){
 # ==== Method for class 'tti' ====
 #   x         tti
 #   cond      character vector with the csf
-# value: A lgical vector with same length as cond
-# See examples below
+#   full      Logical: whether x can be considered to be complete.
+#             If not, full.tt() will be applied to x
+# value: A logical vector of same length as cond
+# See examples
 .inus.tti <- function(x, cond, full = FALSE){
   if (!full) x <- full.tt(x)
   sc <- x$scores
@@ -74,25 +76,27 @@ is.inus <- function(cond, x = NULL){
 # ==== Method for class 'truthTab' ====
 #   x         truthTab
 #   cond      character vector with the csf
-# value: A lgical vector with same length as cond
-# See examples below
+# value: A logical vector with same length as cond
 .inus.truthTab <- function(x, cond){
   tti <- tt.info(x)
+  ok <- .qcondType(cond, colnames(tti$scores), tti$type) == "stdBoolean"
+  if (any(!ok)) 
+    stop("Invalid input to is.inus:\n", paste0("  ", cond[!ok], collapse = "\n"),
+         call. = FALSE)
   .inus.tti(tti, cond, full = FALSE) 
 }
 
 # ==== Default Method (for matrix or data.frame) ====
-# builds 
-#   x       truthTab
-# value:    truthTab, mv if original is mv, cs else
 .inus.default  <- function(x, cond){
   if (is.null(x)){
     x <- full.tt(cond)
   } else {
     x <- full.tt(x)
   }
-  .inus.tti(tt.info(x), cond, full = TRUE)
+  tti <- tt.info(x)
+  ok <- .qcondType(cond, colnames(tti$scores), tti$type) == "stdBoolean"
+  if (any(!ok)) 
+    stop("Invalid input to is.inus:\n", paste0("  ", cond[!ok], collapse = "\n"),
+         call. = FALSE)
+  .inus.tti(tti, cond, full = TRUE)
 }
-
-
-

@@ -7,7 +7,7 @@
 #   cond  character string specifying a condition on the variables in x
 #   type
 # Value: Reduced data frame
-selectCases <- function(cond, x, type, cutoff = 0.5, 
+selectCases <- function(cond, x = full.tt(cond), type, cutoff = 0.5, 
                         rm.dup.factors = FALSE, rm.const.factors = FALSE){
   if (inherits(x, "truthTab")){
     type <- attr(x, "type")
@@ -29,7 +29,7 @@ selectCases <- function(cond, x, type, cutoff = 0.5,
 # macht keinen Unterschied zwischen "->" und "<->"!!
 #   selectCases("A->B", ...) entspricht selectCases1 mit con=1 und cov=0
 #   selectCases("A<->B", ...) entspricht selectCases1 mit con=1 und cov=1
-selectCases1 <- function(cond, x, type, con = 1, cov = 1, 
+selectCases1 <- function(cond, x = full.tt(cond), type, con = 1, cov = 1, 
                          rm.dup.factors = FALSE, rm.const.factors = FALSE){
   if (inherits(x, "truthTab")){
     type <- attr(x, "type")
@@ -46,7 +46,9 @@ selectCases1 <- function(cond, x, type, con = 1, cov = 1,
   cov <- cov - d.eps
   
   a <- condition.default(cond, x, rm.parentheses = TRUE)[[1]]
-  if (!inherits(a, "atomicCond")) stop("selectCases only works with a condition of type 'atomic'.")
+  if (inherits(a, "invalidCond"))
+    stop("The condition is invalid (", reason(a), "): ", format.condString(cond))
+  if (!inherits(a, "atomicCond")) stop("selectCases1 only works with a condition of type 'atomic'.")
   a <- tt2df(a)
   d <- a[[1L]] - a[[2L]]        # differences
   r <- rank(d, ties.method = "random") # ranks (random within ties)

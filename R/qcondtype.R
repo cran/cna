@@ -60,7 +60,7 @@ maybeBoolean <- function(x, tt_type){
   }
   out <- !grepl(invalidChars, x)
   if (tt_type == "mv"){
-    mvValueString <- "^[[:alpha:]\\.][[:alnum:]\\._]*=[[:digit:]]$"
+    mvValueString <- "^[[:alpha:]\\.][[:alnum:]\\._]*=[[:digit:]]+$"
     spl <- hstrsplit(x, c("+", "*"), relist = FALSE)
     string_ok <- grepl(mvValueString, spl) 
     string_ok <- hrelist(string_ok, collapse(attr(spl, "lengths"), 2))
@@ -86,9 +86,9 @@ maybeAtomic <- function(x, tt_type){
   }
   ok
 }
-
-maybeComplex <- function(x, tt_type = tt_type){
-  ok <- grepl(")*(", x, fixed = TRUE) & grepl("^\\(", x) & grepl("\\)$", x) 
+maybeComplex <- function(x, tt_type, multiple.only = TRUE){
+  ok <- grepl("^\\(", x) & grepl("\\)$", x) 
+  if (multiple.only) ok <- ok & grepl(")*(", x, fixed = TRUE)
   if (any(ok)){
     csfStruct <- m_all(happly(strsplit(sub("^\\((.+)\\)$", "\\1", x[ok]), ")*(", fixed = TRUE), 
                                maybeAtomic, tt_type = tt_type))
@@ -101,9 +101,8 @@ maybeComplex <- function(x, tt_type = tt_type){
 # ==== .qcondType() ====
 # Determine the 'qtypes' of conditions
 # possible values:
-# "constant" , "stdBoolean", "stdAomic", "stdComplex", "unknown", "invalidValues"
-
-.qcondType <- function(x, values, tt_type){
+# "constant" , "stdBoolean", "stdAtomic", "stdComplex", "unknown", "invalidValues"
+.qcondType <- function(x, values, tt_type, stdComplex.multiple.only = TRUE){
   out <- rep("unknown", length(x))
   names(out) <- x
   
@@ -155,7 +154,7 @@ maybeComplex <- function(x, tt_type = tt_type){
   # "complex"
   sel1 <- out == "unknown"
   if (!any(sel1)) return(out)
-  sel2 <- maybeComplex(x[sel1], tt_type)
+  sel2 <- maybeComplex(x[sel1], tt_type, multiple.only = stdComplex.multiple.only)
   if (any(sel2)){
     sel3 <-  checkValues(gsub("^\\(|\\)$", "", x[sel1][sel2]), c(")*(", "<*->", "+", "*"), 
                          values, fixed = c(TRUE, FALSE, TRUE))
@@ -173,13 +172,6 @@ maybeComplex <- function(x, tt_type = tt_type){
   out
 }
 
-
-# ==== check Syntax ====
-# Auxiliary function tryparse()
-tryparse <- function(x) tryCatch(visible2parsed(x)[[1]], 
-                                 error = function(e) NULL)
-
-# ------------------------------------------------------------------------------
 
 qcond2cond_bool <- function(x){
   qc <- setNames(split.default(as.data.frame(x), seq_len(ncol(x))),

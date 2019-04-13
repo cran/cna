@@ -4,7 +4,7 @@ cna <- function (x, type,
     con = 1, cov = 1, con.msc = con, 
     notcols = NULL, rm.const.factors = TRUE, rm.dup.factors = TRUE,  
     maxstep = c(3, 3, 9), inus.only = FALSE,
-    only.minimal.msc = TRUE, maxSol = 1e6, 
+    only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6, 
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
     cutoff = 0.5, border = c("down", "up", "drop"),
     details = FALSE
@@ -27,7 +27,7 @@ cna <- function (x, type,
 
   # more formal requirements  
   if (nrow(tt) <= 1 || ncol(tt) <= 1)
-    stop("Truth table must have at least two rowsand two columns.")
+    stop("Truth table must have at least two rows and two columns.")
   ordering <- check.ordering(ordering, tt)
   details <- details0 <- details1 <- clarify_details(details)
   if (inus.only){
@@ -71,7 +71,7 @@ cna <- function (x, type,
   # Define config, uniqueValues, resp_nms, factMat, nVal, valueId, scores
   tti <- tt.info(tt, cutoff = cutoff, border = match.arg(border))
   vnms <- colnames(tti$scores)
-  f <- attr(tt, "n")
+  freqs <- attr(tt, "n")
   
   # setup output object
   sol <- vector("list", length(tti$resp_nms))
@@ -86,8 +86,6 @@ cna <- function (x, type,
     poteff <- potential.effects(tt, .znm, ordering, strict)
     if (length(poteff) == 0L) next
     
-    nsteps <- min(length(poteff), maxstep[1L])
-    minSuff <- vector("list", nsteps)
     y <- tti$scores[, zname, drop = TRUE]
     if (zname %in% notcols){
       y[] <- 1-y
@@ -95,50 +93,10 @@ cna <- function (x, type,
       zname <- tolower(zname)
     }  
     
-    for (.step in seq_along(minSuff)){
-      # Select .step-fold conditions occurring in the data
-      if (.step == 1L){
-        allkfoldConds <- matrix(unlist(tti$config[poteff], use.names = FALSE),
-                                ncol = 1)
-      } else {
-         allkfoldConds <- findAllSubsets(tti$valueId, .step, match(poteff, colnames(tti$valueId)))
-      }                          
-      # Eliminate combinations that contain a simpler combination that has been selected in an earlier step
-      if (only.minimal.msc && .step >= 2L){
-        for (k_ in seq_len(.step-1L))
-          if (!is.null(minSuff[[k_]]))
-            allkfoldConds <- allkfoldConds[!hasSubsetInM(allkfoldConds, minSuff[[k_]]), , drop = FALSE]
-        rm(k_)
-      }
-      if (nrow(allkfoldConds) == 0) break
-      stopifnot(anyDuplicated(allkfoldConds) == 0L)
-      # Select sufficient conditions and add them to output list
-      cons <- conj_conCov(allkfoldConds, tti$scores, y, f)
-    if (any(isSuff <- cons[1, ] >= con.msc, na.rm = TRUE)){
-        isSuff[is.na(isSuff)] <- FALSE
-        minSuff[[.step]] <- structure(allkfoldConds[isSuff, , drop = FALSE], 
-                                      conCov = cons[, isSuff, drop = FALSE])
-      }  
-    }
+    minSuff <- findMinSuff(tti, y, poteff, freqs, con.msc, 
+                           maxstep, only.minimal.msc)
     if (all(m_is.null(minSuff))) next
     
-    make.msc <- function(x, outcome, tti, details){
-      if (is.null(x)) return(NULL)
-      vnms <- colnames(tti$scores)
-      out <- data.frame(
-        outcome,
-        condition = C_mconcat(C_relist_Char(vnms[t(x)], 
-                                            rep(ncol(x), nrow(x))), 
-                              sep = "*"),
-        setNames(data.frame(t(attr(x, "conCov"))), c("consistency", "coverage")),
-        stringsAsFactors = FALSE)
-      if (length(details))
-        out <- cbind(out, 
-                     .det.tti(tti, paste0(out$condition, "->", out$outcome), 
-                              what = details))
-      rownames(out) <- NULL
-      out
-    }
     msc <- lapply(minSuff, make.msc, outcome = zname, tti = tti, details = details1)
     msc <- do.call(rbind, msc)
     nstars <- gregexpr("*", msc$condition, fixed = TRUE)
@@ -155,53 +113,11 @@ cna <- function (x, type,
     noMsc <- m_is.null(.conjList)
     .conjList[noMsc] <- lapply(which(noMsc), function(i) matrix(integer(0), 0, i))
 
-    .conSc <- lapply(seq_along(.conjList), function(i) C_conjScore(tti$scores, .conjList[[i]]))
-    maxstep1 <- maxstep
-    maxstep1[[1]] <- min(maxstep1[[1]], length(.conSc))
-    .combs <- allStructs(maxstep1)
-    # initial step
-    .sol <- list()
-    i <- 0L
-    
-    # search for asf's
-    nn <- vapply(.conSc, ncol, integer(1))
-    for (i in seq_along(.combs)){
-      .c <- .combs[[i]]
-      if (prod(nn[.c]) == 0 || any(tabulate(.c, nbins = length(.conSc)) > nn)) next
-      .s <- C_find_asf(.c, .conSc[.c], y, f, con, cov, maxSol)
+    .sol <- findAsf(tti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf)
+    stopifnot(length(.sol) == 0 || any(vapply(.sol, is.intList, logical(1))))
       
-      if (nrow(.s) > 0){
-        .cands <- lapply(seq_along(.c), function(i){
-          .part <- .conjList[[.c[i]]][.s[, i] + 1L, , drop = FALSE]
-          unname(split.default(.part, row(.part)))
-        })
-        .newsol <- do.call(mapply, c(list(list), .cands, list(SIMPLIFY = FALSE)))
-        stopifnot(is.recIntList(.newsol))
-        if (length(.sol)){ 
-          .newsol <- .newsol[C_minimal(.newsol, .sol)]
-        }
-
-        .sol <- c(.sol, .newsol)
-      }
-    }
-    
-    stopifnot(length(.sol) == 0 || vapply(.sol, is.intList, logical(1)))
     if (length(.sol)){
-      .lhs <- hconcat(.sol, c("+", "*"), f = function(i) vnms[i])
-      asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), 
-                          tti$scores, tti$freq)  
-      asf$condition[] <- .lhs
-      n_plus_stars <- gregexpr("[\\*\\+]", asf$condition)
-      asf$complexity <- 
-        lengths(n_plus_stars) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
-      asf <- asf[order(asf$complexity, -asf$consistency * asf$coverage), , drop = FALSE]
-      if (length(details))
-        asf <- cbind(asf, 
-                     .det.tti(tti, paste0(asf$condition, "<->", asf$outcome), 
-                              what = details))
-      if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
-      rownames(asf) <- NULL
-  
+      asf <- make.asf(tti, zname, .sol, inus.only, details)
       sol[[c(zname, "asf")]] <- asf
     }
   }
@@ -217,6 +133,107 @@ cna <- function (x, type,
   out$details <- details0
 
   return(out)
+}
+
+
+findMinSuff <- function(tti, y, poteff, freqs, con.msc, maxstep, only.minimal.msc){
+  nsteps <- min(length(poteff), maxstep[1L])
+  minSuff <- vector("list", nsteps)
+  
+  for (.step in seq_along(minSuff)){
+    # Select .step-fold conditions occurring in the data
+    if (.step == 1L){
+      allkfoldConds <- matrix(unlist(tti$config[poteff], use.names = FALSE),
+                              ncol = 1)
+    } else {
+       allkfoldConds <- findAllSubsets(tti$valueId, .step, match(poteff, colnames(tti$valueId)))
+    }                          
+    # Eliminate combinations that contain a simpler combination that has been selected in an earlier step
+    if (only.minimal.msc && .step >= 2L){
+      for (k_ in seq_len(.step-1L))
+        if (!is.null(minSuff[[k_]]))
+          allkfoldConds <- allkfoldConds[!hasSubsetInM(allkfoldConds, minSuff[[k_]]), , drop = FALSE]
+      rm(k_)
+    }
+    if (nrow(allkfoldConds) == 0) break
+    stopifnot(anyDuplicated(allkfoldConds) == 0L)
+    # Select sufficient conditions and add them to output list
+    cons <- conj_conCov(allkfoldConds, tti$scores, y, freqs)
+  if (any(isSuff <- cons[1, ] >= con.msc, na.rm = TRUE)){
+      isSuff[is.na(isSuff)] <- FALSE
+      minSuff[[.step]] <- structure(allkfoldConds[isSuff, , drop = FALSE], 
+                                    conCov = cons[, isSuff, drop = FALSE])
+    }  
+  }
+  minSuff
+}
+make.msc <- function(x, outcome, tti, details){
+  if (is.null(x)) return(NULL)
+  vnms <- colnames(tti$scores)
+  out <- data.frame(
+    outcome,
+    condition = C_mconcat(C_relist_Char(vnms[t(x)], 
+                                        rep(ncol(x), nrow(x))), 
+                          sep = "*"),
+    setNames(data.frame(t(attr(x, "conCov"))), c("consistency", "coverage")),
+    stringsAsFactors = FALSE)
+  if (length(details))
+    out <- cbind(out, 
+                 .det.tti(tti, paste0(out$condition, "->", out$outcome), 
+                          what = details))
+  rownames(out) <- NULL
+  out
+}
+
+findAsf <- function(tti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf){
+  .conSc <- lapply(seq_along(.conjList), function(i) C_conjScore(tti$scores, .conjList[[i]]))
+  maxstep1 <- maxstep
+  maxstep1[[1]] <- min(maxstep1[[1]], length(.conSc))
+  .combs <- allStructs(maxstep1)
+  
+  # initial step  
+  .sol <- list()
+  i <- 0L
+  # search for asf's
+  nn <- vapply(.conSc, ncol, integer(1))
+  for (i in seq_along(.combs)){
+    .c <- .combs[[i]]
+    if (prod(nn[.c]) == 0 || any(tabulate(.c, nbins = length(.conSc)) > nn)) next
+    .s <- C_find_asf(.c, .conSc[.c], y, freqs, con, cov, maxSol)
+    
+    if (nrow(.s) > 0){
+      .cands <- lapply(seq_along(.c), function(i){
+        .part <- .conjList[[.c[i]]][.s[, i] + 1L, , drop = FALSE]
+        unname(split.default(.part, row(.part)))
+      })
+      .newsol <- do.call(mapply, c(list(list), .cands, list(SIMPLIFY = FALSE)))
+      stopifnot(is.recIntList(.newsol))
+      if (only.minimal.asf && length(.sol)){ 
+        .newsol <- .newsol[C_minimal_old(.newsol, .sol, ignore_equals = FALSE)]
+      }
+
+      .sol <- c(.sol, .newsol)
+    }
+  }
+  .sol
+}
+make.asf <- function(tti, zname, .sol, inus.only, details){
+  vnms <- colnames(tti$scores)
+  .lhs <- hconcat(.sol, c("+", "*"), f = function(i) vnms[i])
+  asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), 
+                      tti$scores, tti$freq)  
+  asf$condition[] <- .lhs
+  n_plus_stars <- gregexpr("[\\*\\+]", asf$condition)
+  asf$complexity <- 
+    lengths(n_plus_stars) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
+  asf <- asf[order(asf$complexity, -asf$consistency * asf$coverage), , drop = FALSE]
+  if (length(details))
+    asf <- cbind(asf, 
+                 .det.tti(tti, paste0(asf$condition, "<->", asf$outcome), 
+                          what = details))
+  if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
+  rownames(asf) <- NULL
+  asf
 }
 
 ################################################################################

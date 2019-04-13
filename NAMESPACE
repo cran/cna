@@ -3,7 +3,9 @@ export(allCombs, makeFuzzy, selectCases, selectCases1, some,
        condition, cscond, mvcond, fscond,
        msc, asf, csf, condTbl, as.condTbl, coherence, minimalizeCsf,
        cna, cscna, mvcna, fscna,
-       group.by.outcome)
+       group.by.outcome,
+       cyclic, full.tt, is.inus, is.submodel, identical.model, minimalize, 
+       redundant, randomAsf, randomCsf)
 
 useDynLib(cna, .registration = TRUE)
 importFrom(Rcpp, sourceCpp)

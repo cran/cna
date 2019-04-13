@@ -4,12 +4,15 @@
 
 using namespace Rcpp;
 
-std::string concat2(std::string x, std::string y, std::string sep){
+// Some functions for manipulating character vectors
+// -------------------------------------------------
+
+std::string concat2(const std::string x, const std::string y, const std::string sep){
   return x + sep + y;
 }
 // paste(x, collapse = sep)
 // [[Rcpp::export]]
-std::string C_concat(CharacterVector x, std::string sep){
+std::string C_concat(const CharacterVector x, const std::string sep){
   std::string out = ""; 
   std::string sep0 = "";
   for (int i=0; i<x.length(); i++){
@@ -24,7 +27,7 @@ std::string C_concat(CharacterVector x, std::string sep){
 // applies C_concat to each element of x separately 
 // optionally sorts the elements (disjuncts)
 // [[Rcpp::export]]
-CharacterVector C_mconcat(charList x, std::string sep, bool sorted = false){
+CharacterVector C_mconcat(const charList x, const std::string sep, const bool sorted = false){
   int n = x.size();
   CharacterVector out(n);
   for (int i=0; i<n; i++){
@@ -40,8 +43,8 @@ CharacterVector C_mconcat(charList x, std::string sep, bool sorted = false){
 
 // convert a charlist to a character string
 // [[Rcpp::export]]
-std::string C_charList2string(charList x, std::string disj = "+", std::string conj = "*",
-                              bool sorted = false){
+std::string C_charList2string(const charList x, const std::string disj = "+", 
+                              const std::string conj = "*", const bool sorted = false){
   CharacterVector conjs = C_mconcat(x, conj, sorted);
   if (sorted){
     conjs = conjs.sort();
@@ -51,8 +54,8 @@ std::string C_charList2string(charList x, std::string disj = "+", std::string co
 
 // convert a recursive charlist to a character vector
 // [[Rcpp::export]]
-CharacterVector C_recCharList2char(recCharList x, std::string disj = "+", std::string conj = "*",
-                                  bool sorted = false){
+CharacterVector C_recCharList2char(const recCharList x, const std::string disj = "+", 
+                                   const std::string conj = "*", const bool sorted = false){
   int n = x.size();
   CharacterVector out(n);
   for (int i=0; i<n; i++){

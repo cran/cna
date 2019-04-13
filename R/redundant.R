@@ -38,6 +38,10 @@ redundant <- function(cond, x = NULL, simplify = TRUE){
 # Function suited for interactive use
 .redund.truthTab <- function(x, cond, simplify = TRUE, full = FALSE){
   tti <- tt.info(x)
+  ok <- .qcondType(cond, colnames(tti$scores), tti$type) %in% c("stdAtomic", "stdComplex")
+  if (any(!ok)) 
+    stop("Invalid input to redundant:\n", paste0("  ", cond[!ok], collapse = "\n"),
+         call. = FALSE)
   .redund.tti(tti, cond, simplify = simplify, full = full) 
 }
 
@@ -51,5 +55,10 @@ redundant <- function(cond, x = NULL, simplify = TRUE){
   } else {
     x <- full.tt(x)
   }
-  .redund.tti(tt.info(x), cond, simplify = simplify, full = TRUE)
+  tti <- tt.info(x)
+  ok <- .qcondType(cond, colnames(tti$scores), tti$type) %in% c("stdAtomic", "stdComplex")
+  if (any(!ok)) 
+    stop("Invalid input to redundant:\n", paste0("  ", cond[!ok], collapse = "\n"),
+         call. = FALSE)
+  .redund.tti(tti, cond, simplify = simplify, full = TRUE)
 }

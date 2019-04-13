@@ -1,3 +1,14 @@
+Changes in version 2.2.0 (2019-04-13)
+  * In this release, we have added further utility functions that are helpful to explore and benchmark the cna method.
+  * New functions: full.tt, is.inus, redundant, cyclic, is.submodel, identical.model, minimalize, randomAsf, randomCsf. See the help files for details.
+  * cna() has a new argument only.minimal.asf.
+  * In selectCases() and selectCases1(), the argument x is not mandatory anymore; it now has the default value full.tt(cond). Similarly, minimalizeCsf() can also be used without a data argument.
+  * The package vignette has been updated accordingly.
+
+Changes in version 2.1.1 (2018-06-13)
+  * Bug fix in minimalizeCsf()
+
+
 Changes in version 2.1.0 (2018-06-01)
   * The package now comes with a vignette providing an extensive introduction to the methodological background and the package's usage.
   * Several functions have a noticeably faster implementation, most notably csf().

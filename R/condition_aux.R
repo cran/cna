@@ -119,6 +119,9 @@ visible2parsed <- function(x){
   as.list(parse(text = x, keep.source = FALSE))
 }
 
+# Auxiliary function tryparse(): parse while catching errors
+tryparse <- function(x) tryCatch(visible2parsed(x)[[1]], error = function(e) NULL)
+
 # parsed to visible
 parsed2visible <- function(px){
   x <- C_concat(noblanks(deparse(invertArrow(px))), sep = "")

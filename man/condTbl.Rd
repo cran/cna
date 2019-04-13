@@ -13,7 +13,7 @@ Extract conditions and solutions from an object of class \dQuote{cna}
 }
 
 \description{
-Given an object \code{x} produced by \code{\link{cna}}, \code{msc(x)} extracts all minimally sufficient conditions, \code{asf(x)} all atomic solution formulas, and \code{csf(x, n)} extracts at least \code{n} complex solution formulas. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well. The three functions return a data frame with the additional class attribute \code{condTbl}.
+Given a solution object \code{x} produced by \code{\link{cna}}, \code{msc(x)} extracts all minimally sufficient conditions, \code{asf(x)} all atomic solution formulas, and \code{csf(x, n)} extracts at least \code{n} complex solution formulas. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well. The three functions return a data frame with the additional class attribute \code{condTbl}.
 
 \code{as.condTbl} reshapes the output produced by \code{\link{condition}} in such a way as to make it identical to the output returned by \code{msc}, \code{asf}, and \code{csf}.
 
@@ -33,18 +33,18 @@ as.condTbl(x, ...)
 }
 
 \arguments{
-  \item{x}{An object of class \dQuote{cna}. In \code{as.condTbl}, \code{x} is a list of evaluated conditions as returned by \code{condition}.}
-  \item{details}{Either TRUE/FALSE or a character vector specifying which solution attributes to print (see \code{\link{cna}}). Note that \code{msc} and \code{asf} can only display attributes that are saved in \code{x}, i.e. those that have been requested in the \code{details} argument within the call of \code{\link{cna}}.}
+  \item{x}{Object of class \dQuote{cna}. In \code{as.condTbl}, \code{x} is a list of evaluated conditions as returned by \code{condition}.}
+  \item{details}{Either \code{TRUE/FALSE} or a character vector specifying which solution attributes to print (see \code{\link{cna}}). Note that \code{msc} and \code{asf} can only display attributes that are saved in \code{x}, i.e. those that have been requested in the \code{details} argument within the call of \code{\link{cna}}.}
   \item{warn_details}{Logical; if \code{TRUE}, a warning is issued when some attribute requested in \code{details} is not available in \code{x} (parameter for internal use).}
   \item{n}{The minimal number of \code{csf} to be calculated.}
   \item{tt}{A \code{truthTab}.}
-  \item{asfx}{An object of class \dQuote{condTbl} resulting from \code{asf}.}
+  \item{asfx}{Object of class \dQuote{condTbl} resulting from \code{asf}.}
   \item{digits}{Number of digits to print in consistency, coverage, exhaustiveness, faithfulness, and coherence scores.}
-  \item{quote, row.names}{As in \code{\link{print.data.frame}}}
+  \item{quote, row.names}{As in \code{\link{print.data.frame}}.}
   \item{\dots}{All arguments in \code{condTbl} are passed on to \code{\link{condition}}.}
 }
 
-\details{Depending on the processed data, the solutions output by \code{\link{cna}} are sometimes ambiguous, that is, it can happen that many atomic and complex solutions fit the data equally well. To facilitate the inspection of the \code{\link{cna}} output, however, the latter standardly returns only 5 minimally sufficient conditions and 5 atomic and complex solution formulas for each outcome. \code{msc} can be used to extract \emph{all} minimally sufficient conditions from an object \code{x} of class \dQuote{cna}, \code{asf} to extract \emph{all} atomic solution formulas, and \code{csf} to extract at least \code{n} complex solution formulas from \code{x}. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well.
+\details{Depending on the processed data, the solutions output by \code{\link{cna}} are often ambiguous, to the effect that many atomic and complex solutions fit the data equally well. To facilitate the inspection of the \code{\link{cna}} output, however, the latter standardly returns only 5 minimally sufficient conditions and 5 atomic and complex solution formulas for each outcome. \code{msc} can be used to extract \emph{all} minimally sufficient conditions from an object \code{x} of class \dQuote{cna}, \code{asf} to extract \emph{all} atomic solution formulas, and \code{csf} to extract at least \code{n} complex solution formulas from \code{x}. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well.
 The outputs of \code{msc}, \code{asf}, and \code{csf} can be further processed by the \code{\link{condition}} function.
 
 The argument \code{digits} applies to the \code{print} function. It determines how many digits of consistency, coverage, exhaustiveness, faithfulness, and coherence scores are printed. The default value is 3.
@@ -55,9 +55,9 @@ The function \code{as.condTbl} takes a list of objects of class \dQuote{cond} th
 }
 
 \value{
-\code{msc}, \code{asf}, \code{csf}, and \code{as.condTbl} return objects of class \dQuote{condTbl}, a \code{data.frame} which feature the following components:
+\code{msc}, \code{asf}, \code{csf}, and \code{as.condTbl} return objects of class \dQuote{condTbl}, a \code{data.frame} which features the following components:
 \tabular{rl}{
-\code{outcome}: \tab the outcome factors\cr
+\code{outcome}: \tab the outcomes\cr
 \code{condition}:\tab the relevant conditions or solutions\cr
 \code{consistency}:\tab the consistency scores \cr
 \code{coverage}: \tab the coverage scores  \cr
@@ -114,7 +114,7 @@ msc(cna.irrigate)$condition
 cna2.irrigate <- cna(d.irrigate, cov = .9, maxstep = c(4,4,12), details = TRUE)
 
 # To speed up the construction of complex solution formulas, first extract atomic solutions
-# and then feed these asf into csf.
+# and then pass these asf to csf.
 cna2.irrigate.asf <- asf(cna2.irrigate)
 # By default, at least 20 csf are generated.
 \donttest{csf(cna2.irrigate, asfx = cna2.irrigate.asf, details = FALSE)}

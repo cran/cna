@@ -37,22 +37,7 @@ asf <- function(x, details = x$details, warn_details = TRUE){
 csf <- function (x, n = 20, tt = x$truthTab, details = x$details,
                  asfx = asf(x, details, warn_details = FALSE) 
                  ){
-  head_with_ties <- function(x, n){
-    x <- as.matrix(x)
-    if (nrow(x) <= n) {
-      n <- nrow(x)
-    }
-    else {
-      notDup <- which(!duplicated(x))
-      if (all(notDup <= n)) {
-        n <- nrow(x)
-      }
-      else {
-        n <- min(notDup[notDup > n]) - 1L
-      }
-    }
-    seq_len(n)
-  }
+
   if (nrow(asfx) == 0 || n <= 0) {
     out <- emptyCondTbl("stdComplex")
     # if (coh) out$coherence <- numeric(0)
@@ -104,6 +89,7 @@ csf <- function (x, n = 20, tt = x$truthTab, details = x$details,
     stringsAsFactors = FALSE)
   out <- cbind(out, .det.tti(tt.info(x$truthTab), out$condition, 
                              what = details, available = x$details))
+  # insert treatment of csf with redundancies here...
   rownames(out) <- NULL
   if (n.out < n.csf) {
     message(n.out, " of the ", 
@@ -111,7 +97,6 @@ csf <- function (x, n = 20, tt = x$truthTab, details = x$details,
   }
   as.condTbl(out, condClass = "stdComplex")
 }
-# Auxiliary function head_with_ties
 
 # Auxiliary function expand.frames
 expand.frames <- function(x, y){
@@ -119,6 +104,24 @@ expand.frames <- function(x, y){
   ny <- nrow(y)
   cbind(x[rep(seq_len(nx), each = ny), , drop = FALSE],
         y[rep(seq_len(ny), nx), , drop = FALSE])
+}
+
+# Auxiliary function head_with_ties
+head_with_ties <- function(x, n){
+  x <- as.matrix(x)
+  if (nrow(x) <= n) {
+    n <- nrow(x)
+  }
+  else {
+    notDup <- which(!duplicated(x))
+    if (all(notDup <= n)) {
+      n <- nrow(x)
+    }
+    else {
+      n <- min(notDup[notDup > n]) - 1L
+    }
+  }
+  seq_len(n)
 }
 
 # Add blanks before and after given strings (default: <->, -> and +)

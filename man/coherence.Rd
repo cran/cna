@@ -6,7 +6,7 @@ Calculate the coherence of complex solution formulas
 }
 
 \description{
-Calculates the coherence measure of complex solution formulas.
+Calculates the coherence measure of complex solution formulas (csf).
 }
 
 \usage{
@@ -15,8 +15,8 @@ coherence(cond, tt, type)
 
 \arguments{
   \item{cond}{Character vector specifying an asf or csf.}
-  \item{tt}{A \code{truthTab} or data frame.}
-  \item{type}{A character vector specifying the type of \code{tt}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). Defaults to the type of \code{tt}, if \code{tt} is a \code{truthTab} or to \code{"cs"} otherwise.}
+  \item{tt}{Data frame or \code{truthTab}.}
+  \item{type}{Character vector specifying the type of \code{tt}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). Defaults to the type of \code{tt}, if \code{tt} is a \code{truthTab} or to \code{"cs"} otherwise.}
 }
 
 \details{
@@ -27,20 +27,18 @@ Coherence is a measure for model fit that is custom-built for complex solution f
 Numeric vector of coherence values.
 }
 
-\seealso{\code{\link{cna}}, \code{\link{condition}}, \code{\link{selectCases}}, \code{\link{allCombs}}, \code{\link{condTbl}}}
+\seealso{\code{\link{cna}}, \code{\link{condition}}, \code{\link{selectCases}}, \code{\link{allCombs}}, \code{\link{full.tt}}, \code{\link{condTbl}}}
 
 \examples{
 # Perfect coherence.
-dat1 <- allCombs(rep(2, 6))-1 
-dat2 <- selectCases("(A*b <-> C)*(C+D <-> E)", dat1)
-coherence("(A*b <-> C)*(C + D <-> E)", dat2)
-csf(cna(dat2, details = "c"))
+dat1 <- selectCases("(A*b <-> C)*(C+D <-> E)")
+coherence("(A*b <-> C)*(C + D <-> E)", dat1)
+csf(cna(dat1, details = "c"))
 
 # Non-perfect coherence.
-dat3 <- allCombs(rep(2, 8)) -1
-dat4 <- selectCases("(a*B <-> C)*(C + D<->E)*(F*g <-> H)", dat3)
-dat5 <- rbind(tt2df(dat4), c(0,1,0,1,1,1,0,1))
-coherence("(a*B <-> C)*(C + D <-> E)*(F*g <-> H)", dat5)
-csf(cna(dat5, con=.88, details = "c")) 
+dat2 <- selectCases("(a*B <-> C)*(C + D<->E)*(F*g <-> H)")
+dat3 <- rbind(tt2df(dat2), c(0,1,0,1,1,1,0,1))
+coherence("(a*B <-> C)*(C + D <-> E)*(F*g <-> H)", dat3)
+csf(cna(dat3, con=.88, details = "c")) 
 }
 
