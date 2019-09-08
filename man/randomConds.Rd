@@ -24,8 +24,6 @@ randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL)
 
 
 \details{
-%To benchmark the reliability of a method of causal inference it must be tested to what degree the method recovers the true data-generating structure \eqn{\Delta} or proper substructures of \eqn{\Delta} from data of varying quality. As \eqn{\Delta} is not normally known in real-life discovery contexts, the reliability of a method cannot be assessed by applying it to real-life data. Instead, reliability benchmarking is done in so-called \emph{inverse searches}, which reverse the order of causal discovery as normally conducted in scientific practice. An inverse search comprises three steps: (1) a causal structure \eqn{\Delta} is drawn/presupposed (as ground truth), (2) artificial data \code{x} is simulated from \eqn{\Delta}, possibly featuring various deficiencies (e.g. noise, limited diversity, etc.), and (3) \code{x} is processed by the benchmarked method in order to check whether its output meets the tested reliability benchmark (e.g. whether the output is true of or identical to \eqn{\Delta}). 
-
 \code{randomAsf} and \code{randomCsf} can be used to randomly draw data generating structures (ground truths) in inverse search trials benchmarking the output of \code{\link{cna}}. In the regularity theoretic context in which the CNA method is embedded, a causal structure is a redundancy-free Boolean dependency structure. Hence, \code{randomAsf} and \code{randomCsf} both produce redundancy-free Boolean dependency structures. \code{randomAsf} generates structures with one outcome, i.e. atomic solution formulas (asf), \code{randomCsf} generates structures with multiple outcomes, i.e. complex solution formulas (csf), that are free of cyclic substructures. In a nutshell, \code{randomAsf} proceeds by, first, randomly drawing disjunctive normal forms (DNFs) and by, second, eliminating redundancies from these DNFs. \code{randomCsf} essentially consists in repeated executions of \code{randomAsf}.
 
 The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{truthTab} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{truthTab}.
@@ -35,37 +33,9 @@ The optional argument \code{outcome} determines which factors in \code{x} shall 
 The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. Assigning unduly high values to \code{compl} results in an error.
 
 
-\code{randomAsf} has the additional argument \code{how} with the two possible values \code{"inus"} and \code{"minimal"}. \code{how = "inus"} determines that the generated asf is redundancy-free relative to all logically possible configurations of the factors in \code{x}, i.e. relative to \code{full.tt(x)}, whereas in case of \code{how = "minimal"} redundancy-freeness is imposed only relative to all configurations actually contained in \code{x}, i.e. relative to \code{x} itself. Typically \code{"inus"} should be used; the value \code{"minimal"} is relevant mainly in repeated \code{randomAsf} calls from within \code{randomCsf}.
+\code{randomAsf} has the additional argument \code{how} with the two possible values \code{"inus"} and \code{"minimal"}. \code{how = "inus"} determines that the generated asf is redundancy-free relative to all logically possible configurations of the factors in \code{x}, i.e. relative to \code{full.tt(x)}, whereas in case of \code{how = "minimal"} redundancy-freeness is imposed only relative to all configurations actually contained in \code{x}, i.e. relative to \code{x} itself. Typically \code{"inus"} should be used; the value \code{"minimal"} is relevant mainly in repeated \code{randomAsf} calls from within \code{randomCsf}. Moreover, setting \code{how = "minimal"} will return an error if \code{x} is a \code{\link{truthTab}} of type \code{"fs"}.
 
 The argument \code{n.asf} controls the number of asf in the generated csf. Its value is limited to \code{ncol(x)-2} and overridden by \code{length(outcome)}, if \code{outcome} is not \code{NULL}. Analogously to \code{compl}, \code{n.asf} specifies the number of asf prior to redundancy elimination, which, in turn, may further reduce these numbers. That is, \code{n.asf} provides an upper bound for the number of asf in the resulting csf.
-
-
-%\code{randomAsf} works as follows:
-%\enumerate{
-%\item If \code{compl} is \code{NULL}, it is set to \code{2:min(ncol(x)-1, 4)}. %Otherwise, all elements in \code{compl} are eliminated that are greater than \code{ncol(x)-1} or smaller than \code{1}.
-%\item The initial number of disjuncts (msc) is determined by randomly sampling one element from \code{compl}.
-%\item The length of each msc (i.e. the number of factor values that are conjunctively combined) is determined by randomly sampling from \code{compl}.
-%\item If \code{outcome} is \code{NULL}, the outcome is chosen by randomly selecting one factor.
-%\item The msc are generated by random sampling of factor values. 
-%\item The resulting expression is not necessarily redundancy-free. If it is not, it is \code{cna:::rreduce}d with respect to \code{x} (wrt \code{full.tt(x)} if \code{how = "inus"}).
-%\item The result is returned .
-%}
-
-%\code{randomCsf} essentially consists in repeated executions of \code{randomAsf}. Its steps are:
-%\enumerate{
-%\item If \code{outcome} is \code{NULL}: 
-%\itemize{
-%\item Determine the number of asf as an integer drawn at random from \code{2:min(ncol(x)-2, 4)}.
-%\item Determine outcomes at random by sampling from all factors.
-%}
-%\item Iterate over outcomes and repeatedly call \code{randomAsf}:
-%\itemize{
-%\item The first asf is generated with the exogeneous factors \code{setdiff(names(x), outcome)} as potential effects; 
-%\item The second outcome has the potential effects of the first asf plus the first outcome as potential effects; 
-%\item etc.
-%}
-%Hereby, \code{randomAsf} is called with \code{how = "minimal"} and \code{x} equal to the subset of \code{full.tt(x)} having positive scores in all earlier asfs. This procedure guarantees that no redundant factors or disjuncts or asf remain in the formula.
-%}
 }
 
 \value{The randomly generated formula, a character string.}

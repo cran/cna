@@ -11,6 +11,7 @@ rreduce <- function (cond, x = full.tt(cond), full = !missing(x),
   stopifnot(length(cond) == 1L, nrow(x) > 1L)
   cond <- noblanks(cond)
   if (full) x <- full.tt(x)
+  if (x$type == "fs") stop("Invalid use of data of type 'fs'." )
   sc <- x$scores
 
   evalCond0 <- drop(qcond_bool(cond, sc))
@@ -55,7 +56,7 @@ rreduce <- function (cond, x = full.tt(cond), full = !missing(x),
           if (verbose) cat(counter, ":", C_charList2string(conjs, disj = " + "), "\n")
         } else break
       } else break
-      if (counter > maxiter) stop("Reached maximal number of reduction steps (maxiter")
+      if (counter > maxiter) stop("Reached maximal number of reduction steps (maxiter)")
     }
   }
   out <- C_charList2string(conjs)
@@ -64,6 +65,7 @@ rreduce <- function (cond, x = full.tt(cond), full = !missing(x),
 
 
 # getCond: Define a condition from a data.frame/matrix:
+#   "Internal" facility: If asf is NULL, aresult is returned as an 'intList'
 getCond <- function(x, outcome = NULL, type, asf = TRUE){
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
   if (missing(type)) type <- "cs"
@@ -86,7 +88,9 @@ getCond <- function(x, outcome = NULL, type, asf = TRUE){
     b <- matrix(colnames(xx), nrow(xx), ncol(xx), byrow = TRUE)
     b[] <- paste0(b, "=", xx)
   }
-  sol <- C_mconcat(split(b, row(b)), "*")
+  sol <- split(b, row(b))
+  if (is.null(asf)) return(sol)
+  sol <- C_mconcat(sol, "*")
   if (!asf) return(sol)
   C_concat(sol, "+")
 }

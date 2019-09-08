@@ -7,109 +7,6 @@
 
 using namespace Rcpp;
 
-// C_conCov
-NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f);
-RcppExport SEXP _cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_conCov(x, y, f));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_subsetMin
-double C_subsetMin(const NumericVector x, const IntegerVector sub);
-RcppExport SEXP _cna_C_subsetMin(SEXP xSEXP, SEXP subSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type sub(subSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_subsetMin(x, sub));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_conjScore
-NumericMatrix C_conjScore(const NumericMatrix x, const IntegerMatrix m);
-RcppExport SEXP _cna_C_conjScore(SEXP xSEXP, SEXP mSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const IntegerMatrix >::type m(mSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_conjScore(x, m));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_init_ii
-IntegerVector C_init_ii(const IntegerVector nn, const LogicalVector st);
-RcppExport SEXP _cna_C_init_ii(SEXP nnSEXP, SEXP stSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
-    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_init_ii(nn, st));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_set_lim
-IntegerVector C_set_lim(const IntegerVector nn, const LogicalVector st);
-RcppExport SEXP _cna_C_set_lim(SEXP nnSEXP, SEXP stSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
-    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_set_lim(nn, st));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_max_which
-int C_max_which(const LogicalVector x);
-RcppExport SEXP _cna_C_max_which(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const LogicalVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_max_which(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_increment
-IntegerVector C_increment(IntegerVector ii, const IntegerVector nn, const LogicalVector st, const IntegerVector lim);
-RcppExport SEXP _cna_C_increment(SEXP iiSEXP, SEXP nnSEXP, SEXP stSEXP, SEXP limSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type ii(iiSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
-    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type lim(limSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_increment(ii, nn, st, lim));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_find_asf
-IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const int maxSol);
-RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type conjlen(conjlenSEXP);
-    Rcpp::traits::input_parameter< const numMatList >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
-    Rcpp::traits::input_parameter< const double >::type con(conSEXP);
-    Rcpp::traits::input_parameter< const double >::type cov(covSEXP);
-    Rcpp::traits::input_parameter< const int >::type maxSol(maxSolSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_find_asf(conjlen, x, y, f, con, cov, maxSol));
-    return rcpp_result_gen;
-END_RCPP
-}
 // C_concat
 std::string C_concat(const CharacterVector x, const std::string sep);
 RcppExport SEXP _cna_C_concat(SEXP xSEXP, SEXP sepSEXP) {
@@ -254,6 +151,109 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const List >::type x(xSEXP);
     Rcpp::traits::input_parameter< const IntegerVector >::type l(lSEXP);
     rcpp_result_gen = Rcpp::wrap(C_relist_List(x, l));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_conCov
+NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_conCov(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_subsetMin
+double C_subsetMin(const NumericVector x, const IntegerVector sub);
+RcppExport SEXP _cna_C_subsetMin(SEXP xSEXP, SEXP subSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type sub(subSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_subsetMin(x, sub));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_conjScore
+NumericMatrix C_conjScore(const NumericMatrix x, const IntegerMatrix m);
+RcppExport SEXP _cna_C_conjScore(SEXP xSEXP, SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_conjScore(x, m));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_init_ii
+IntegerVector C_init_ii(const IntegerVector nn, const LogicalVector st);
+RcppExport SEXP _cna_C_init_ii(SEXP nnSEXP, SEXP stSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_init_ii(nn, st));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_set_lim
+IntegerVector C_set_lim(const IntegerVector nn, const LogicalVector st);
+RcppExport SEXP _cna_C_set_lim(SEXP nnSEXP, SEXP stSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_set_lim(nn, st));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_max_which
+int C_max_which(const LogicalVector x);
+RcppExport SEXP _cna_C_max_which(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const LogicalVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_max_which(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_increment
+IntegerVector C_increment(IntegerVector ii, const IntegerVector nn, const LogicalVector st, const IntegerVector lim);
+RcppExport SEXP _cna_C_increment(SEXP iiSEXP, SEXP nnSEXP, SEXP stSEXP, SEXP limSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type ii(iiSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector >::type st(stSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type lim(limSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_increment(ii, nn, st, lim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_find_asf
+IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const int maxSol);
+RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector >::type conjlen(conjlenSEXP);
+    Rcpp::traits::input_parameter< const numMatList >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    Rcpp::traits::input_parameter< const double >::type con(conSEXP);
+    Rcpp::traits::input_parameter< const double >::type cov(covSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxSol(maxSolSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_find_asf(conjlen, x, y, f, con, cov, maxSol));
     return rcpp_result_gen;
 END_RCPP
 }

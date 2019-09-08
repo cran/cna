@@ -69,8 +69,6 @@ condition.default <- function(x, tt, type, add.data = FALSE,
   reshaped <- !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
                       x, noblanks(x.in), 
                       SIMPLIFY = TRUE, USE.NAMES = FALSE)
-  # if (rm.parentheses && exists("inPar") && any(inPar))
-  #   reshaped[inPar & rm.parentheses] <- TRUE
   forced <- force.bool | (condTypes == "boolean" & grepl("->", x, fixed = TRUE))
   
   # treat conditions according to their condition-type
