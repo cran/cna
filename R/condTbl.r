@@ -3,14 +3,14 @@
 msc <- function(x, details = x$details){
   stopifnot(inherits(x, "cna"))
   msc.list <- lapply(x$solution, "[[", "msc")
-  if (all(m_is.null(msc.list)))
-    return(emptyCondTbl("stdAtomic"))
-  all.msc <- do.call(rbind, msc.list)
-  all.msc$condition <- paste0(all.msc[["condition"]], "->", all.msc[["outcome"]])
   basicCols <- c("outcome", "condition", "consistency", "coverage", "complexity")
   detailCols <- clarify_details(details, 
                                 measures = c("inus", "exhaustiveness", "faithfulness"),
                                 available = x$details)
+  if (all(m_is.null(msc.list)))
+    return(emptyCondTbl("stdAtomic", details = detailCols))
+  all.msc <- do.call(rbind, msc.list)
+  all.msc$condition <- paste0(all.msc[["condition"]], "->", all.msc[["outcome"]])
   out <- data.frame(all.msc[c(basicCols, detailCols)],
                     row.names = NULL, stringsAsFactors = FALSE)
   as.condTbl(out, condClass = "stdAtomic")
@@ -20,109 +20,19 @@ msc <- function(x, details = x$details){
 asf <- function(x, details = x$details, warn_details = TRUE){
   stopifnot(inherits(x, "cna"))
   asf.list <- lapply(x$solution, "[[", "asf")
-  if (all(vapply(asf.list, NROW, integer(1)) == 0L))
-    return(emptyCondTbl("stdAtomic"))
-  all.asf <- do.call(rbind, asf.list)
-  all.asf$condition <- paste0(all.asf[["condition"]], "<->", all.asf[["outcome"]])
   basicCols <- c("outcome", "condition", "consistency", "coverage", "complexity")
   detailCols <- clarify_details(details, 
                                 measures = c("inus", "exhaustiveness", "faithfulness"),
                                 available = x$details, warn = warn_details)
+  if (all(vapply(asf.list, NROW, integer(1)) == 0L))
+    return(emptyCondTbl("stdAtomic", details = detailCols))
+  all.asf <- do.call(rbind, asf.list)
+  all.asf$condition <- paste0(all.asf[["condition"]], "<->", all.asf[["outcome"]])
   out <- data.frame(all.asf[c(basicCols, detailCols)],
                     row.names = NULL, stringsAsFactors = FALSE)
   as.condTbl(out, condClass = "stdAtomic")
 }
 
-# Extract csf from cna object
-csf <- function (x, n = 20, tt = x$truthTab, details = x$details,
-                 asfx = asf(x, details, warn_details = FALSE) 
-                 ){
-
-  if (nrow(asfx) == 0 || n <= 0) {
-    out <- emptyCondTbl("stdComplex")
-    # if (coh) out$coherence <- numeric(0)
-    return(out)
-  }
-  splitasf <- split(asfx, asfx$outcome)
-  n.csf <- prod(vapply(splitasf, nrow, integer(1)))
-  splitasf <- lapply(splitasf, 
-    function(x) x[head_with_ties(x$complexity, n), , drop = FALSE])
-  l <- length(splitasf)
-  a <- splitasf[[1]][c("complexity", "consistency", "coverage")]
-  a$id1 <- seq_len(nrow(a))
-  if (nrow(a) > n){
-    ord <- order(a$complexity)
-    a <- a[ord, ]
-    a <- a[head_with_ties(a$complexity, n), , drop = FALSE]
-  }
-  if (l >= 2) for (i in seq(2, l)){
-    b <- splitasf[[i]][c("complexity", "consistency", "coverage")]
-    names(b) <- paste0(names(b), ".",  1)
-    b[[paste0("id", i)]] <- seq_len(nrow(b))
-    ab <- expand.frames(a, b)
-    ab$complexity <- ab$complexity + ab$complexity.1
-    con.smaller <- ab$consistency.1 < ab$consistency
-    ab$consistency[con.smaller] <- ab$consistency.1[con.smaller]
-    cov.smaller <- ab$coverage.1 < ab$coverage
-    ab$coverage[cov.smaller] <- ab$coverage.1[cov.smaller]
-    ord <- order(ab$complexity)
-    ab <- ab[ord, , drop = FALSE]
-    a <- ab[head_with_ties(ab$complexity, n), , drop = FALSE]
-    a$complexity.1 <- a$consistency.1 <- a$coverage.1 <- NULL
-  }
-  a <- a[with(a, order(complexity, -consistency * coverage)), , drop = FALSE]
-  selectedRows <- head_with_ties(cbind(a$complexity, 
-                                       with(a, -consistency*coverage)), 
-                                 n)
-  a <- a[selectedRows, , drop = FALSE]
-  n.out <- nrow(a)
-  
-  id <- a[grepl("^id", names(a))]
-  allAsfs <- mapply(function(x, i) x$condition[i], splitasf, id,
-                    SIMPLIFY = FALSE, USE.NAMES = FALSE)
-  allAsfs <- C_relist_Char(do.call(rbind, allAsfs), rep(l, n.out))
-  nms <- csf_representation(allAsfs)
-  out <- data.frame(
-    outcome = C_concat(names(splitasf), sep = ","),
-    condition = nms,
-    consistency = a$consistency, coverage = a$coverage, complexity = a$complexity,
-    stringsAsFactors = FALSE)
-  out <- cbind(out, .det.tti(tt.info(x$truthTab), out$condition, 
-                             what = details, available = x$details))
-  # insert treatment of csf with redundancies here...
-  rownames(out) <- NULL
-  if (n.out < n.csf) {
-    message(n.out, " of the ", 
-            n.csf, " complex solutions (csf) have been calculated.")
-  }
-  as.condTbl(out, condClass = "stdComplex")
-}
-
-# Auxiliary function expand.frames
-expand.frames <- function(x, y){
-  nx <- nrow(x)
-  ny <- nrow(y)
-  cbind(x[rep(seq_len(nx), each = ny), , drop = FALSE],
-        y[rep(seq_len(ny), nx), , drop = FALSE])
-}
-
-# Auxiliary function head_with_ties
-head_with_ties <- function(x, n){
-  x <- as.matrix(x)
-  if (nrow(x) <= n) {
-    n <- nrow(x)
-  }
-  else {
-    notDup <- which(!duplicated(x))
-    if (all(notDup <= n)) {
-      n <- nrow(x)
-    }
-    else {
-      n <- min(notDup[notDup > n]) - 1L
-    }
-  }
-  seq_len(n)
-}
 
 # Add blanks before and after given strings (default: <->, -> and +)
 addblanks <- function(x, spaces = getOption("spaces")){
@@ -193,12 +103,15 @@ as.condTbl.data.frame <- function(x, condClass = "condString", ...){
     class(x$outcome) <- c("outcomeString", "character")
   structure(x, class = c("condTbl", "data.frame"))
 }
-emptyCondTbl <- function(condClass = "condString"){
+emptyCondTbl <- function(condClass = "condString", details = FALSE){
   out <- data.frame(outcome = character(0),
                     condition = character(0),
                     consistency = numeric(0),
                     coverage = numeric(0),
                     complexity = numeric(0))
+  for (d in clarify_details(details)){
+    out[[d]] <- if (d %in% c("inus", "redundant")) logical(0) else numeric(0)
+  }
   as.condTbl(out)
 }
 
@@ -248,6 +161,6 @@ condTbl <- function(...){
 }
 
 # condition method for class condTbl
-condition.condTbl <- function(x, tt, ...)
+condition.condTbl <- function(x, tt = full.tt(x[["condition"]]), ...)
   condition.default(x[["condition"]], tt, ...)
 

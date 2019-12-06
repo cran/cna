@@ -8,7 +8,7 @@ condition <- function(x, ...)
 # ==== condition.default ====
 # entirely new
 # now able to handle the types "cs", "mv", "fs"
-condition.default <- function(x, tt, type, add.data = FALSE,
+condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
                               force.bool = FALSE, rm.parentheses = FALSE, ...){
   stopifnot(is.character(x.in <- x))
   x[] <- noblanks(x)   # remove blanks

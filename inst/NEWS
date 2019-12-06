@@ -1,3 +1,8 @@
+Changes in version 2.2.2 (2019-12-06)
+  * In the default method of condition(), argument tt now has a default value.
+  * Added some informative error messages
+  * Two bug fixes
+
 Changes in version 2.2.1 (2019-09-06)
   * Added an error message in case of using wrong data in rreduce()
 
@@ -10,7 +15,6 @@ Changes in version 2.2.0 (2019-04-13)
 
 Changes in version 2.1.1 (2018-06-13)
   * Bug fix in minimalizeCsf()
-
 
 Changes in version 2.1.0 (2018-06-01)
   * The package now comes with a vignette providing an extensive introduction to the methodological background and the package's usage.
@@ -27,7 +31,6 @@ Changes in version 2.1.0 (2018-06-01)
   * truthTab() has a new argument verbose.
   * The option spaces is newly available for controlling the spacing in asf and csf.
   * Data with more than 26 factors can now be processed as well. 
-
 
 Changes in version 2.0.0 (2017-04-11)
   * Most functions in the package have been fundamentally redesigned or revised. Although we tried to maintain backward compatibility where it was reasonably achievable, code compatible with older versions will not work in many cases.

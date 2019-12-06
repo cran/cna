@@ -38,7 +38,14 @@ selectCases1 <- function(cond, x = full.tt(cond), type, con = 1, cov = 1,
       x <- truthTab(x, type = type, rm.dup.factors = FALSE, 
                     rm.const.factors = FALSE, verbose = FALSE)
   }
-  stopifnot(length(cond) == 1, con>=0, con<=1, cov>=0, cov<=1)
+  # Check inputs
+  if (length(con) != 1 || con < 0 || con > 1 || 
+      length(cov) != 1 || cov < 0 || cov > 1){
+    stop("Invalid input for 'con' or 'cov'")
+  }
+  if (length(cond) != 1){
+    stop("'cond' must have length 1.")
+  }
 
   # Slightly reduce con and cov values to avoid failing to find conditions due to rounding issues
   d.eps <- nrow(x) * .Machine$double.eps

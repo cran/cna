@@ -1,7 +1,8 @@
 
 # rreduce: reduce a cond wrt a data.fame/truthTab:
-rreduce <- function (cond, x = full.tt(cond), full = !missing(x), 
-                     verbose = FALSE, maxiter = 1000){
+rreduce <- function(cond, x = full.tt(cond), full = !missing(x), 
+                    verbose = FALSE, maxiter = 1000,
+                    simplify2constant = TRUE){
   if (!inherits(x, "tti")){
     if (!inherits(x, "truthTab")){
       x <- truthTab(x, rm.dup.factors=FALSE, rm.const.factors=FALSE)
@@ -10,12 +11,13 @@ rreduce <- function (cond, x = full.tt(cond), full = !missing(x),
   }
   stopifnot(length(cond) == 1L, nrow(x) > 1L)
   cond <- noblanks(cond)
-  if (full) x <- full.tt(x)
   if (x$type == "fs") stop("Invalid use of data of type 'fs'." )
+  if (full) x <- full.tt(x)
   sc <- x$scores
 
   evalCond0 <- drop(qcond_bool(cond, sc))
-  if (all(evalCond0 == evalCond0[1L])) return(as.character(evalCond0[1L]))
+  if (simplify2constant && all(evalCond0 == evalCond0[1L])) 
+    return(as.character(evalCond0[1L]))
   
   disjs <- strsplit(cond, "+", fixed = TRUE)[[1L]]
   evalDisj <- qcond_bool(disjs, sc)
@@ -66,6 +68,7 @@ rreduce <- function (cond, x = full.tt(cond), full = !missing(x),
 
 # getCond: Define a condition from a data.frame/matrix:
 #   "Internal" facility: If asf is NULL, aresult is returned as an 'intList'
+#   [used in cnaOpt::cnaOpt]
 getCond <- function(x, outcome = NULL, type, asf = TRUE){
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
   if (missing(type)) type <- "cs"
@@ -88,7 +91,7 @@ getCond <- function(x, outcome = NULL, type, asf = TRUE){
     b <- matrix(colnames(xx), nrow(xx), ncol(xx), byrow = TRUE)
     b[] <- paste0(b, "=", xx)
   }
-  sol <- split(b, row(b))
+  sol <- unname(split(b, row(b)))
   if (is.null(asf)) return(sol)
   sol <- C_mconcat(sol, "*")
   if (!asf) return(sol)

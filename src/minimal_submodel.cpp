@@ -79,7 +79,7 @@ IntegerVector initComb(const int k){
 void nextComb(IntegerVector ii, const int k, const int n){
   if (k == 1){
     ++ii[0];
-    ii[1] %= n;
+    //ii[1] %= n;
     return;
   }
   ++ii[k-1];

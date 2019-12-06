@@ -59,10 +59,15 @@ cna <- function (x, type,
     tt.out <- tt
   }
 
-  # Slightly reduce con and cov values to avoid failing to find conditions due to rounding issues
+  # Check con and cov values and reduce them slightly to avoid failing 
+  # to find conditions due to rounding issues
+  if (length(con) != 1 || con < 0 || con > 1 || 
+      length(cov) != 1 || cov < 0 || cov > 1){
+    stop("Invalid input for 'con' or 'cov'")
+  }
   d.eps <- nrow(tt) * .Machine$double.eps
-  con <- con - d.eps
-  cov <- cov - d.eps
+  con <- max(con - d.eps, 0)
+  cov <- max(cov - d.eps, 0)
 
   # maxstep
   stopifnot(length(maxstep) == 3, maxstep > 0)
