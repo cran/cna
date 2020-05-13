@@ -215,11 +215,11 @@ library(dplyr)
 groundTruth <- "(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=2*D=3 <-> E=3)"
 # Generate ideal data on groundTruth.
 fullData <- allCombs(c(3, 3, 2, 3, 3))
-idealData <- selectCases(groundTruth, fullData, type = "mv")
+idealData <- tt2df(selectCases(groundTruth, fullData, type = "mv"))
 # Randomly add 15% inconsistent cases.
 inconsistentCases <- setdiff(fullData, idealData)
-realData <- rbind(tt2df(idealData), inconsistentCases[sample(1:nrow(inconsistentCases), 
-                                                         nrow(idealData)*0.15), ]) 
+realData <- rbind(idealData, inconsistentCases[sample(1:nrow(inconsistentCases), 
+                                               nrow(idealData)*0.15), ])
 # Determine model fit of groundTruth and its submodels. 
 condition(groundTruth, realData, type = "mv")
 mvcond(groundTruth, realData)

@@ -133,14 +133,29 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
 #   Default show.cases: TRUE, if all rownames shorter than 20 characters
 #   ...  digits, quote, right passed to print.data.frame
 print.truthTab <- function(x, show.cases = NULL, ...){ 
-  if (is.null(attr(x, "n", exact = TRUE)))
-      warning("Attribute \"n\" is missing")
-  if (is.null(attr(x, "cases")))
-      warning("Attribute \"cases\" is missing")
+  # check attribute 'n'
+  attr.n <- attr(x, "n", exact = TRUE)
+  n.ok <- is.numeric(attr.n) && length(attr.n) == nrow(x)
+  if (is.null(attr.n)){
+    warning("Attribute \"n\" is missing")
+  } else if (!n.ok){
+    warning("Number of case frequencies does not match nrow(x) - all case frequencies are set to 1.")
+  } 
+  if (!n.ok) attr(x, "n") <- rep(1L, nrow(x))
+  # check attribute 'cases'
+  attr.cases <- attr(x, "cases", exact = TRUE)
+  cases.ok <- length(attr.cases) == nrow(x)
+  if (is.null(attr.cases)){
+    warning("Attribute \"cases\" is missing")
+  } else if (!cases.ok){
+    warning("Number of case labels does not match nrow(x) - case labels are ignored.")
+    attr(x, "cases") <- NULL
+  }
+  # create data frame for printing
   df.args <- list(as.data.frame(x), n.obs = attr(x, "n", exact = TRUE), check.names = FALSE)
   ncols <- length(df.args[[1]])
   prntx <- do.call(data.frame, df.args)
-  rownames(prntx) <- C_mconcat(lapply(attr(x, "cases"), sort), sep = ",")
+  if (cases.ok) rownames(prntx) <- C_mconcat(lapply(attr(x, "cases"), sort), sep = ",")
   cat(paste0("truthTab of type \"", attr(x, "type"), "\"\n"))
   if (is.null(show.cases) && nrow(x) > 0){
     show.cases <- max(nchar(rownames(prntx))) <= 20
@@ -162,8 +177,8 @@ print.truthTab <- function(x, show.cases = NULL, ...){
   cl$rm.dup.factors <- cl$rm.const.factors <- NULL
   len <- length(cl)
   nms <- names(cl)
-  if ("drop" %in% nms){
-    warning("'drop' argument will be ignored")
+  if ("drop" %in% nms && !isFALSE(drop)){
+    warning("'drop=TRUE' is ignored")
     cl$drop <- NULL
     len <- len - 1L
   }
@@ -192,7 +207,7 @@ as.data.frame.truthTab <- function(x, ...){
 `[<-.truthTab` <- function(x, i, j, value){
   out <- as.data.frame(NextMethod("[<-", x))
   row.sel <- nargs() == 5 && !missing(i)
-  rows <- if (row.sel) i else TRUE
+  rows <- if (row.sel) i else if (nrow(x)) TRUE else logical(0)
   out <- truthTab(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),

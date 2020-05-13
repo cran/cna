@@ -23,8 +23,8 @@ The new functionalities provided by version 2.2 of the \pkg{cna} package include
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 2.2.2\cr
-Date:    \tab 2019-12-06\cr
+Version: \tab 2.2.3\cr
+Date:    \tab 2020-05-13\cr
 License: \tab GPL (>= 2)\cr
     }
 }

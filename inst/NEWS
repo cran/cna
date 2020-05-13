@@ -1,3 +1,7 @@
+Changes in version 2.2.3 (2020-05-13)
+  * A few adjustments and a bug fix in methods for class "truthTab"
+  * Minor adjustments in examples for compliance with dplyr 1.0.0
+
 Changes in version 2.2.2 (2019-12-06)
   * In the default method of condition(), argument tt now has a default value.
   * Added some informative error messages

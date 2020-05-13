@@ -1,4 +1,4 @@
-b15fa0285ee78d5d7aebe5ece61a4a7e *DESCRIPTION
+f417f1abc76b412f0e620173df0215ac *DESCRIPTION
 6613183c41a810c623c69ea94dc4d6c6 *NAMESPACE
 350a3b88c5d7abf107cf8b097e64878f *R/RcppExports.R
 d8170905ab8ac7e6d273762a4bf2aee0 *R/allCombs_makefuzzy.r
@@ -38,7 +38,7 @@ b6b3c3764ee13aabff6cd2ef3aef5194 *R/redundant.R
 d6dea94b5034805f8e7ffd2822d6e300 *R/selectCases.r
 01f191c3d57830b5309dc0fd26bf0b1b *R/some.r
 7a9c6ed841fbaad021cc8f1b25185145 *R/standard.R
-ec3b78fc2ffb1f90b8ed8d0a311bc4b1 *R/truthTab.r
+0ea2f1b40545429f8b183e402d4a791b *R/truthTab.r
 4b09f4544a214e7abd493219c6974bca *R/tt2df.r
 43c9a9c763724901a2ebc6b756a1c07a *build/vignette.rds
 0f6603115cc0ad507437171e3472ad39 *data/d.autonomy.tab.gz
@@ -51,16 +51,16 @@ dfa181b6390a1df889aae8a33f9d301c *data/d.pban.tab.gz
 8c018ee8a696fd2ce0b20b1576bf07ed *data/d.performance.tab.gz
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
-dc1df4c853f1dd1f14a993c2ca522380 *inst/NEWS
+23d9ec6372f0d62d6b4bcd4cba9c99f7 *inst/NEWS
 9125352c70da3999d5a7ae6cf9ca40a4 *inst/doc/cna_vignette.R
 198ab0f63c758e7f54834ebd8199946c *inst/doc/cna_vignette.Rnw
-707a4ec00c526fdadf21425d272331b6 *inst/doc/cna_vignette.pdf
+2a7e13feea863bcbe8e2e1068e2b3903 *inst/doc/cna_vignette.pdf
 dea8f4275affc710606f0634307ae1d8 *man/allCombs.Rd
-d2df5fee53da7deec658b70849c61330 *man/cna-package.Rd
-bbb578e2be9677ac3ae447b3a8e2b4cc *man/cna.Rd
+614499b3dacd8418a51763e24497bfe1 *man/cna-package.Rd
+ebdf116524cb3582ff164d6c5434f50c *man/cna.Rd
 6a8104455da8fd5cb0711aad325ecc93 *man/coherence.Rd
 9c7ec767df46eeab92bbcb4d7a6eefcd *man/condTbl.Rd
-d4798f455fd8630f5f468d199a23767f *man/condition.Rd
+a66d9f6c8c690f27c5afb367059bb696 *man/condition.Rd
 bcc24f633a4119c1e68e7bf36682f49f *man/cyclic.Rd
 dd6127da040c4f4832696bed42ef8899 *man/d.autonomy.Rd
 59ee6dc200b886567f7fffb97d5be43c *man/d.educate.Rd

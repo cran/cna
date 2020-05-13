@@ -266,8 +266,7 @@ ana1}
 # "d.women". Here is how to extract the configurations that are compatible with 
 # the first asf but are not contained in "d.women":
 \donttest{library(dplyr)
-setdiff(tt2df(selectCases(asf(ana1)$condition[1], 
-              full.tt(d.women))),
+setdiff(tt2df(selectCases(asf(ana1)$condition[1], full.tt(d.women))),
         d.women)
 }
 
