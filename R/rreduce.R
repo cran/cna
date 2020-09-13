@@ -1,18 +1,18 @@
 
-# rreduce: reduce a cond wrt a data.fame/truthTab:
-rreduce <- function(cond, x = full.tt(cond), full = !missing(x), 
+# rreduce: reduce a cond wrt a data.fame/configTable:
+rreduce <- function(cond, x = full.ct(cond), full = !missing(x), 
                     verbose = FALSE, maxiter = 1000,
                     simplify2constant = TRUE){
-  if (!inherits(x, "tti")){
-    if (!inherits(x, "truthTab")){
-      x <- truthTab(x, rm.dup.factors=FALSE, rm.const.factors=FALSE)
+  if (!inherits(x, "cti")){
+    if (!inherits(x, "configTable")){
+      x <- configTable(x, rm.dup.factors=FALSE, rm.const.factors=FALSE)
     }
-    x <- tt.info(x)
+    x <- ctInfo(x)
   }
   stopifnot(length(cond) == 1L, nrow(x) > 1L)
   cond <- noblanks(cond)
   if (x$type == "fs") stop("Invalid use of data of type 'fs'." )
-  if (full) x <- full.tt(x)
+  if (full) x <- full.ct(x)
   sc <- x$scores
 
   evalCond0 <- drop(qcond_bool(cond, sc))
@@ -73,16 +73,16 @@ getCond <- function(x, outcome = NULL, type, asf = TRUE){
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
   if (missing(type)) type <- "cs"
   if (type == "fs") stop("getCond is not applicable to fs data.")
-  tt <- truthTab(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
-                 verbose = FALSE)
+  ct <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
+                    verbose = FALSE)
   if (!is.null(outcome)){
     outcomeName <- sub("=.+", "", outcome)
     stopifnot(length(outcome) == 1, outcomeName %in% names(x))
-    outcomePositive <- condition(outcome, tt)[[1]] == 1
-    xx <- as.matrix(tt)[outcomePositive, setdiff(colnames(x), outcomeName), drop = FALSE]
+    outcomePositive <- condition(outcome, ct)[[1]] == 1
+    xx <- as.matrix(ct)[outcomePositive, setdiff(colnames(x), outcomeName), drop = FALSE]
     xx <- unique(xx)
   } else {
-    xx <- as.matrix(tt)
+    xx <- as.matrix(ct)
   }
   if (type == "cs"){
     b <- matrix(colnames(xx), nrow(xx), ncol(xx), byrow = TRUE)

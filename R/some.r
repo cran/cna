@@ -2,7 +2,7 @@
 # Generic function 'some'
 # =======================
 #   taken from 'car' package
-some <- function (x, ...) UseMethod("some")
+# some <- function (x, ...) UseMethod("some")
 
 # some.data.frame
 # ===============
@@ -15,16 +15,16 @@ some.data.frame <- function (x, n = 10, replace = TRUE, ...)
     x[i, , drop = FALSE]
 }
 
-# some.truthTab
-# =============
+# some.configTable
+# ================
 # some os a generic function from package 'car'
 # added argument replace
-some.truthTab <- function (x, n = 10, replace = TRUE, ...){
+some.configTable <- function (x, n = 10, replace = TRUE, ...){
   nr <- nrow(x)
   if (!replace) n <- min(n, nr)
   i <- sort(sample(nr, n, replace = replace))
   xx <- x[i, ]
   attr(xx, "cases") <- lapply(attr(xx, "cases"), make.unique)
-  truthTab(xx, rm.dup.factors = FALSE, rm.const.factors = FALSE, ...)
+  configTable(xx, rm.dup.factors = FALSE, rm.const.factors = FALSE, ...)
 }
 

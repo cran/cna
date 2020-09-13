@@ -7,14 +7,14 @@
 #   cond  character string specifying a condition on the variables in x
 #   type
 # Value: Reduced data frame
-selectCases <- function(cond, x = full.tt(cond), type, cutoff = 0.5, 
+selectCases <- function(cond, x = full.ct(cond), type, cutoff = 0.5, 
                         rm.dup.factors = FALSE, rm.const.factors = FALSE){
-  if (inherits(x, "truthTab")){
+  if (inherits(x, "configTable")){
     type <- attr(x, "type")
   } else {
     if (missing(type)) type <- "cs"    # "hidden" Default value!
-    x <- truthTab(x, type = type, rm.dup.factors = FALSE, 
-                  rm.const.factors = FALSE, verbose = FALSE)
+    x <- configTable(x, type = type, rm.dup.factors = FALSE, 
+                     rm.const.factors = FALSE, verbose = FALSE)
   }
   stopifnot(length(cond) == 1)
   co <- condition.default(cond, x, force.bool = TRUE)[[1]]
@@ -29,14 +29,14 @@ selectCases <- function(cond, x = full.tt(cond), type, cutoff = 0.5,
 # macht keinen Unterschied zwischen "->" und "<->"!!
 #   selectCases("A->B", ...) entspricht selectCases1 mit con=1 und cov=0
 #   selectCases("A<->B", ...) entspricht selectCases1 mit con=1 und cov=1
-selectCases1 <- function(cond, x = full.tt(cond), type, con = 1, cov = 1, 
+selectCases1 <- function(cond, x = full.ct(cond), type, con = 1, cov = 1, 
                          rm.dup.factors = FALSE, rm.const.factors = FALSE){
-  if (inherits(x, "truthTab")){
+  if (inherits(x, "configTable")){
     type <- attr(x, "type")
   } else {
     if (missing(type)) type <- "cs"    # "hidden" Default value!
-      x <- truthTab(x, type = type, rm.dup.factors = FALSE, 
-                    rm.const.factors = FALSE, verbose = FALSE)
+      x <- configTable(x, type = type, rm.dup.factors = FALSE, 
+                       rm.const.factors = FALSE, verbose = FALSE)
   }
   # Check inputs
   if (length(con) != 1 || con < 0 || con > 1 || 
@@ -56,7 +56,7 @@ selectCases1 <- function(cond, x = full.tt(cond), type, con = 1, cov = 1,
   if (inherits(a, "invalidCond"))
     stop("The condition is invalid (", reason(a), "): ", format.condString(cond))
   if (!inherits(a, "atomicCond")) stop("selectCases1 only works with a condition of type 'atomic'.")
-  a <- tt2df(a)
+  a <- ct2df(a)
   d <- a[[1L]] - a[[2L]]        # differences
   r <- rank(d, ties.method = "random") # ranks (random within ties)
   # lower and upper limiting values for potential subsets
@@ -96,7 +96,7 @@ selectCases1 <- function(cond, x = full.tt(cond), type, con = 1, cov = 1,
   imax <- row(okMat)[wmax]
   jmax <- col(okMat)[wmax]
   subs <- d == 0 | (r >= loVal[imax] & r <= upVal[jmax])
-  truthTab(tt2df(x)[subs, ], type = attr(x, "type"), 
-           rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors)
+  configTable(ct2df(x)[subs, ], type = attr(x, "type"), 
+              rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors)
 }
 

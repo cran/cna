@@ -277,7 +277,7 @@ initializeInfo <- function(...){
   cl$stringsAsFactors <- FALSE
   x <- eval.parent(cl)
   n <- nrow(x)
-  x$sumf <- x$sxy <- x$sy <- x$sx <- x$freq <- 
+  x$sumf <- x$sxy <- x$sy <- x$sx <- x$complexity <- x$freq <- 
     x$coverage <- x$consistency <- emptyVector("double", n)
   x$outcome <- emptyVector("character", n)
   x$asfCovs <- x$asfCons <- emptyVector("list", n)

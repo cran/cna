@@ -1,4 +1,72 @@
 
+# ==== getCondType ==== 
+# Determine conditions' types
+#   x:    condition (blanks not allowed!)
+#   cti:  "ctInfo" object
+#   force.bool, rm.parentheses: passed from condition() 
+# Possible values: 
+#   "stdBoolean", "stdAtomic", "stdComplex", 
+#   "boolean", "atomic", "complex",
+#   "invalidSyntax", "invalidComplex", "invalidValues"
+# Examples:
+#' cond <- c("A+B", "a+b*C->E", "(a+b*C<->E)*(A+B<->D)",
+#'               "!a", "!(a+B)<->C", "(a+b*C<->E)*(A+!b<->D)",
+#'               "(a<->B)*(A+d)", "(a+*C", "x+y->Z", "a<-B->C")
+#' getCondType(cond, cna:::ctInfo(full.ct(5)))
+getCondType <- function(x, cti, force.bool = FALSE, rm.parentheses = FALSE){
+  vnms <- colnames(cti$scores)
+  inhStd <- as.logical(
+    inherits(x, 
+             c("stdBoolean", "stdAtomic", "stdComplex"),
+             which = TRUE))
+
+  # Case "std" declared in class attribute
+  if (any(inhStd)){
+    condTypes <- qct <- rep(c("stdBoolean", "stdAtomic", "stdComplex")[inhStd],
+                            length(x))
+    return(structure(condTypes, x = x))
+  }
+  # Check "standard" type (identifiable through by .qcondType())
+  condTypes <- qct <- .qcondType(x, vnms, cti$type)
+  x <- names(qct)
+  names(qct) <- names(condTypes) <- NULL
+  anyUnknown <- any(noqct <- qct == "unknown")
+  if (!anyUnknown){
+    return(structure(condTypes, x = x))
+  }
+  # All other cases: parsing is necessary
+  if (!anyUnknown){
+    return(structure(condTypes, x = x))
+  }
+  px <- lapply(x[noqct], tryparse)
+  px_ind <- which(noqct)
+  syntax_ok <- !m_is.null(px)
+  inPar_px <- logical(length(px))
+  for (i in seq_along(px)){
+    if (!syntax_ok[[i]]) next
+    if (inPar_px[i] <- (as.character(px[[i]][[1]]) == "("))
+      px[[i]] <- rm.parentheses(px[[i]])
+    px[[i]] <- reshapeCall(px[[i]])
+    x[[px_ind[i]]] <- parsed2visible(px[[i]])
+  }
+  inPar <- reshaped_px <- logical(length(x))
+  inPar[noqct] <- inPar_px
+  if (!all(syntax_ok))
+    condTypes[noqct][!syntax_ok] <- "invalidSyntax"
+  if (any(syntax_ok)){
+    vars_ok <- checkVariableNames(px[syntax_ok], if (cti$type == "mv") names(cti$nVal) else vnms)
+    ct <- character(sum(vars_ok))
+    ct_inPar <- !rm.parentheses & inPar_px[syntax_ok][vars_ok]
+    if (any(ct_inPar)) ct[ct_inPar] <- "boolean"
+    if (!all(ct_inPar))
+      ct[!ct_inPar] <- .condType(px[syntax_ok][vars_ok][!ct_inPar], force.bool)
+    condTypes[noqct][syntax_ok][vars_ok] <- ct
+    if (!all(vars_ok))
+      condTypes[noqct][syntax_ok][!vars_ok] <- "invalidValues"
+  }
+  structure(condTypes, x = x, px = px, px_ind = px_ind)
+}
+
 # ==== checkValues() ===
 # check if all factor values in a condition are %in% values
 checkValues <- function(char, split, values, fixed = TRUE){
@@ -52,14 +120,15 @@ checkVariableNames <- function(px, values){
 # check the syntactic form of the condition
 #   does not check the validity of  factor values
 #   NA = invalidSyntax
-maybeBoolean <- function(x, tt_type){
-  invalidChars <- if (tt_type == "mv"){
+maybeBoolean <- function(x, ct_type){
+  invalidChars <- if (ct_type == "mv"){
     "[\\<\\-\\>!\\(\\)]"
   } else {
     "[\\<\\-\\>!\\(\\)=]"
   }
   out <- !grepl(invalidChars, x)
-  if (tt_type == "mv"){
+  out[grepl("*+", x, fixed = TRUE)] <- FALSE
+  if (ct_type == "mv"){
     mvValueString <- "^[[:alpha:]\\.][[:alnum:]\\._]*=[[:digit:]]+$"
     spl <- hstrsplit(x, c("+", "*"), relist = FALSE)
     string_ok <- grepl(mvValueString, spl) 
@@ -71,38 +140,38 @@ maybeBoolean <- function(x, tt_type){
   }
   if (any(out))
     out[out][grepl("^[\\+\\*]", x[out])] <- NA
-  if (any(out))
-    out[out][grepl("[\\+\\*]$", x[out])] <- NA
+  if (any(s <- !is.na(out) & out))
+    out[s][grepl("[\\+\\*]$", x[s])] <- NA
   out
 }
-maybeAtomic <- function(x, tt_type){
-  ok <- grepl("<*->", x)
+maybeAtomic <- function(x, ct_type){
+  ok <- grepl("[^+*<]<{0,1}->", x)
   if (any(ok)){
-    mbBool <- happly(strsplit(x[ok], "<*->"), maybeBoolean, tt_type = tt_type)
+    mbBool <- happly(strsplit(x[ok], "<*->"), maybeBoolean, ct_type = ct_type)
     chk <- m_all(mbBool)
+    chk[is.na(chk)] <- FALSE
     ok1 <- ok
     ok[ok][!chk] <- FALSE
     ok[ok1][chk & lengths(mbBool) != 2] <- NA  # NA = invalidSyntax
   }
   ok
 }
-maybeComplex <- function(x, tt_type, multiple.only = TRUE){
+maybeComplex <- function(x, ct_type, multiple.only = TRUE){
   ok <- grepl("^\\(", x) & grepl("\\)$", x) 
   if (multiple.only) ok <- ok & grepl(")*(", x, fixed = TRUE)
   if (any(ok)){
     csfStruct <- m_all(happly(strsplit(sub("^\\((.+)\\)$", "\\1", x[ok]), ")*(", fixed = TRUE), 
-                               maybeAtomic, tt_type = tt_type))
+                               maybeAtomic, ct_type = ct_type))
     ok[ok][!csfStruct] <- FALSE
   }
   ok
 }
 
-
 # ==== .qcondType() ====
-# Determine the 'qtypes' of conditions
+# Determine the 'qtypes' of conditions (preliminary selection, without parsing)
 # possible values:
 # "constant" , "stdBoolean", "stdAtomic", "stdComplex", "unknown", "invalidValues"
-.qcondType <- function(x, values, tt_type, stdComplex.multiple.only = TRUE){
+.qcondType <- function(x, values, ct_type, stdComplex.multiple.only = TRUE){
   out <- rep("unknown", length(x))
   names(out) <- x
   
@@ -115,7 +184,7 @@ maybeComplex <- function(x, tt_type, multiple.only = TRUE){
   # "boolean"
   sel1 <- out == "unknown"
   if (!any(sel1)) return(out)
-  mbBool <- maybeBoolean(x[sel1], tt_type)
+  mbBool <- maybeBoolean(x[sel1], ct_type)
   sel2 <- mbBool & !is.na(mbBool)
   out[is.na(mbBool)] <- "invalidSyntax"
   if (any(sel2)){
@@ -134,7 +203,7 @@ maybeComplex <- function(x, tt_type, multiple.only = TRUE){
   # "atomic"
   sel1 <- out == "unknown"
   if (!any(sel1)) return(out)
-  mbAt <- maybeAtomic(x[sel1], tt_type)
+  mbAt <- maybeAtomic(x[sel1], ct_type)
   sel2 <- mbAt & !is.na(mbAt)
   out[is.na(mbAt)] <- "invalidSyntax"
   if (any(sel2)){
@@ -154,7 +223,7 @@ maybeComplex <- function(x, tt_type, multiple.only = TRUE){
   # "complex"
   sel1 <- out == "unknown"
   if (!any(sel1)) return(out)
-  sel2 <- maybeComplex(x[sel1], tt_type, multiple.only = stdComplex.multiple.only)
+  sel2 <- maybeComplex(x[sel1], ct_type, multiple.only = stdComplex.multiple.only)
   if (any(sel2)){
     sel3 <-  checkValues(gsub("^\\(|\\)$", "", x[sel1][sel2]), c(")*(", "<*->", "+", "*"), 
                          values, fixed = c(TRUE, FALSE, TRUE))
@@ -209,7 +278,6 @@ qcond2cond_csf <- function(x){
   xx <- lapply(xx, "class<-", c("stdAtomicCond", "atomicCond", "cond", "data.frame"))
   qc <- setNames(split.default(xx, rep(seq_along(ll), ll/2)),
                  names(x))
-  lapply(qc, "class<-", c("stdComplexCond", "complexCond", "cond"))
+  lapply(qc, "class<-", c("stdComplexCond", "complexCond", "cond", "data.frame"))
 }
-
 

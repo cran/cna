@@ -4,14 +4,24 @@
 # returns 1 for an atomicCond
 # returns NA for a booleanCond
 # cond   character vector
-# x      truthTab or data frame
-# type   type of truthTab 
-coherence <- function(cond, tt, type){
-  if (inherits(tt, "truthTab")){
-    type <- attr(tt, "type")
+# x      configTable or data frame
+# type   type of configTable 
+coherence <- function(cond, x, type, tt){
+  if (length(cond) == 0L) return(numeric(0))
+  
+    # Ensure backward compatibility of argument tt
+    if (!missing(tt)){
+      warning("Argument tt is deprecated in coherence(); use x instead.", 
+              call. = FALSE)
+      if (missing(x)) x <- tt
+    }
+
+  if (inherits(x, "configTable")){
+    type <- attr(x, "type")
+    ct <- x
   } else {
     if (missing(type)) type <- "cs"
-    tt <- truthTab(tt, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+    ct <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
   stdClasses <- c("stdBoolean", "stdAtomic", "stdComplex")
   inhStd <- stdClasses[as.logical(inherits(cond, stdClasses, which = TRUE))]
@@ -23,28 +33,29 @@ coherence <- function(cond, tt, type){
     return(coh)
   }
   cond <- noblanks(cond) # don't use noblanks earlier because it removes the class attribute
-  .coher(cond, tt, 
+  .coher(cond, ct, 
          std = identical(inhStd, "stdComplex"))
 }
 
 
 # .coher(): internal function calculating coherence measures
 #   cond    char evtor, conditions, typically csf's
-#   tt      truthTab
+#   ct      configTable
 #   std     Logical: Does cond contain csf's in standard form?
 #   names   Logical: Add names to toutput vector?
-#   tti, qc_tt
+#   cti, qc_ct
 #           These "intermediate results" can be passed directly
 #           NOTE THAT THIS ONLY WORKS IF  STD=true !!
-.coher <- function(cond, tt, std = inherits(cond, "stdComplex"),
-                   names = TRUE, tti = tt.info(tt), 
-                   qc_tt = qcond_csf(cond, tti$scores, flat = TRUE)){
+.coher <- function(cond, ct, std = inherits(cond, "stdComplex"),
+                   names = TRUE, cti = ctInfo(ct), 
+                   qc_ct = qcond_csf(cond, cti$scores, flat = TRUE)){
   coh <- rep(NA_real_, length(cond))
+  if (length(coh) == 0) return(coh)
   if (std){
-    nms <- C_relist_Char(attr(qc_tt, "condition"), attr(qc_tt, "csflengths"))
+    nms <- C_relist_Char(attr(qc_ct, "condition"), attr(qc_ct, "csflengths"))
     isComplexCond <- rep(TRUE, length(cond))
   } else {
-    cnd <- condition.default(cond, tt, rm.parentheses = FALSE)
+    cnd <- condition.default(cond, ct, rm.parentheses = FALSE)
     nms <- nmsList(cnd)
     isAtomicCond <- vapply(cnd, inherits, logical(1), "atomicCond", USE.NAMES = FALSE)
     if (any(isAtomicCond)){
@@ -60,11 +71,11 @@ coherence <- function(cond, tt, type){
     csflen1 <- vapply(relist1(hl[[2]], hl[[1]]), max, integer(1)) <= 1
     coh[isComplexCond][csflen1] <- 1
     if (!all(csflen1)){
-      f <- if (missing(tt)) tti$freq else attr(tt, "n")
+      f <- if (missing(ct)) cti$freq else attr(ct, "n")
       n <- length(f)
       if (std){
         subs <- rep(!csflen1, collapse(hl, 2)[[1]])
-        x <- qc_tt[, , subs, drop = FALSE]
+        x <- qc_ct[, , subs, drop = FALSE]
       } else {
         cnd <- cnd[isComplexCond][!csflen1]
         ll <- lengths(cnd, use.names = FALSE)

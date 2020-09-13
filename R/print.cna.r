@@ -1,7 +1,10 @@
 
 # print method for class cna
 print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5, 
-                      details = x$details, show.cases = NULL, ...){
+                      details = x$details, show.cases = NULL, 
+                      inus.only = x$inus.only, 
+                      acyclic.only = x$acyclic.only, cycle.type = x$cycle.type, 
+                      verbose = FALSE, ...){
   cat("--- Coincidence Analysis (CNA) ---\n")
  # cat("\nFunction call:\n", deparse(x$call), "\n", sep = "")
 
@@ -13,18 +16,20 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
   }
   names(whatl) <- c("t", "m", "a", "c")
 
+  details <- clarify_details(details, available = x$details)
+  
   if (nsolutions == "all") nsolutions <- Inf
   
   if (whatl["t"]){
-    cat("\nTruth table:\n")
-    print(x$truthTab_out, show.cases = show.cases)
+    cat("\nConfiguration table:\n")
+    print(x$configTable_out, show.cases = show.cases)
   }
   if (!is.null(x$ordering))
     cat("\nCausal ordering",
         if(!is.null(x$call$strict) && eval(x$call$strict)) " (strict)", ":\n",
         C_concat(C_mconcat(x$ordering, sep = ", "), sep = " < "),
         "\n", sep = "")
-  else cat("\nFactors:", C_concat(names(x$truthTab), sep = ", "), "\n")
+  else cat("\nFactors:", C_concat(names(x$configTable), sep = ", "), "\n")
 
   if (whatl["m"]){
     msc.df <- msc(x)
@@ -34,12 +39,8 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
       cat("\n*none*\n")
     } else for (msc1 in split(msc.df, msc.df$outcome)){
       cat("\nOutcome ", msc1$outcome[1], ":\n", sep = "")
-      if (short <- ((nsol <- nrow(msc1)) > nsolutions))
-        msc1 <- msc1[seq_len(nsolutions), , drop = FALSE]
       names(msc1)[names(msc1) == "condition"] <- "solution"
-      print(msc1[-1], digits = digits, row.names = FALSE, ...)
-      if (short)
-        cat(" ... (total no. of conditions: ", nsol, ")\n", sep = "")
+      print(msc1[-1], n = nsolutions, digits = digits, row.names = FALSE, ...)
     }
   }
 
@@ -49,15 +50,12 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
   if (whatl["a"]){
     cat("\nAtomic solution formulas:\n",
         "-------------------------", sep = "")
-    if (nrow(asf.df) == 0) cat("\n*none*\n")
-    else for (asf1 in split(asf.df, asf.df$outcome)){
+    if (nrow(asf.df) == 0){
+      cat("\n*none*\n")
+    } else for (asf1 in split(asf.df, asf.df$outcome)){
       cat("\nOutcome ", asf1$outcome[1], ":\n", sep = "")
-      if (short <- ((nsol <- nrow(asf1)) > nsolutions))
-        asf1 <- asf1[seq_len(nsolutions), , drop = FALSE]
       names(asf1)[names(asf1) == "condition"] <- "solution"
-      print(asf1[-1], digits = digits, row.names = FALSE, ...)
-      if (short)
-        cat(" ... (total no. of formulas: ", nsol, ")\n", sep = "")
+      print(asf1[-1], n = nsolutions, digits = digits, row.names = FALSE, ...)
     }
   }
 
@@ -67,21 +65,16 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
     if (nrow(asf.df) == 0){
       n.csf <- 0L
     } else {
-      n.csf.by.outcome <- vapply(split(asf.df, asf.df$outcome), nrow, integer(1L))
-      n.csf <- prod(vapply(split(asf.df, asf.df$outcome), nrow, integer(1L)))
+      csf1 <- csf(x, asfx = asf.df, details = details,
+                  inus.only = inus.only, acyclic.only = acyclic.only, 
+                  cycle.type = cycle.type, verbose = verbose)
+      n.csf <- nrow(csf1)
     }  
     if (n.csf == 0){
       cat("*none*\n")
-    } else if (length(n.csf.by.outcome) == 1L && whatl["a"]){
-      cat("Same as asf\n")
     } else {
-      csf1 <- csf(x, n = nsolutions, asfx = asf.df, details = details)
-      if (short <- ((nsol <- nrow(csf1)) > nsolutions))
-        csf1 <- csf1[seq_len(nsolutions), , drop = FALSE]
       names(csf1)[names(csf1) == "condition"] <- "solution"
-      print(csf1, digits = digits, row.names = FALSE, ...)
-      if (short)
-        cat(" ... (total no. of formulas: ", nsol, ")\n", sep = "")
+      print(csf1, n = nsolutions, digits = digits, row.names = FALSE, ...)
     }
   }
 

@@ -4,56 +4,45 @@
 # Returns a character vector of conditions resulting from reducing the conds in
 # rownames(x) according to x
 .redCsf <- function(x){
-  nms <- rownames(x)
-  rownames(x) <- NULL
+  nms <- names(x)
+  names(x) <- NULL
+  which_asf_red <- lapply(x, which)
+  orig <- mapply(rep, seq_along(which_asf_red), lengths(which_asf_red), SIMPLIFY = FALSE)
+  orig <- unlist(orig)
   
-  k <- ncol(x)
+  asfList <- extract_asf(nms)
+  asfList <- mapply("[", asfList[orig], -unlist(which_asf_red), SIMPLIFY = FALSE)
   
-  tr1 <- t(x)
-  cnr <- row(tr1)[tr1]
-  logdiag <- 1-diag(k)
-  mode(logdiag) <- "logical"
-  logmat <- logdiag[, cnr, drop = FALSE]
-  
-  rs <- rowSums(x)
-  orig <- rep(seq_along(rs), rs)
-  asfmat <- do.call(cbind, extract_asf(nms))[, orig, drop = FALSE]
-  stopifnot(identical(dim(logmat), dim(asfmat)))
-  
-  asfmat <- matrix(asfmat[logmat], k-1)
-  asfmat[] <- paste0("(", asfmat, ")")
-  
-  out <- do.call(paste, c(split(asfmat, row(asfmat)), sep = "*"))
+  out <- C_mconcat(happly(asfList, function(x) paste0("(", x, ")")), sep = "*")
   structure(out, originalCond = orig)
 }  
 
 # recursive function .minCsf
-# takes cond and (either tti or full.tti)
+# takes cond and (either cti or full.cti)
 # returns cond without redundancies
-.minCsf <- function(cond, tti = NULL, full.tti = NULL, verbose = FALSE){
+.minCsf <- function(cond, cti = NULL, full.cti = NULL, verbose = FALSE){
   ids <- attr(cond, "id")
   if (is.null(attr(cond, "id")))
     ids <- as.list(seq_along(cond))
 
-  if (is.null(full.tti)){
-    full.tti <- full.tt(tti)
+  if (is.null(full.cti)){
+    full.cti <- full.ct(cti)
   }
-  
-  rr <- redundant(cond, full.tti)
-  anyRed <- rowAnys(rr)
-  n.asf <- ncol(rr)
+  rr <- redundant(cond, full.cti, simplify = FALSE)
+  anyRed <- m_any(rr)
+  n.asf <- lengths(rr, use.names = FALSE)
   if (verbose)
     cat("csf-lengths ", n.asf, ": ",
         sum(anyRed), " of ", length(cond), " csf are reducible ",
         sep = "")
-  noRed <- rownames(rr)[!anyRed]
+  noRed <- names(rr)[!anyRed]
   attr(noRed, "id") <- ids[!anyRed]
-  attr(noRed, "n.asf") <- rep(n.asf, length(noRed))
+  attr(noRed, "n.asf") <- n.asf[!anyRed]
   if (!any(anyRed)){
     if (verbose) cat("\n")
     return(noRed)
   }
-  withRed <- rr[anyRed, , drop = FALSE]
+  withRed <- rr[anyRed]
   condNew <- .redCsf(withRed)
   idsNew <- ids[anyRed][attr(condNew, "originalCond")]
   splitId <- split(idsNew, condNew)
@@ -62,8 +51,8 @@
   condNew <- condNew[!dups]
   condNew <- structure(condNew, 
                        id = unname(splitId[condNew]),
-                       n.asf = rep(n.asf - 1L, sum(!dups)))
-  recurs <- .minCsf(condNew, NULL, full.tti = full.tti, verbose = verbose)
+                       n.asf = n.asf[anyRed][!dups] - 1L)
+  recurs <- .minCsf(condNew, NULL, full.cti = full.cti, verbose = verbose)
   structure(c(recurs, noRed), 
             id = lapply(c(attr(recurs, "id"), attr(noRed, "id")),
                         function(...) unique.default(unlist(...)),
@@ -76,23 +65,32 @@ minimalizeCsf <- function(x, ...){
   UseMethod("minimalizeCsf")
 }
 # Default method (for character vector)
-minimalizeCsf.default <- function(x, data = full.tt(x), verbose = FALSE, ...){
-  if (length(x) == 0) stop("Input has length 0.")
+minimalizeCsf.default <- function(x, ct = full.ct(x), verbose = FALSE, ..., data){
+  
+    # Ensure backward compatibility of argument data
+    if (!missing(data)){
+      warning("Argument 'data' is deprecated in minimalizeCsf(); use 'ct' instead.", 
+              call. = FALSE)
+      if (missing(ct)) ct <- data
+    }
+
+  if (length(x) == 0){
+    return(emptyMinimalizeCsf())
+  }
   x <- noblanks(x)
-  tt <- truthTab(data, verbose = verbose, 
-                 rm.dup.factors = FALSE, rm.const.factors = FALSE)
-  minim <- .minCsf(x, tt.info(tt), verbose = verbose)
+  ct <- configTable(ct, verbose = verbose, 
+                    rm.dup.factors = FALSE, rm.const.factors = FALSE)
+  minim <- .minCsf(x, ctInfo(ct), verbose = verbose)
   redundantParts <- vector("list", length(minim))
   for (i in seq_along(minim)){
-    redasf <- 
-      lapply(extract_asf(x[attr(minim, "id")[[i]]]), 
-             setdiff, extract_asf(minim[[i]])[[1]])
+    redasf <- lapply(extract_asf(x[attr(minim, "id")[[i]]]), 
+                     setdiff, extract_asf(minim[[i]])[[1]])
     redasf <- happly(redasf, function(x) if (length(x)) paste0("(", x, ")") else character(0))
     redundantParts[[i]] <- C_mconcat(redasf, "*")
   }
   out <- qcondTbl_csf(minim, 
-                      tt.info(tt)$scores, 
-                      attr(tt, "n"))
+                      ctInfo(ct)$scores, 
+                      attr(ct, "n"))
   out$n.asf <- attr(minim, "n.asf")
   out$redundantParts <- redundantParts 
   class(out) <- c("minimalizeCsf", "data.frame")
@@ -100,14 +98,15 @@ minimalizeCsf.default <- function(x, data = full.tt(x), verbose = FALSE, ...){
 }
 # Method for class cna
 minimalizeCsf.cna <- function(x, n = 20, verbose = FALSE, ...){
-  csfs <- csf(x, max(n))$condition
-  if (length(csfs) == 0)
-    stop("cna object has no complex solutions")
+  csfs <- csf(x, n.init = max(n), inus.only = FALSE)$condition
+  if (length(csfs) == 0){
+    return(emptyMinimalizeCsf())
+  }
   if (length(n)>1){
     n <- n[n<length(csfs)]
     csfs <- csfs[n]
   }
-  minimalizeCsf.default(csfs, data = x$truthTab, verbose = verbose, ...)
+  minimalizeCsf.default(csfs, ct = x$configTable, verbose = verbose, ...)
 }
 
 # print method
@@ -129,3 +128,12 @@ print.minimalizeCsf <- function(x, subset = 1:5, ...){
   invisible()
 }
 
+# Output object for input with zero csf
+emptyMinimalizeCsf <- function() structure(list(
+  outcome = c("JSR", "JSR", "JSR", "JSR"), condition = character(0), 
+  con = numeric(0), 
+  cov = numeric(0), 
+  n.asf = integer(0),
+  redundantParts = vector("list", 0)), 
+  class = c("minimalizeCsf", "data.frame")
+)

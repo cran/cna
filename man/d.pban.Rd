@@ -28,7 +28,7 @@ The data frame contains 48 rows (cases) and the following 5 columns, some of whi
 \source{
 Hartmann, Christof, and Joerg Kemmerzell. 2010. \dQuote{Understanding Variations 
 in Party Bans in Africa.} \emph{Democratization} 17(4):642-65.
-DOI: 10.1080/13510347.2010.491189.
+doi:10.1080/13510347.2010.491189.
 }
 
 \keyword{datasets}

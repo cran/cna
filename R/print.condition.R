@@ -59,11 +59,11 @@ print.cond <- function (x, digits = 3, print.table = TRUE,
       cnms[longName] <- paste0(substring(cnms[longName], 1, 20), "...")
       colnames(dfr) <- cnms
     }    
-    if (is.null(add.data) & !is.null(attr(x, "tt")))
-      add.data <- attr(x, "tt")
+    if (is.null(add.data) & !is.null(attr(x, "ct")))
+      add.data <- attr(x, "ct")
     if (!is.null(add.data)){
-      if (!inherits(add.data, "truthTab")){
-        add.data <- truthTab(add.data, type = attr(x, "type"))
+      if (!inherits(add.data, "configTable")){
+        add.data <- configTable(add.data, type = attr(x, "type"))
       }
       stopifnot(attr(x, "type") == attr(add.data, "type"), 
                 isTRUE(all.equal(attr(add.data, "cases"), attr(x, "cases"))))
@@ -110,11 +110,11 @@ print.complexCond <- function (x, digits = 3, print.table = TRUE,
     } else {
       C_mconcat(attr(x, "cases"), sep = ",")
     }
-    if (is.null(add.data) & !is.null(attr(x, "tt")))
-      add.data <- attr(x, "tt")
+    if (is.null(add.data) & !is.null(attr(x, "ct")))
+      add.data <- attr(x, "ct")
     if (!is.null(add.data)){
-      if (!inherits(add.data, "truthTab")){
-        add.data <- truthTab(add.data, type = attr(x, "type"))
+      if (!inherits(add.data, "configTable")){
+        add.data <- configTable(add.data, type = attr(x, "type"))
       }
       stopifnot(attr(x, "type") == attr(add.data, "type"), 
                 isTRUE(all.equal(attr(add.data, "cases"), attr(x, "cases"))))

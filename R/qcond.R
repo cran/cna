@@ -34,7 +34,7 @@ qcond_asf <- function(condstr, sc, force.bool = FALSE){
   l <- length(condstr)
   n <- nrow(sc)
   lr <- strsplit(condstr, "<*->")
-  out <- qcond_bool(unlist(lr, recursive = FALSE, use.names = FALSE), sc)
+  out <- qcond_bool(as.character(unlist(lr, recursive = FALSE, use.names = FALSE)), sc)
   if (force.bool){
     dim(out) <- c(n, 2, l)
     equiv <- grepl("<->", condstr, fixed = TRUE)
@@ -101,11 +101,16 @@ qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
   n <- nrow(sc)
   asfs <- extract_asf(condstr)
   lengths <- lengths(asfs)
-  unlasfs <- unlist(asfs, use.names = FALSE, recursive = FALSE)
+  unlasfs <- as.character(unlist(asfs, use.names = FALSE, recursive = FALSE))
   varray <- qcond_asf(unlasfs, sc, force.bool = force.bool)
   if (force.bool){
+    relisted <- if (length(varray)){
+      relist1(as.vector(varray), lengths*n)
+    } else {
+      list()
+    }
     out <- vapply(
-      relist1(as.vector(varray), lengths*n), 
+      relisted, 
       function(x){ rowMins(matrix(x, nrow = n)) },
       numeric(n))
     colnames(out) <- condstr

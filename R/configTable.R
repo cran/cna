@@ -1,21 +1,21 @@
 
-# New version of cna:truthTab
-# ===========================
+# New version of configTable
+# ==========================
 # Modifications:
 #   - types "cs", "mv", und "fs"
-#   - Behaviour if x already is a truthTab
-truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
-                     case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
-                     .cases = NULL, verbose = TRUE){
+#   - Behaviour if x already is a configTable
+configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
+                        case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
+                        .cases = NULL, verbose = TRUE){
   nm.x <- deparse(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x), length(case.cutoff) == 1)
   if (is.matrix(x)) {
     if (is.null(colnames(x)))
       colnames(x) <- make.unique(rep(LETTERS, length.out = ncol(x)))
     x <- as.data.frame(x)
-  } else if (inherits(x, "truthTab")){
+  } else if (inherits(x, "configTable")){
     if (!is.null(frequency))
-      stop(nm.x, " already is a truthTab - argument frequency is not admissable in this case!")
+      stop(nm.x, " already is a configTable - argument frequency is not admissable in this case!")
     frequency <- attr(x, "n", exact = TRUE)
     .cases <- attr(x, "cases")
     type <- attr(x, "type")
@@ -51,8 +51,8 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
   for (i in seq_along(x)) mode(x[[i]]) <- datatype
   cx <- do.call(paste, c(x, list(sep = "\r")))
   cx <- factor(cx, levels = unique(cx))
-  tt <- x[!duplicated(cx), , drop = FALSE]
-  rownames(tt) <- NULL
+  ct <- x[!duplicated(cx), , drop = FALSE]
+  rownames(ct) <- NULL
   if (is.null(frequency)){
     f <- tabulate(cx)
   } else {
@@ -75,21 +75,21 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     message(sum(f[del.cases]), " of ", sum(f),
         " cases are removed due to case.cutoff = ", case.cutoff,
         ".")
-    tt <- tt[!del.cases, , drop = FALSE]
+    ct <- ct[!del.cases, , drop = FALSE]
     f <- f[!del.cases]
     .cases <- .cases[!del.cases]
   }
   # remove rows with frequency 0
   if (any(rm.rows <- (f == 0L))) {
-    tt <- tt[!rm.rows, , drop = FALSE]
+    ct <- ct[!rm.rows, , drop = FALSE]
     f <- f[!rm.rows]
   }
   # constant columns
-  constcols <- vapply(tt, isConstant, logical(1))
+  constcols <- vapply(ct, isConstant, logical(1))
   if (any(constcols)){
-    nms.constcols <- names(tt)[constcols]
+    nms.constcols <- names(ct)[constcols]
     if (rm.const.factors){
-      tt <- tt[, !constcols, drop = FALSE]
+      ct <- ct[, !constcols, drop = FALSE]
       if (verbose) message("The following factors are constant and therefore eliminated: ",
                            C_concat(nms.constcols, sep = ", "))
     } else if (verbose){
@@ -98,11 +98,11 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     }        
   }          
   # eliminate duplicated columns
-  dupcols <- duplicated(t(tt))
+  dupcols <- duplicated(t(ct))
   if (any(dupcols)){
-    nms.dupcols <- names(tt)[dupcols]
+    nms.dupcols <- names(ct)[dupcols]
     if (rm.dup.factors){
-      tt <- tt[, !dupcols, drop = FALSE]
+      ct <- ct[, !dupcols, drop = FALSE]
       if (verbose)
         message("The following factors are duplicates of factors in preceding columns of the data table: ",
                 C_concat(nms.dupcols, sep = ", "),
@@ -113,26 +113,26 @@ truthTab <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     } 
   }
   # Warn if names are not syntactically valid
-  nms <- names(tt) <- toupper(names(tt))
+  nms <- names(ct) <- toupper(names(ct))
   if (!identical(nms, make.names(nms, unique = TRUE))){
-    warning("truthTab has syntactically invalid names. condition(), cna() and other functions may not work.",
+    warning("configTable has syntactically invalid names. condition(), cna() and other functions may not work.",
             call. = FALSE)
   }
   # output
-  class(tt) <- c("truthTab", "data.frame")
-  attr(tt, "n") <- as.vector(f)
-  attr(tt, "cases") <- lapply(.cases, function(x) sort(unlist(x, use.names = FALSE, recursive = FALSE)))
-  attr(tt, "type") <- type
-  tt
+  class(ct) <- c("configTable", "data.frame", "truthTab")
+  attr(ct, "n") <- as.vector(f)
+  attr(ct, "cases") <- lapply(.cases, function(x) sort(unlist(x, use.names = FALSE, recursive = FALSE)))
+  attr(ct, "type") <- type
+  ct
 }
 
-# print-method for truthTab
-# =========================
+# print-method for configTable
+# ============================
 # New: Type is displayed
 # cases now shown as rownames
 #   Default show.cases: TRUE, if all rownames shorter than 20 characters
 #   ...  digits, quote, right passed to print.data.frame
-print.truthTab <- function(x, show.cases = NULL, ...){ 
+print.configTable <- function(x, show.cases = NULL, ...){ 
   # check attribute 'n'
   attr.n <- attr(x, "n", exact = TRUE)
   n.ok <- is.numeric(attr.n) && length(attr.n) == nrow(x)
@@ -150,13 +150,18 @@ print.truthTab <- function(x, show.cases = NULL, ...){
   } else if (!cases.ok){
     warning("Number of case labels does not match nrow(x) - case labels are ignored.")
     attr(x, "cases") <- NULL
+  } else if (max(lengths(attr(x, "cases")))>100){
+    # message("Case labels are suppressed.")
+    cases.ok <- FALSE
   }
   # create data frame for printing
   df.args <- list(as.data.frame(x), n.obs = attr(x, "n", exact = TRUE), check.names = FALSE)
   ncols <- length(df.args[[1]])
   prntx <- do.call(data.frame, df.args)
-  if (cases.ok) rownames(prntx) <- C_mconcat(lapply(attr(x, "cases"), sort), sep = ",")
-  cat(paste0("truthTab of type \"", attr(x, "type"), "\"\n"))
+  if (cases.ok){
+    rownames(prntx) <- C_mconcat(lapply(attr(x, "cases"), sort), sep = ",")
+  }
+  cat(paste0("configTable of type \"", attr(x, "type"), "\"\n"))
   if (is.null(show.cases) && nrow(x) > 0){
     show.cases <- max(nchar(rownames(prntx))) <= 20
     labels.suppressed <- !show.cases
@@ -169,10 +174,10 @@ print.truthTab <- function(x, show.cases = NULL, ...){
   invisible(x)
 }
 
-# "["-method for truthTab:
-# ========================
+# "["-method for configTable:
+# ===========================
 #  Note that default of argument 'drop' differs from that in "[.data.frame"
-`[.truthTab` <- function(x, i, j, drop = FALSE, rm.dup.factors = FALSE, rm.const.factors = FALSE){
+`[.configTable` <- function(x, i, j, drop = FALSE, rm.dup.factors = FALSE, rm.const.factors = FALSE){
   cl <- sys.call()
   cl$rm.dup.factors <- cl$rm.const.factors <- NULL
   len <- length(cl)
@@ -189,51 +194,51 @@ print.truthTab <- function(x, show.cases = NULL, ...){
   cl1[[3]] <- i <- eval.parent(cl1[[3]])
   cl1[[4]] <- if (noRowPos) cl[[3]] else cl[[4]]
   xx <- eval.parent(cl1)
-  truthTab(xx,
-           type = attr(x, "type"),
-           frequency = attr(x, "n", exact = TRUE)[i],
-           .cases = attr(x, "cases")[i],
-           rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors, verbose = FALSE)
+  configTable(xx,
+              type = attr(x, "type"),
+              frequency = attr(x, "n", exact = TRUE)[i],
+              .cases = attr(x, "cases")[i],
+              rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors, verbose = FALSE)
 }
 
 
-# More methods for class "truthTab"
-# =================================
-as.data.frame.truthTab <- function(x, ...){
+# More methods for class "configTable"
+# ====================================
+as.data.frame.configTable <- function(x, ...){
   class(x) <- "data.frame"
   attributes(x)[c("type", "cases", "n")] <- NULL
   x
 }
-`[<-.truthTab` <- function(x, i, j, value){
+`[<-.configTable` <- function(x, i, j, value){
   out <- as.data.frame(NextMethod("[<-", x))
   row.sel <- nargs() == 5 && !missing(i)
   rows <- if (row.sel) i else if (nrow(x)) TRUE else logical(0)
-  out <- truthTab(out,
+  out <- configTable(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),
            .cases = attr(x, "cases")[rows],
            rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
-`$<-.truthTab` <- function(x, name, value){
+`$<-.configTable` <- function(x, name, value){
   out <- as.data.frame(NextMethod("$<-", x))
-  out <- truthTab(out,
+  out <- configTable(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),
            .cases = attr(x, "cases"),
            rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
-`[[<-.truthTab` <- function(x, i, j, value){
+`[[<-.configTable` <- function(x, i, j, value){
   out <- as.data.frame(NextMethod("[[<-", x))
-  out <- truthTab(out,
+  out <- configTable(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),
            .cases = attr(x, "cases"),
            rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
-subset.truthTab <- function(x, subset, ...){
+subset.configTable <- function(x, subset, ...){
   r <- if (missing(subset))
     rep_len(TRUE, nrow(x))
   else {
@@ -246,7 +251,7 @@ subset.truthTab <- function(x, subset, ...){
   x[r, , ...]
 }
 
-head.truthTab <- function (x, n = 6L, ...) 
+head.configTable <- function (x, n = 6L, ...) 
 {
   stopifnot(length(n) == 1L)
   n <- if (n < 0L) 
@@ -255,7 +260,7 @@ head.truthTab <- function (x, n = 6L, ...)
   x[seq_len(n), , ...]
 }
 
-tail.truthTab <- function (x, n = 6L, ...) 
+tail.configTable <- function (x, n = 6L, ...) 
 {
   stopifnot(length(n) == 1L)
   nrx <- nrow(x)
@@ -275,25 +280,25 @@ tail.truthTab <- function (x, n = 6L, ...)
 
 ################################################################################
 
-# versions of truthTab with fixed type
-cstt <- function(...){
-  cl <- match.call(truthTab, sys.call())
+# versions of configTable with fixed type
+csct <- function(...){
+  cl <- match.call(configTable, sys.call())
   stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(truthTab)
+  cl[[1]] <- quote(configTable)
   cl$type <- "cs"
   eval.parent(cl)
 }
-mvtt <- function(...){
-  cl <- match.call(truthTab, sys.call())
+mvct <- function(...){
+  cl <- match.call(configTable, sys.call())
   stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(truthTab)
+  cl[[1]] <- quote(configTable)
   cl$type <- "mv"
   eval.parent(cl)
 }
-fstt <- function(...){
-  cl <- match.call(truthTab, sys.call())
+fsct <- function(...){
+  cl <- match.call(configTable, sys.call())
   stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(truthTab)
+  cl[[1]] <- quote(configTable)
   cl$type <- "fs"
   eval.parent(cl)
 }

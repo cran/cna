@@ -9,35 +9,36 @@ Eliminate structural redundancies from csf
 }
 
 \description{
-\code{minimalizeCsf} eliminates structural redundancies from complex solutions formulas (csf) by recursively testing their component atomic solution formulas (asf) for redundancy and eliminating the redundant ones.
+\code{minimalizeCsf} eliminates structural redundancies from complex solution formulas (csf) by recursively testing their component atomic solution formulas (asf) for redundancy and eliminating the redundant ones.
 }
 
 \usage{
 minimalizeCsf(x, ...)
 
-\method{minimalizeCsf}{default}(x, data = full.tt(x), verbose = FALSE, ...)
+\method{minimalizeCsf}{default}(x, ct = full.ct(x), verbose = FALSE, ..., data)
 \method{minimalizeCsf}{cna}(x, n = 20, verbose = FALSE, ...)
 \method{print}{minimalizeCsf}(x, subset = 1:5, ...)
 }
 
 \arguments{
-  \item{x}{In the default method, \code{x} is a character vector specifying csf. The \code{cna} method uses the strings representing the csf contained in an output object of \code{cna} (see details).}
-  \item{data}{Data frame, matrix or \code{\link{truthTab}} with the data; optional if all factors in \code{x} are binary but required if some factors are multi-value. }
+  \item{x}{In the default method, \code{x} is a character vector of csf. The \code{cna} method uses the strings representing the csf contained in an output object of \code{cna} (see details).}
+  \item{ct}{Data frame, matrix or \code{\link{configTable}} with the data; optional if all factors in \code{x} are binary but required if some factors are multi-value. }
   \item{verbose}{Logical; if \code{TRUE} additional messages on the number of csf that are found to be reducible are printed.}
   \item{n}{Minimal number of csf to use.}
   \item{subset}{Integer vector specifying the numbers of csf to be displayed.}
   \item{\dots}{Further arguments passed to the methods.}
+  \item{data}{Argument \code{data} is deprecated in \code{minimalizeCsf()}; use \code{ct} instead.}
 }
 
-\details{The core criterion that Boolean dependency structures must satisfy in order to be causally interpretable is \emph{redundancy-freeness}. In atomic solution formulas (asf), both sufficient and necessary conditions are completely free of redundant elements. However, when asf are conjunctively combined to complex solution formulas (csf), new redundancies may arise. A csf may contain redundant parts. To illustrate, assume that a csf is composed of three asf: asf1 * asf2 * asf3. It can happen that the conjunction asf1 * asf2 * asf3 is logically equivalent to a proper part of itself, say, to asf1 * asf2. In that case, asf3 is a so-called \emph{structural redundancy} in asf1 * asf2 * asf3 and must not be causally interpreted. See the \pkg{cna} package vignette or Baumgartner and Falk (2018) for more details. 
+\details{As of version 3.0 of the \pkg{cna} package, the function \code{minimalizeCsf} is automatically executed, where needed, by the default calls of the \code{\link{cna}} and \code{\link{csf}} functions. In consequence, applying the stand-alone \code{minimalizeCsf} function to an output object of \code{cna} is no longer required. The stand-alone function is kept in the package for reasons of backwards compatibility and for developing purposes. Its automatic execution can be suppressed by calling \code{csf} with \code{minimalizeCsf = FALSE}, which emulates outputs of older versions of the package.
 
-\code{minimalizeCsf} recursively tests the \code{asf} contained in a \code{csf} for structural redundancies and eliminates the redundant ones. It takes a character vector \code{x} specifying csf as input and builds all redundancy-free csf that can be inferred from \code{x}. The function is especially useful in combination with \code{cna}, which builds csf by conjunctively concatenating asf. One of the \code{cna} solution attributes, which is accessed via \code{details = TRUE} or \code{details = "r"}, is called "redundant". If a csf output by \code{cna} has the attribute \code{redundant == TRUE}, that csf has at least one structurally redundant part. The \code{cna} function, however, does not identify those redundant parts. For this purpose, the \code{cna} object must be passed on to \code{minimalizeCsf}.
+The core criterion that Boolean dependency structures must satisfy in order to be causally interpretable is \emph{redundancy-freeness}. In atomic solution formulas (asf), both sufficient and necessary conditions are completely free of redundant elements. However, when asf are conjunctively combined to complex solution formulas (csf), new redundancies may arise. A csf may contain redundant parts. To illustrate, assume that a csf is composed of three asf: asf1 * asf2 * asf3. It can happen that the conjunction asf1 * asf2 * asf3 is logically equivalent to a proper part of itself, say, to asf1 * asf2. In that case, asf3 is a so-called \emph{structural redundancy} in asf1 * asf2 * asf3 and must not be causally interpreted. See the \pkg{cna} package vignette or Baumgartner and Falk (2019) for more details. 
 
-There are two possibilities to use \code{minimalizeCsf}. Either the csf to be tested for structural redundancies is passed to \code{minimalizeCsf} as a character vector (this is the default method), or \code{minimalizeCsf} is applied directly to the output of \code{\link{cna}}. In the latter case, the csf are extracted from the \code{cna}-object.
+\code{minimalizeCsf} recursively tests the \code{asf} contained in a \code{csf} for structural redundancies and eliminates the redundant ones. It takes a character vector \code{x} specifying csf as input and builds all redundancy-free csf that can be inferred from \code{x}. There are two possibilities to use \code{minimalizeCsf}. Either the csf to be tested for structural redundancies is passed to \code{minimalizeCsf} as a character vector (this is the default method), or \code{minimalizeCsf} is applied directly to the output of \code{\link{cna}}---which however, as indicated above, is superfluous as of version 3.0 of the \pkg{cna} package. %In the latter case, the csf are extracted from the \code{cna}-object. 
 
-As a test for structural redundancies amounts to a test of logical equivalencies, it must be conducted relative to all logically possible configurations of the factors in \code{x}. That space of logical possibilities is generated by \code{full.tt(x)} if the \code{data} argument takes its default value. If all factors in \code{x} are binary, providing a non-default \code{data} value is optional and without influence on the output of \code{minimalizeCsf}. If some factors in \code{x} are multi-value, \code{minimalizeCsf} needs to be given the range of these values by means of the \code{data} argument. \code{data} can be a data frame or \code{truthTab} listing all possible value configurations.
+As a test for structural redundancies amounts to a test of logical equivalencies, it must be conducted relative to all logically possible configurations of the factors in \code{x}. That space of logical possibilities is generated by \code{full.ct(x)} if the \code{ct} argument takes its default value. If all factors in \code{x} are binary, providing a non-default \code{ct} value is optional and without influence on the output of \code{minimalizeCsf}. If some factors in \code{x} are multi-value, \code{minimalizeCsf} needs to be given the range of these values by means of the \code{ct} argument. \code{ct} can be a data frame or \code{configTable} listing all possible value configurations.
 
-%The argument \code{data}, which takes the value \code{full.tt(x)} by default, allows for specifying a data set relative to which structural redundancies shall be eliminated. Providing a non-default value is optional (because without effect) if all factors in \code{x} are binary but is required if some factors are multi-value, for \code{full.tt} does not generate all logically possible configurations when applied to an expression featuring multi-value factors (see \code{\link{full.tt}}).
+
 
 }
 
@@ -50,12 +51,12 @@ Falk, Christoph: identification and solution of the problem of structural redund
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2018. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{PhilSci Archive}. url: http://philsciarchive.pitt.edu/id/eprint/14876.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
 
 }
 
 \seealso{
-\code{\link{csf}}, \code{\link{cna}}, \code{\link{redundant}}, \code{\link{full.tt}}.
+\code{\link{csf}}, \code{\link{cna}}, \code{\link{redundant}}, \code{\link{full.ct}}.
 }
 
 \examples{
@@ -67,29 +68,18 @@ minimalizeCsf("(f + a*D <-> C)*(C + A*B <-> D)*(c + a*E <-> F)",
 # The cna method.
 dat1 <- selectCases("(C + A*B <-> D)*(c + a*E <-> F)")
 ana1 <- cna(dat1, details = c("r"))
-csf(ana1)
+csf(ana1, minimalizeCsf = FALSE)
 # The attribute "redundant" taking the value TRUE in ana1 shows that this csf contains 
-# at least one redundant element. Only the application of minimalizeCsf() identifies 
+# at least one redundant element. Applying minimalizeCsf() identifies 
 # the redundant element.
 minimalizeCsf(ana1)
-\donttest{
-# Real data entailing a large number of csf with many redundancies.
-tt.js <- fstt(d.jobsecurity)
-cna.js <- cna(tt.js, con = .8, cov = .8)
-minim100 <- minimalizeCsf(cna.js, n = 100) # may take a couple of seconds...
-minim100  # By default the first 5 solutions are displayed. 
-}
-# With mv data.
-tt.pban <- mvtt(d.pban)
-cna.pban <- cna(tt.pban, con = .75, cov = .75)
-csf.pban <- csf(cna.pban, 100)
+
+\donttest{# Mv data.
+ct.pban <- mvct(d.pban)
+cna.pban <- cna(ct.pban, con = .75, cov = .75)
+csf.pban <- csf(cna.pban, minimalizeCsf = FALSE)
 sol.pban <- csf.pban$condition
-
-minim.pban <- minimalizeCsf(sol.pban, tt.pban)
+minim.pban <- minimalizeCsf(sol.pban, ct.pban)
 as.character(minim.pban$condition)
-
-# Alternatively, a more direct replication of the above using the cna method.
-minim.pban <- minimalizeCsf(cna.pban, n = 100)
-print(minim.pban, 1:50) # print the first 50 redundancy-free csf
-
+}
 }

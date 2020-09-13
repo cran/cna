@@ -4,7 +4,7 @@
 
 \alias{d.women}
 
-\title{Data on high percentage of women's represention in parliaments of western countries}
+\title{Data on high percentage of women's representation in parliaments of western countries}
 
 \description{
 This dataset is from Krook (2010), who analyzes the causal conditions for high women's representation in western-democratic parliaments.

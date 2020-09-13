@@ -1,3 +1,16 @@
+Changes in version 3.0.0 (2020-09-11)
+	* The function and class 'truthTab' has been renamed 'configTable', in order to avoid confusion due to the use of the term 'truth table' in other contexts.
+	* As a consequence, several other functions have also changed their names: full.tt to full.ct; tt2df to ct2df; cstt/fstt/mvtt to csct/fsct/mvct.
+	* Code using the old names of these functions will mostly work. However their use is deprecated, and you will be warned to switch to the new names. The old names may eventually be removed in future releases.
+	* cna() has new arguments acyclic.only and cycle.type.
+	* In cna(), the default value of the argument maxstep has changed to c(3, 4, 10).
+	* In csf(), the selection process of complex solution formulas has been thoroughly revised. See the 'Details' section in ?csf.
+	* csf() has new arguments inus.only, minimalizeCsf, acyclic.only, cycle.type and verbose. Its argument n has been renamed as n.init, with a default of 1000.
+	* The way the output of msc(), asf() and csf() is printed has been modified (class 'condTbl'). 
+s	* The changes in csf() also affect printed output from cna(), as csf() is executed within the print method of class 'cna'.
+	* Renaming of an argument in condition(): from tt to ct
+	* is.inus() now also applies to conditions of the msc, asf or csf type. is.inus() has a new argument csf.info.
+
 Changes in version 2.2.3 (2020-05-13)
   * A few adjustments and a bug fix in methods for class "truthTab"
   * Minor adjustments in examples for compliance with dplyr 1.0.0

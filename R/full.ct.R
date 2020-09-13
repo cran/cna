@@ -1,21 +1,21 @@
 
-# ==== full.tt() ====
+# ==== full.ct() ====
 # Generic function
-full.tt <- function(x, ...) UseMethod("full.tt")
+full.ct <- function(x, ...) UseMethod("full.ct")
 
 .expandUniqvals <- function(valueList){
   do.call(expand.grid, 
           c(valueList, list(KEEP.OUT.ATTRS = FALSE)))
 }
 
-# ==== Method for class 'tti' ====
+# ==== Method for class 'cti' ====
 # builds 
-#   x       output of tt.info truthTab
-# value:    tti of truthTab, mv if original is mv, cs else
-full.tt.tti <- function(x, ...){
+#   x       output of ctInfo configTable
+# value:    cti of configTable, mv if original is mv, cs else
+full.ct.cti <- function(x, ...){
   expanded <- .expandUniqvals(x$uniqueValues)
   x$scores <- do.call(cbind, lapply(x$resp_nms, factMat(x$type), 
-                                      tt = expanded))
+                                      ct = expanded))
   if (x$type == "fs") x$type <- "cs"
   vId <- switch(x$type,
     cs = valueId <- 2 - as.matrix(expanded),
@@ -31,21 +31,21 @@ full.tt.tti <- function(x, ...){
   x
 }
 
-# ==== Method for class 'truthTab' ====
-# builds full truthTab
-#   x       truthTab
-#   value:  truthTab, mv if original is mv, cs else
-full.tt.truthTab <- function(x, ...){
-  tti <- tt.info(x)
-  expanded <- .expandUniqvals(tti$uniqueValues)
-  truthTab(expanded, type = if (tti$type == "mv") "mv" else "cs",
-           rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+# ==== Method for class 'configTable' ====
+# builds full configTable
+#   x       configTable
+#   value:  configTable, mv if original is mv, cs else
+full.ct.configTable <- function(x, ...){
+  cti <- ctInfo(x)
+  expanded <- .expandUniqvals(cti$uniqueValues)
+  configTable(expanded, type = if (cti$type == "mv") "mv" else "cs",
+              rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
 # ==== Default Method (for matrix or data.frame) ====
-# builds full.tt
+# builds full.ct
 # cases: character, list, matrix/data.frame
-full.tt.default  <- function(x, type = c("cs", "mv", "fs"), ...){
+full.ct.default  <- function(x, type = c("cs", "mv", "fs"), ...){
   if (is.numeric(x) && length(x) == 1 && x %in% 0:length(LETTERS)){
     x <- LETTERS[seq_len(x)]
   }
@@ -53,7 +53,7 @@ full.tt.default  <- function(x, type = c("cs", "mv", "fs"), ...){
     type <- if (any(grepl("=", x))) "mv" else "cs"
     px <- lapply(x, tryparse)
     if (!all(ok <- !vapply(px, is.null, logical(1))))
-      stop("Invalid input to full.tt:\n", paste0("  ", x[!ok], collapse = "\n"),
+      stop("Invalid input to full.ct:\n", paste0("  ", x[!ok], collapse = "\n"),
            call. = FALSE)
     if (type == "cs"){
       nms <- unique(toupper(unlist(lapply(px, all.vars))))
@@ -76,23 +76,24 @@ full.tt.default  <- function(x, type = c("cs", "mv", "fs"), ...){
       type <- "mv"
   }
   if (is.data.frame(x) || is.matrix(x)){
-    return(full.tt.truthTab(truthTab(x, type = type, 
-                                     rm.dup.factors = FALSE, 
-                                     rm.const.factors = FALSE, 
-                                     verbose = FALSE, ...)))
+    return(full.ct.configTable(
+      configTable(x, type = type, 
+                  rm.dup.factors = FALSE, 
+                  rm.const.factors = FALSE, 
+                  verbose = FALSE, ...)))
   }
-  stop("Don't know how to apply 'full.tt' to this input.")
+  stop("Don't know how to apply 'full.ct' to this input.")
 }
   
 
 # Aux function rowID
-# generates a unique integer identifier of the rows in the tt
-rowID <- function(tti){
-  # if (tti$type == "fs") warning("Be careful when using rowID() with 'fs' data.")
-  v <- matrix(unlist(tti$uniqueValues, use.names = FALSE)[tti$valueId], 
-              nrow = nrow(tti$valueId), 
-              dimnames = list(NULL, names(tti$nVal)))
-  maxVal <- vapply(tti$uniqueValues, max, 1L) + 1L
+# generates a unique integer identifier of the rows in the ct
+rowID <- function(cti){
+  # if (cti$type == "fs") warning("Be careful when using rowID() with 'fs' data.")
+  v <- matrix(unlist(cti$uniqueValues, use.names = FALSE)[cti$valueId], 
+              nrow = nrow(cti$valueId), 
+              dimnames = list(NULL, names(cti$nVal)))
+  maxVal <- vapply(cti$uniqueValues, max, 1L) + 1L
   m <- c(1L, cumprod(maxVal[-length(maxVal)]))
   drop(v %*% m)
 }

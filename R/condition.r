@@ -8,64 +8,37 @@ condition <- function(x, ...)
 # ==== condition.default ====
 # entirely new
 # now able to handle the types "cs", "mv", "fs"
-condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
-                              force.bool = FALSE, rm.parentheses = FALSE, ...){
+condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
+                              force.bool = FALSE, rm.parentheses = FALSE, ..., 
+                              tt){
+  
+    # Ensure backward compatibility of argument tt
+    if (!missing(tt)){
+      warning("Argument tt is deprecated in condition(); use ct instead.", 
+              call. = FALSE)
+      if (missing(ct)) ct <- tt
+    }
+
   stopifnot(is.character(x.in <- x))
   x[] <- noblanks(x)   # remove blanks
   x[] <- gsub(",", "*", x, fixed = TRUE)
-  if (inherits(tt, "truthTab")){
-    type <- attr(tt, "type")
+  if (inherits(ct, "configTable")){
+    type <- attr(ct, "type")
   } else {
     if (missing(type)) type <- "cs"    # "hidden" Default value!
-    tt <- truthTab(tt, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+    ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
-  sc <- tt.info(tt)$scores
-  vnms <- colnames(sc)
-  n.cases <- attr(tt, "n", exact = TRUE)
-  
-  negateCase <- type %in% c("cs", "fs") # use lower case negation in conditions' syntax?
-  
+  cti <- ctInfo(ct)
+
   # Determine the conditions' types
-  inhStd <- as.logical(
-    inherits(x, 
-             c("stdBoolean", "stdAtomic", "stdComplex"),
-             which = TRUE))
-  if (any(inhStd)){
-    condTypes <- qct <- rep(c("stdBoolean", "stdAtomic", "stdComplex")[inhStd],
-                            length(x))
-  } else {
-    condTypes <- qct <- .qcondType(x, vnms, type)
-    x <- names(qct)
-    names(qct) <- names(condTypes) <- NULL
-    if (any(noqct <- qct == "unknown")){
-      px <- lapply(x[noqct], tryparse)
-      px_ind <- which(noqct)
-      syntax_ok <- !m_is.null(px)
-      inPar_px <- logical(length(px))
-      for (i in seq_along(px)){
-        if (!syntax_ok[[i]]) next
-        if (inPar_px[i] <- (as.character(px[[i]][[1]]) == "("))
-          px[[i]] <- rm.parentheses(px[[i]])
-        px[[i]] <- reshapeCall(px[[i]])
-        x[[px_ind[i]]] <- parsed2visible(px[[i]])
-      }
-      inPar <- reshaped_px <- logical(length(x))
-      inPar[noqct] <- inPar_px
-      if (!all(syntax_ok))
-        condTypes[noqct][!syntax_ok] <- "invalidSyntax"
-      if (any(syntax_ok)){
-        vars_ok <- checkVariableNames(px[syntax_ok], if (type == "mv") names(tt) else vnms)
-        ct <- character(sum(vars_ok))
-        ct_inPar <- !rm.parentheses & inPar_px[syntax_ok][vars_ok]
-        if (any(ct_inPar)) ct[ct_inPar] <- "boolean"
-        if (!all(ct_inPar))
-          ct[!ct_inPar] <- .condType(px[syntax_ok][vars_ok][!ct_inPar], force.bool)
-        condTypes[noqct][syntax_ok][vars_ok] <- ct
-        if (!all(vars_ok))
-          condTypes[noqct][syntax_ok][!vars_ok] <- "invalidValues"
-      }
-    }
-  }
+  condTypes <- getCondType(x, cti, force.bool = force.bool, rm.parentheses = rm.parentheses)
+  x <- attr(condTypes, "x")
+  px <- attr(condTypes, "px")
+  px_ind <- attr(condTypes, "px_ind")
+  condTypes <- as.vector(condTypes)
+
+  n.cases <- attr(ct, "n", exact = TRUE)
+  negateCase <- type %in% c("cs", "fs") # use lower case negation in conditions' syntax?
   reshaped <- !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
                       x, noblanks(x.in), 
                       SIMPLIFY = TRUE, USE.NAMES = FALSE)
@@ -76,12 +49,12 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
   info <- initializeInfo(condition = x, input = x.in, condTypes, 
                          reshaped = reshaped, force.bool = forced)
   if (any(stdBool <- (condTypes == "stdBoolean"))){
-    qc <- qcond_bool(x[stdBool], sc)
+    qc <- qcond_bool(x[stdBool], cti$scores)
     out[stdBool] <- qcond2cond_bool(qc)
     info <- updateInfo(info, stdBool, getInfo_bool(qc, n.cases))
   }
   if (any(stdAtomic <- (condTypes == "stdAtomic"))){
-    qc <- qcond_asf(x[stdAtomic], sc, force.bool = force.bool)
+    qc <- qcond_asf(x[stdAtomic], cti$scores, force.bool = force.bool)
     out[stdAtomic] <- qcond2cond_asf(qc)
     infoUpdate <- if (!force.bool){
       getInfo_asf(qc, n.cases)
@@ -91,7 +64,7 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
     info <- updateInfo(info, stdAtomic, infoUpdate)
   }
   if (any(stdComplex <- (condTypes == "stdComplex"))){
-    qc <- qcond_csf(x[stdComplex], sc, force.bool = force.bool,
+    qc <- qcond_csf(x[stdComplex], cti$scores, force.bool = force.bool,
                     freqs = n.cases)
     out[stdComplex] <- qcond2cond_csf(qc)
     infoUpdate <- if (!force.bool){
@@ -103,12 +76,12 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
   }
   if (any(bool <- (condTypes == "boolean"))){
     out[bool] <- booleanCond(px[match(which(bool), px_ind)], 
-                             tt = tt, negateCase = negateCase)
+                             ct = ct, negateCase = negateCase)
     info <- updateInfo(info, bool, getInfo_bool(out[bool], n.cases))
   }
   if (any(atomic <- (condTypes == "atomic"))){
     out[atomic] <- atomicCond(px[match(which(atomic), px_ind)], 
-                              tt = tt, negateCase = negateCase)
+                              ct = ct, negateCase = negateCase)
     info <- updateInfo(info, atomic,
       getInfo_asf(structure(out[atomic], response = rhs(x[atomic])), 
                   n.cases))
@@ -117,11 +90,17 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
     i_x <- which(complx) 
     i_px <- match(i_x, px_ind)
     for (i in seq_along(i_x)){
-      out[[i_x[i]]] <- complexCond(px[[i_px[i]]], tt = tt, negateCase = negateCase)
+      out[[i_x[i]]] <- complexCond(px[[i_px[i]]], ct = ct, negateCase = negateCase)
     }
     info <- updateInfo(info, complx,
       getInfo_customCsf(out[i_x], lengths(out[i_x]), n.cases))
   }
+  
+  # temp: insert complexity for "std" cases
+  {
+    isStd <- condTypes %in% c("stdBoolean", "stdAtomic", "stdComplex")
+    info$complexity[isStd] <- getComplexity(info$input[isStd])
+  }  
 
   ok <- condTypes %in% c("stdBoolean", "stdAtomic", "stdComplex", "boolean", "atomic", "complex")
   out[!ok] <- rep(list(invalidCond()), sum(!ok))
@@ -131,8 +110,8 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
   }
   attr(out, "type") <- type
   attr(out, "n") <- n.cases
-  attr(out, "cases") <- attr(tt, "cases")
-  if (add.data) attr(out, "tt") <- tt
+  attr(out, "cases") <- attr(ct, "cases")
+  if (add.data) attr(out, "ct") <- ct
   rownames(info) <- NULL
   attr(out, "info") <- info
   class(out) <- "condList"
@@ -142,23 +121,23 @@ condition.default <- function(x, tt = full.tt(x), type, add.data = FALSE,
 # ------------------------------------------------------------------------------
 
 # ==== ...Cond functions: handling the 3 types of conds (boolean, atomic, complex) ====
-# take a quoted string x and a truthTable tt
+# take a quoted string x and a configTable ct
 # returns a cond object
 
 # cond, "boolean" case
-booleanCond <- function(px, tt, negateCase, addClass = TRUE){
+booleanCond <- function(px, ct, negateCase, addClass = TRUE){
   nms <- vapply(px, parsed2visible, character(1))
   if (negateCase) {
     px[] <- lapply(px, applyCaseNegation)
   }
-  datatype <- switch(attr(tt, "type"),
+  datatype <- switch(attr(ct, "type"),
                      cs = "integer",
                      mv = "integer",
                      fs = "numeric")
   out <- vector("list", length(px))
   for (i in seq_along(px)){
     # evaluate
-    out_i <- eval(px[[i]], envir = tt, enclos = logicalOperators)
+    out_i <- eval(px[[i]], envir = ct, enclos = logicalOperators)
     mode(out_i) <- datatype
     out_i <- as.data.frame(out_i)
     names(out_i) <- nms[[i]]
@@ -170,14 +149,14 @@ booleanCond <- function(px, tt, negateCase, addClass = TRUE){
 
 
 # cond, "atomic" case
-atomicCond <- function(px, tt, negateCase){
+atomicCond <- function(px, ct, negateCase){
   l <- length(px)
   bconds <- unlist(lapply(px, function(x){
       ind <- if (as.character(x[[1]]) != "=") 3:2 else 2:3
       as.list(x[ind])
       }), 
     recursive = FALSE)
-  bconds <- booleanCond(bconds, tt, negateCase, addClass = FALSE)
+  bconds <- booleanCond(bconds, ct, negateCase, addClass = FALSE)
   out <- C_relist_List(bconds, rep(2, l))
   for (i in seq_along(out)){
     out_i <- as.data.frame(out[[i]], optional = TRUE)
@@ -188,7 +167,7 @@ atomicCond <- function(px, tt, negateCase){
 }
 
 # cond, "complex" case
-complexCond <- function(pxi, tt, negateCase){
+complexCond <- function(pxi, ct, negateCase){
   strct <- .call2list(pxi)
   atConds <- rapply(strct, function(x) x, classes = c("call", "<-", "="), how = "unlist")
   cntr <- .counter()
@@ -196,7 +175,7 @@ complexCond <- function(pxi, tt, negateCase){
   strct <- rapply(strct, function(x) as.name(paste0("atomicCond..", cntr$increment())), 
                   classes = c("call", "<-", "="), how = "replace")
   restoredStruct <- .list2call(strct)
-  cc <- atomicCond(atConds, tt, negateCase = negateCase)
+  cc <- atomicCond(atConds, ct, negateCase = negateCase)
   names(cc) <- vapply(atConds, parsed2visible, character(1))
   attr(cc, "complStruct") <- restoredStruct
   class(cc) <- c("complexCond", "cond")
@@ -213,7 +192,7 @@ invalidCond <- function()
 # Function to translate lower case negation into R-syntax
 # (see Wickham, "Advanced R", section 14.7.)
 # takes and returns a language object
-# Names are rendered either as in vnms (positive value; the variable names in the truthTab) or 
+# Names are rendered either as in vnms (positive value; the variable names in the configTable) or 
 # as lowercase (negative value)
 applyCaseNegation <- function(x, negChar = "-"){
   if (is.atomic(x)){

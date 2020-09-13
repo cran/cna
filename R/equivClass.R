@@ -1,8 +1,8 @@
 
 equivClass <- function(conds, x){
   if (missing(x)) x <- conds
-  x <- full.tt(x)
-  qco <- qcond_bool(conds, tt.info(x)$scores)
+  x <- full.ct(x)
+  qco <- qcond_bool(conds, ctInfo(x)$scores)
   ec <- apply(qco, 2, C_concat, "|")
   out <- unname(split(conds, ec))
   out <- out[order(lengths(out), decreasing = TRUE)]

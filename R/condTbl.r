@@ -3,13 +3,14 @@
 msc <- function(x, details = x$details){
   stopifnot(inherits(x, "cna"))
   msc.list <- lapply(x$solution, "[[", "msc")
-  basicCols <- c("outcome", "condition", "consistency", "coverage", "complexity")
+  all.msc <- do.call(rbind, msc.list)
+  basicCols <- intersect(c("outcome", "condition", "consistency", "coverage", "complexity", "minimal"),
+                         names(all.msc))
   detailCols <- clarify_details(details, 
-                                measures = c("inus", "exhaustiveness", "faithfulness"),
+                                measures = c("exhaustiveness", "faithfulness"),
                                 available = x$details)
   if (all(m_is.null(msc.list)))
-    return(emptyCondTbl("stdAtomic", details = detailCols))
-  all.msc <- do.call(rbind, msc.list)
+    return(emptyCondTbl("stdAtomic", details = detailCols, msc = TRUE))
   all.msc$condition <- paste0(all.msc[["condition"]], "->", all.msc[["outcome"]])
   out <- data.frame(all.msc[c(basicCols, detailCols)],
                     row.names = NULL, stringsAsFactors = FALSE)
@@ -24,6 +25,7 @@ asf <- function(x, details = x$details, warn_details = TRUE){
   detailCols <- clarify_details(details, 
                                 measures = c("inus", "exhaustiveness", "faithfulness"),
                                 available = x$details, warn = warn_details)
+  detailCols <- union("inus", detailCols)
   if (all(vapply(asf.list, NROW, integer(1)) == 0L))
     return(emptyCondTbl("stdAtomic", details = detailCols))
   all.asf <- do.call(rbind, asf.list)
@@ -77,7 +79,7 @@ as.condTbl.condList <- function (x, ...){
   info <- attr(x, "info")
   stopifnot(is.list(x), vapply(x, inherits, logical(1), "cond"))
   outcome <- character(length(x))
-  out <- info[c("outcome", "condition", "consistency", "coverage", "freq")]
+  out <- info[c("outcome", "condition", "consistency", "coverage", "complexity", "freq")]
   ctypes <- info$condTypes
   if (any(bool <- ctypes %in% c("boolean", "stdBoolean")))
     out$outcome[bool] <- "(No outcome)"
@@ -91,7 +93,9 @@ as.condTbl.condList <- function (x, ...){
     class(out$condition) <- c("condString", "character")
   }
   if (!is.null(out$outcome)) class(out$outcome) <- c("outcomeString", "character")
-  out[colAlls(is.na(out))] <- NULL
+  additionalCols <- setdiff(names(out), c("outcome", "condition", "consistency", "coverage", "complexity"))
+  rmCols <- subset(additionalCols, colAlls(is.na(out[additionalCols])))
+  out[rmCols] <- NULL
   as.condTbl(out)
 }
 as.condTbl.data.frame <- function(x, condClass = "condString", ...){
@@ -103,12 +107,15 @@ as.condTbl.data.frame <- function(x, condClass = "condString", ...){
     class(x$outcome) <- c("outcomeString", "character")
   structure(x, class = c("condTbl", "data.frame"))
 }
-emptyCondTbl <- function(condClass = "condString", details = FALSE){
+emptyCondTbl <- function(condClass = "condString", details = FALSE, msc = FALSE){
   out <- data.frame(outcome = character(0),
                     condition = character(0),
                     consistency = numeric(0),
                     coverage = numeric(0),
                     complexity = numeric(0))
+  if (msc){
+    out$minimal <- logical(0)
+  }
   for (d in clarify_details(details)){
     out[[d]] <- if (d %in% c("inus", "redundant")) logical(0) else numeric(0)
   }
@@ -117,34 +124,34 @@ emptyCondTbl <- function(condClass = "condString", details = FALSE){
 
 # print method for class condTbl
 # Code taken from print.data.frame, except for leftAlignedColnames 
-print.condTbl <- function(x, digits = 3, quote = FALSE, 
+print.condTbl <- function(x, n = 20, digits = 3, quote = FALSE, 
   row.names = TRUE, ...){
   leftAlignedColnames <- c("outcome", "condition", "solution")
-  n <- length(row.names(x))
-  if (length(x) == 0L) {
-    cat(sprintf(ngettext(n, "data frame with 0 columns and %d row", 
-      "data frame with 0 columns and %d rows"), n), "\n", 
-      sep = "")
-  }
-  else if (n == 0L) {
-    print.default(names(x), quote = FALSE)
-    cat(gettext("<0 rows> (or 0-length row.names)\n"))
-  }
-  else {
-    m <- as.matrix(format.data.frame(x, digits = digits, 
+  n.total <- nrow(x)
+  n.print <- min(n, n.total)
+  if (length(x) == 0L || n.print == 0L) {
+    print.data.frame(x)
+  } else {
+    short <- n.print < n.total
+    if (short) x <- x[seq_len(n.print), , drop = FALSE]
+    m <- as.matrix(format.data.frame(x, digits = digits, quote = quote, 
       na.encode = FALSE))
     if (!isTRUE(row.names)) 
       dimnames(m)[[1L]] <- if (identical(row.names, FALSE)) 
-        rep.int("", n)
+        rep.int("", n.print)
       else row.names
 
     for (nm in leftAlignedColnames)
       m <- leftAlignColname(m, nm)
     
     print(m, ..., quote = quote, right = TRUE)
+    if (short) 
+      cat(" ... (total no. of formulas: ", n.total, ")\n", 
+        sep = "")
   }
   invisible(x)
 }
+
 leftAlignColname <- function(m, nm){
   if (!is.na(pos <- match(nm, colnames(m)))){
     w <- max(nchar(m[, pos]), na.rm = TRUE)
@@ -161,6 +168,6 @@ condTbl <- function(...){
 }
 
 # condition method for class condTbl
-condition.condTbl <- function(x, tt = full.tt(x[["condition"]]), ...)
-  condition.default(x[["condition"]], tt, ...)
+condition.condTbl <- function(x, ct = full.ct(x[["condition"]]), ...)
+  condition.default(x[["condition"]], ct, ...)
 

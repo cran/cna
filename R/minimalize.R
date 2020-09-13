@@ -1,12 +1,12 @@
 
 # build dnf 
-#  Note that tt is supposed to be a "full" tt
-make.dnf <- function(expr, tt, disj = "+"){
+#  Note that ct is supposed to be a "full" ct
+make.dnf <- function(expr, ct, disj = "+"){
   if (expr %in% c("0", "1")) return(expr)
-  selC <- selectCases(expr, tt)
+  selC <- selectCases(expr, ct)
   if (nrow(selC) == 0L) return("0")
-  if (nrow(selC) == nrow(tt)) return("1")
-  sc <- tt.info(selC)$scores
+  if (nrow(selC) == nrow(ct)) return("1")
+  sc <- ctInfo(selC)$scores
   terms <- split(rep(colnames(sc), each = nrow(sc))[sc == 1],
                  row(sc)[sc == 1])
   conj <- C_mconcat(terms, "*")
@@ -14,11 +14,11 @@ make.dnf <- function(expr, tt, disj = "+"){
   C_concat(conj, disj)
 }
 # Minimize a single condition
-#  Note that x is supposed to be a "full" tt
+#  Note that x is supposed to be a "full" ct
 .minim1 <- function(cond, x, maxstep = c(4, 4, 12)){
   cond <- make.dnf(cond, x)
   if (cond %in% c("0", "1")) return(cond)
-  y <- as.vector(qcond_bool(cond, tt.info(truthTab(x))$scores))
+  y <- as.vector(qcond_bool(cond, ctInfo(configTable(x))$scores))
   if (isConstant(y)) return(as.character(y[[1]]))
   x$..RESP.. <- y
   suppressMessages({
@@ -35,15 +35,16 @@ make.dnf <- function(expr, tt, disj = "+"){
 minimalize <- function(cond, x = NULL, maxstep = c(4, 4, 12)){
   cond <- noblanks(cond)
   if (is.null(x)){
-    x <- full.tt(cond)
+    x <- full.ct(cond)
   } else {
-    x <- full.tt(x)
+    x <- full.ct(x)
   }
-  tti <- tt.info(x)
+  cti <- ctInfo(x)
   out <- vector("list", length(cond))
   names(out) <- cond
+  if (length(cond) == 0) return(out)
   # check for disjunctive normal form
-  dnf <- checkValues(cond, c("+", "*"), colnames(tti$scores))
+  dnf <- checkValues(cond, c("+", "*"), colnames(cti$scores))
   cond1 <- cond
   cond1[!dnf] <- vapply(cond[!dnf], make.dnf, x,
                         FUN.VALUE = character(1), USE.NAMES = FALSE)

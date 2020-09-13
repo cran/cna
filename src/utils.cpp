@@ -96,22 +96,22 @@ bool intList_equal(const intList x, const intList y){
   return(found);
 }
 
-// // [[Rcpp::export]]
-// LogicalVector C_hasSubsetIn(const intList y, const intList x){
-//   int ylen = y.size(), xlen = x.size();
-//   LogicalVector out(ylen);
-//   for (int iy=0; iy < ylen; iy++) {
-//     bool foundSubset=false;
-//     for (int ix=0; ix < xlen; ix++) {
-//       if (C_isSubsetOf(x[ix], y[iy])){
-//         foundSubset=true;
-//         break;
-//       }
-//     }    
-//     out[iy]=foundSubset;
-//   }  
-//   return out;
-// }
+// [[Rcpp::export]]
+LogicalVector C_hasSubsetIn(const intList y, const intList x){
+  int ylen = y.size(), xlen = x.size();
+  LogicalVector out(ylen);
+  for (int iy=0; iy < ylen; iy++) {
+    bool foundSubset=false;
+    for (int ix=0; ix < xlen; ix++) {
+      if (C_isSubsetOf(x[ix], y[iy])){
+        foundSubset=true;
+        break;
+      }
+    }
+    out[iy]=foundSubset;
+  }
+  return out;
+}
 
 // [[Rcpp::export]]
 LogicalVector C_hasSupersetIn(const intList x, const intList y, const bool ignore_equals){

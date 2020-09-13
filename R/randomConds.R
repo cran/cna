@@ -2,8 +2,8 @@
 # randAsf: Determine a random asf
 randomAsf <- function(x, outcome = NULL, compl = NULL, how = c("inus", "minimal")){
   how <- match.arg(how)
-  x <- truthTab(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
-  if (how == "inus") x <- full.tt(x)
+  x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+  if (how == "inus") x <- full.ct(x)
   stopifnot(length(x) >= 3)
   if (!is.null(outcome)) stopifnot(length(outcome) == 1, outcome %in% names(x))
   type <- attr(x, "type")
@@ -28,13 +28,13 @@ randomAsf <- function(x, outcome = NULL, compl = NULL, how = c("inus", "minimal"
   
   # Formal preparations
   p <- ncol(x)
-  tti <- tt.info(x)
+  cti <- ctInfo(x)
   if (type %in% c("cs", "fs")){
-    vals <- mapply(c, tti$resp_nms, tolower(tti$resp_nms), 
+    vals <- mapply(c, cti$resp_nms, tolower(cti$resp_nms), 
                    USE.NAMES = TRUE, SIMPLIFY = FALSE)
   } else {
-    nvals <- lengths(tti$uniqueValues)
-    vals <- split(tti$resp_nms, rep(seq_len(p), nvals))
+    nvals <- lengths(cti$uniqueValues)
+    vals <- split(cti$resp_nms, rep(seq_len(p), nvals))
     names(vals) <- names(nvals)
   }
   
@@ -69,7 +69,7 @@ msamp <- function(i, v) vapply(sample(v, i), sample, 1, FUN.VALUE = character(1)
 # === randomCsf === 
 # randCsf: Determine a random csf
 randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL){
-  x <- full.tt(x)
+  x <- full.ct(x)
   stopifnot(length(x) >= 4)
   type <- attr(x, "type")
 

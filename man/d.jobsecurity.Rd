@@ -22,8 +22,8 @@ The data frame contains 19 rows (cases) and the following 7 columns featuring fu
 [ , 3] \tab \bold{L}   \tab labour movement strength \tab ("1" high, "0" not high)\cr
 [ , 4] \tab \bold{R}   \tab Catholicism              \tab ("1" high, "0" not high)\cr
 [ , 5] \tab \bold{P}   \tab religious party strength \tab ("1" high, "0" not high)\cr
-[ , 6] \tab \bold{V}   \tab institutional veto points \tab ("1" many, "0" not many)\cr
-[ , 7] \tab \bold{JSR} \tab job security regulations \tab ("1" high, "0" not high)
+[ , 6] \tab \bold{V}   \tab institutional veto points \tab   ("1" many, "0" not many)\cr
+[ , 7] \tab \bold{JSR} \tab job security regulations \tab  ("1" high, "0" not high)
 }
 }
 

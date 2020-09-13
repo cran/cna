@@ -5,13 +5,15 @@
 # Returns a logical vector
 cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbose = FALSE){
   stopifnot(is.character(x))
+  if (length(x) == 0) return(logical(0))
   x <- noblanks(x)
+  cycle.type <- match.arg(cycle.type)
 
   # Check input conditions [identical code in is.submodel()]
   px <- lapply(x, tryparse)
   ok <- !vapply(px, is.null, logical(1)) 
-  tt_type <- if (any(grepl("=", x, fixed = T))) "mv" else "cs"
-  if (tt_type == "cs"){
+  ct_type <- if (any(grepl("=", x, fixed = T))) "mv" else "cs"
+  if (ct_type == "cs"){
     vals <- unique.default(unlist(lapply(px, all.vars)))
   } else {
     vals <- rapply(px, .call2list, how = "unlist",
@@ -20,38 +22,35 @@ cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbo
     vals <- unique.default(vals[!vapply(vals, is.symbol, FUN.VALUE = TRUE)])
     vals <- sub(" == ", "=", vapply(vals, deparse, character(1)))
   }
-  cond_type <- .qcondType(x, values = vals, tt_type = tt_type, stdComplex.multiple.only = FALSE)
+  cond_type <- .qcondType(x, values = vals, ct_type = ct_type, stdComplex.multiple.only = FALSE)
   ok <- ok & cond_type %in% c("stdAtomic", "stdComplex")
   if (any(!ok)) 
     stop("Invalid input to cyclic:\n", paste0("  ", x[!ok], collapse = "\n"),
          call. = FALSE)
 
   # check cyclicity
-  out <- vapply(x, .cyclic1, cycle.type = cycle.type, verbose = verbose, FUN.VALUE = logical(1),
-                USE.NAMES = FALSE)
+  fStr <- factorStruct(x, cycle.type = cycle.type, ct_type = ct_type)
+  fStrGr <- factorStructGroups(fStr)
+  # .cyclic1() executed only once per fStr
+  ii <- which(!duplicated(fStrGr))
+  outCycl <- logical(length(ii))
+  cntr <- 0L
+  for (i in ii){
+    if (verbose) cat("---", x[i], "---\n")
+    outCycl[[cntr <- cntr+1L]] <- .cyclic1(fStr[[i]], verbose = verbose)
+  }
+  # Expand to length(x)
+  out <- outCycl[fStrGr]
   if (use.names) names(out) <- x
   out
 }
-# Process one csf
-.cyclic1 <- function(x, cycle.type = c("factor", "value"), verbose = FALSE){
-  cycle.type <- match.arg(cycle.type)
-  asf <- extract_asf(x)[[1]]
-  r <- rhs(asf)
-  l <- strsplit(lhs(asf), "\\+|\\*")
-  
-  if (cycle.type == "factor"){
-    hasEq <- grepl("=", c(r, l), fixed = TRUE)
-    if (length(hasEq)==0 | any(hasEq != hasEq[1]))
-      stop("Incorrect input condition: ", x, call. = FALSE)
-    if (hasEq[1]){  # mv case
-      r <- sub("=.+", "", r)
-      l[] <- lapply(l, FUN = sub, pattern = "=.+", replacement = "")
-    } else {
-      r <- toupper(r)
-      l[] <- lapply(l, toupper)
-    }
-    l <- lapply(l, unique.default)
-  }
+
+
+# .cyclic1
+# Processes one csf, coded as factorStruct (see below)
+.cyclic1 <- function(fstr, verbose = FALSE){
+  r <- names(fstr)
+  l <- fstr
   ul <- unlist(l, use.names = FALSE)
   
   # "causal successors" of all factors
@@ -72,8 +71,6 @@ cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbo
   to_check <- intersect(r, ul)  
   found_cycle <- FALSE
   
-  if (verbose) cat("---", x, "---\n")
-
   # Expand "causal paths"
   while (length(to_check) && !found_cycle){
 
@@ -109,6 +106,43 @@ cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbo
   if (verbose) cat("\n")
   found_cycle
 }
+
+
+# extract factor and outcome configurations from csfs
+factorStruct <- function(x, cycle.type = "factor", ct_type = "cs"){
+  if (cycle.type == "factor" && ct_type == "cs")
+    x[] <- toupper(x)
+  if (cycle.type == "factor" && ct_type == "mv")
+    x[] <- gsub("=[0-9]+", "", x)
+  # extract asf
+  asfs0 <- extract_asf(x)
+  # Remove duplicate factor (values)
+  asfs1 <- happly(asfs0, function(x) strsplit(lhs(x), "\\+|\\*"))
+  asfs1[] <- rapply(asfs1, unique.default, how = "replace", classes = "character")
+  # Sort factor (values) within asf
+  ll <- hlengths(asfs1)
+  ul_factors <- unlist(asfs1, use.names = FALSE, recursive = TRUE)
+  asfs1 <- hrelist(ul_factors[order(rep(seq_along(ll[[2]]), ll[[2]]), ul_factors)], ll)
+  # Set outcomes as names of asf
+  rr <- happly(asfs0, rhs)
+  relst <- relist1(setNames(unlist(asfs1, recursive = FALSE), unlist(rr)),
+                   ll[[1]])
+  # Sort asf within csf
+  ul_asfs <- unlist(relst, use.names = TRUE, recursive = FALSE)
+  ord <- order(rep(seq_along(ll[[1]]), ll[[1]]), names(ul_asfs))
+  C_relist_List(ul_asfs[ord], ll[[1]])
+}
+
+
+# categorize factorStructs into equivalent groups
+# csfs within these groups will be identical wrt cyclicity
+factorStructGroups <- function(x){
+  ux <- unlist(x, recursive = FALSE)
+  uxchar <- paste(C_mconcat(ux, ","), names(ux), sep = ">")
+  xchar <- C_mconcat(relist1(uxchar, lengths(x)), ";")
+  as.integer(factor(xchar, levels = unique(xchar)))
+}
+
 
 # Aux fun
 rep_names <- function(x, nms){

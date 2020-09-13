@@ -466,6 +466,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_hasSubsetIn
+LogicalVector C_hasSubsetIn(const intList y, const intList x);
+RcppExport SEXP _cna_C_hasSubsetIn(SEXP ySEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const intList >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const intList >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_hasSubsetIn(y, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_hasSupersetIn
 LogicalVector C_hasSupersetIn(const intList x, const intList y, const bool ignore_equals);
 RcppExport SEXP _cna_C_hasSupersetIn(SEXP xSEXP, SEXP ySEXP, SEXP ignore_equalsSEXP) {

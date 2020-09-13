@@ -149,6 +149,10 @@ intList_equal <- function(x, y) {
     .Call(`_cna_intList_equal`, x, y)
 }
 
+C_hasSubsetIn <- function(y, x) {
+    .Call(`_cna_C_hasSubsetIn`, y, x)
+}
+
 C_hasSupersetIn <- function(x, y, ignore_equals) {
     .Call(`_cna_C_hasSupersetIn`, x, y, ignore_equals)
 }

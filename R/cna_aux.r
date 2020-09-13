@@ -1,47 +1,47 @@
 
 # fs2cs: 
 # ======
-# transforms a fs-tt into a sc-tt
-# Note: fs2cs is designed to work with a data.frame, not a rtuthTab!!
-fs2cs <- function(tt, cutoff = 0.5, border = c("down", "up", "drop")){
+# transforms a fs-ct into a sc-ct
+# Note: fs2cs is designed to work with a data.frame, not a configTable!
+fs2cs <- function(x, cutoff = 0.5, border = c("down", "up", "drop")){
   if (cutoff <= 0 | cutoff >= 1)
     stop("cutoff must be >0 and <1")
   border <- match.arg(border)
-  tt.r <- tt
-  tt.r[] <- round(tt.r + (0.5 - cutoff))
+  x.r <- x
+  x.r[] <- round(x.r + (0.5 - cutoff))
   if (border == "up") 
-    tt.r[tt%%1 == cutoff] <- tt.r[tt%%1 == cutoff] + 1
+    x.r[x%%1 == cutoff] <- x.r[x%%1 == cutoff] + 1
   if (border == "drop") 
-    tt.r <- tt.r[!rowAnys(tt%%1 == cutoff), , drop = FALSE]
-  tt.r
+    x.r <- x.r[!rowAnys(x%%1 == cutoff), , drop = FALSE]
+  x.r
 }
 
-# tt.info: 
+# ctInfo: 
 # ========
-# Auxiliary function that extracts useful informations from a truthTab
-tt.info <- function(tt, cutoff = 0.5, border = c("down", "up", "drop")){
-  stopifnot(inherits(tt, "truthTab"))
-  type <- attr(tt, "type")
+# Auxiliary function that extracts useful informations from a configTable
+ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
+  stopifnot(inherits(ct, "configTable"))
+  type <- attr(ct, "type")
   border <- match.arg(border)
   
   if (type == "cs") {
-    uniqueValues <- lapply(tt, function(x) 1:0)
-    resp_nms <- names(tt)
-    valueId <- 2 - as.matrix(tt)
+    uniqueValues <- lapply(ct, function(x) 1:0)
+    resp_nms <- names(ct)
+    valueId <- 2 - as.matrix(ct)
   } else if (type == "mv") {
-    uniqueValues <- lapply(tt, function(x) sort(unique.default(x)))
-    resp_nms <- mapply(paste, names(tt), uniqueValues, MoreArgs = list(sep = "="), 
+    uniqueValues <- lapply(ct, function(x) sort(unique.default(x)))
+    resp_nms <- mapply(paste, names(ct), uniqueValues, MoreArgs = list(sep = "="), 
                        SIMPLIFY = FALSE)
     resp_nms <- unlist(resp_nms, use.names = FALSE)
-    valueId <- mapply(match, tt, uniqueValues, SIMPLIFY = TRUE, USE.NAMES = TRUE)
+    valueId <- mapply(match, ct, uniqueValues, SIMPLIFY = TRUE, USE.NAMES = TRUE)
     if (!is.matrix(valueId))
-      valueId <- matrix(valueId, nrow = nrow(tt), 
+      valueId <- matrix(valueId, nrow = nrow(ct), 
                         dimnames = list(NULL, names(uniqueValues)))
   } else if (type == "fs") {
-    tt.r <- fs2cs(as.data.frame(tt), cutoff = cutoff, border = border)
-    uniqueValues <- lapply(tt.r, function(x) 1:0)
-    resp_nms <- names(tt)
-    valueId <- 2 - as.matrix(tt.r)
+    ct.r <- fs2cs(as.data.frame(ct), cutoff = cutoff, border = border)
+    uniqueValues <- lapply(ct.r, function(x) 1:0)
+    resp_nms <- names(ct)
+    valueId <- 2 - as.matrix(ct.r)
   }
   stopifnot(resp_nms == toupper(resp_nms))
   nVal <- lengths(uniqueValues)
@@ -53,51 +53,61 @@ tt.info <- function(tt, cutoff = 0.5, border = c("down", "up", "drop")){
   mode(valueId) <- "integer"
   config <- split(seq_len(sum(nVal)), 
                   rep(seq_along(nVal), nVal))
-  names(config) <- names(tt)
-  if (prod(dim(tt)) == 0){
+  names(config) <- names(ct)
+  if (prod(dim(ct)) == 0){
     scores <- matrix(numeric(0), 0, 0)
   } else {
-    scores <- do.call(cbind, lapply(resp_nms, factMat(type), tt = tt))
+    scores <- do.call(cbind, lapply(resp_nms, factMat(type), ct = ct))
   }
-  freq <- attr(tt, "n")
+  freq <- attr(ct, "n")
   structure(mget(c("type", "resp_nms", "nVal", "uniqueValues", "config", 
                    "valueId", "scores", "freq")),
-            class = "tti")
+            class = c("cti", "tti"))
 }
 # function to build 'scores' matrix
 factMat <- function(type){
   switch(type, 
-    cs =  function(x, tt){
-      structure(cbind(tt[[x]], 1 - tt[[x]]), 
+    cs =  function(x, ct = tt, tt){
+      structure(cbind(ct[[x]], 1 - ct[[x]]), 
                 .Dimnames = list(NULL, c(x, tolower(x))))},
-    mv = function(x, tt){
-      v <- eval(parse(text = sub("=", "==", x, fixed = TRUE), keep.source = FALSE), tt)
+    mv = function(x, ct = tt, tt){
+      v <- eval(parse(text = sub("=", "==", x, fixed = TRUE), keep.source = FALSE), ct)
       matrix(as.integer(v), dimnames = list(NULL, x))},
-    fs = factMat <- function(x, tt){
-      structure(cbind(tt[[x]], 1 - tt[[x]]), 
+    fs = factMat <- function(x, ct = tt, tt){
+      structure(cbind(ct[[x]], 1 - ct[[x]]), 
                 .Dimnames = list(NULL, c(x, tolower(x))))}
   )
 }
   
+# subset method for class "cti"
+subset.cti <- function(x, i, ...){
+  x$valueId <- x$valueId[i, , drop = FALSE]
+  x$scores <- x$scores[i, , drop = FALSE]
+  x$freq <- x$freq[i]
+  x
+}
+
+# old function name (for compatibility of material outside the package)
+tt.info <- ctInfo
 
 
 # function check.ordering
 # =======================
-check.ordering <- function(ordering, tt){
+check.ordering <- function(ordering, ct){
   if (is.null(ordering)) return(NULL)
   if (!is.list(ordering))
     stop("ordering must be NULL or a list.")
   # set all names to uppercase
   ordering <- happly(ordering, toupper)
   ord.vars <- unlist(ordering, use.names = FALSE)
-  if(!all(ord.vars %in% colnames(tt))){
+  if(!all(ord.vars %in% colnames(ct))){
     stop("Factor listed in ordering does not exist: ",
-         setdiff(ord.vars, colnames(tt)))
+         setdiff(ord.vars, colnames(ct)))
   }
   if (anyDuplicated(unlist(ordering)))
     stop("At least one factors appears twice in the ordering.")
-  if (!all(colnames(tt) %in% ord.vars)){
-    ordering <- c(list(setdiff(colnames(tt), ord.vars)), ordering)
+  if (!all(colnames(ct) %in% ord.vars)){
+    ordering <- c(list(setdiff(colnames(ct), ord.vars)), ordering)
   }
   ordering
 }
@@ -115,7 +125,7 @@ potential.effects <- function (x, zname, ordering = NULL, strict = FALSE){
     poteff <- unlist(ordering[seq_len(ordLevelZ - strict)], use.names = FALSE)
     out <- poteff[match(poteff0, poteff, 0)]  # same order as columns in x
   }
-  if (attr(x, "type") == "mv"){ # Case mv with expanded truthTab... [nonstandard!!]
+  if (attr(x, "type") == "mv"){ # Case mv with expanded configTable... [nonstandard!!]
     vname <- sub("(.+)=.+", "\\1", zname)
     out <- setdiff(out, vname)
   }

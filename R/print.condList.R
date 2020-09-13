@@ -19,7 +19,7 @@ print.condList <- function (x, ...){
   out <- NextMethod()
   attributes(out) <- c(
     attributes(out),
-    attributes(x)[c("class", "type", "n", "cases", "tt")]
+    attributes(x)[c("class", "type", "n", "cases", "ct")]
   )
   i <- eval.parent(sys.call()[[3]])
   if (is.character(i)) i <- match(i, names(x), 0L)
@@ -31,7 +31,7 @@ print.condList <- function (x, ...){
   if (identical(out, "Invalid condition")) return(out)
   attributes(out) <- c(
     attributes(out),
-    attributes(x)[c("type", "n", "cases", "tt")])
+    attributes(x)[c("type", "n", "cases", "ct")])
   i <- eval.parent(sys.call()[[3]])
   if (is.character(i)) i <- match(i, names(x), 0L)
   attr(out, "info") <- attr(x, "info")[i, ]
@@ -42,7 +42,7 @@ print.condList <- function (x, ...){
   if (is.null(out) || identical(out, "Invalid condition")) return(out)
   attributes(out) <- c(
     attributes(out),
-    attributes(x)[c("type", "n", "cases", "tt")])
+    attributes(x)[c("type", "n", "cases", "ct")])
   i <- sys.call()[[3]]
   i <- match(as.character(i), names(x), 0L)
   attr(out, "info") <- attr(x, "info")[i, ]

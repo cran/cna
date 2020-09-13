@@ -22,6 +22,7 @@ extern SEXP _cna_C_disj_contained(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_duplicatedMat(SEXP);
 extern SEXP _cna_C_find_asf(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _cna_C_find_first_false(SEXP);
+extern SEXP _cna_C_hasSubsetIn(SEXP, SEXP);
 extern SEXP _cna_C_hasSubsetInM(SEXP, SEXP);
 extern SEXP _cna_C_hasSupersetIn(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_increment(SEXP, SEXP, SEXP, SEXP);
@@ -64,6 +65,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_cna_C_duplicatedMat",       (DL_FUNC) &_cna_C_duplicatedMat,       1},
     {"_cna_C_find_asf",            (DL_FUNC) &_cna_C_find_asf,            7},
     {"_cna_C_find_first_false",    (DL_FUNC) &_cna_C_find_first_false,    1},
+    {"_cna_C_hasSubsetIn",         (DL_FUNC) &_cna_C_hasSubsetIn,         2},
     {"_cna_C_hasSubsetInM",        (DL_FUNC) &_cna_C_hasSubsetInM,        2},
     {"_cna_C_hasSupersetIn",       (DL_FUNC) &_cna_C_hasSupersetIn,       3},
     {"_cna_C_increment",           (DL_FUNC) &_cna_C_increment,           4},

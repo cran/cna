@@ -5,22 +5,22 @@ exhaustive <- function(cond, x, ...){
 }
 
 # ==== exhaust1() ====
-# exhaust1: tests if a cond is exhaustive for a tt
+# exhaust1: tests if a cond is exhaustive for a ct
 
 # Generic function
 # Switch order of first 2 args to provide dispatching on x
 exhaust1 <- function(x, cond, ...) UseMethod("exhaust1")
 
-# ==== Method for class 'tti' ====
+# ==== Method for class 'cti' ====
 #   cond      character vector with the cond
-#   tt        truthTab
-exhaust1.tti <- function(x, cond, ...){
-  tti.full <- full.tt(x)
+#   ct        configTable
+exhaust1.cti <- function(x, cond, ...){
+  cti.full <- full.ct(x)
   IDdata <- rowID(x)
-  IDfull <- rowID(tti.full)
+  IDfull <- rowID(cti.full)
   stopifnot(IDdata %in% IDfull, #anyDuplicated(IDdata) == 0L, 
             anyDuplicated(IDfull) == 0L)
-  complementary.sc <- tti.full$scores[is.na(match(IDfull, IDdata)), , drop = FALSE]
+  complementary.sc <- cti.full$scores[is.na(match(IDfull, IDdata)), , drop = FALSE]
   qcnd <- qcond_csf(cond, complementary.sc, flat = TRUE)
 
   ll <- attr(qcnd, "csflengths")
@@ -29,21 +29,21 @@ exhaust1.tti <- function(x, cond, ...){
   setNames(colAlls(eq %*% outer(r, seq_along(ll), "==") > 0), cond)
 }
 
-# ==== Method for class 'truthTab' ====
+# ==== Method for class 'configTable' ====
 # Function suited for interactive use
-exhaust1.truthTab <- function(x, cond, ...){
-  tti <- tt.info(x)
-  exhaust1.tti(tti, cond, ...)
+exhaust1.configTable <- function(x, cond, ...){
+  cti <- ctInfo(x)
+  exhaust1.cti(cti, cond, ...)
 }
 
 # ==== Default Method (for matrix or data.frame) ====
 # builds 
-#   x       truthTab
-# value:    truthTab, mv if original is mv, cs else
+#   x       configTable
+# value:    configTable, mv if original is mv, cs else
 exhaust1.default  <- function(x, cond, ...){
   if (is.matrix(x) || is.data.frame(x)){
-    x <- truthTab(x)
-    exhaust1.truthTab(x, cond, ...)
+    x <- configTable(x)
+    exhaust1.configTable(x, cond, ...)
   } else {
     stop("Invalid specification of arguments")
   }

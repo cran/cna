@@ -4,10 +4,10 @@
 
 \alias{d.educate}
 
-\title{Artifical data on education levels and left-party strength}
+\title{Artificial data on education levels and left-party strength}
 
 \description{
-This artifical dataset of macrosociological factors on high levels of education is from Baumgartner (2009).
+This artificial dataset of macro-sociological factors on high levels of education is from Baumgartner (2009).
 }
 
 \usage{d.educate}

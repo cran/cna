@@ -3,6 +3,7 @@
 #   x   character Vector with 1-sided formulas. No blanks allowed!
 stdCond <- function(x){
   l <- strsplit(noblanks(x), "+", fixed = TRUE)
+  if (length(l) == 0L) return(character(0))
   l <- lapply(l, unique.default)
   u <- unlist(l, use.names = FALSE, recursive = FALSE)
   out <- 
