@@ -1,9 +1,9 @@
-c1ad2daab07e509dc3606a28ce2c0889 *DESCRIPTION
+5e160650e0634f44cef5fcf0f7ae5864 *DESCRIPTION
 6e765e0528521e5be55e1ffc1612ae0c *NAMESPACE
 2cf56321d9bea67a69f9296edfc7b646 *R/RcppExports.R
 f4a3e9d06c4ff6d032789dda48695363 *R/allCombs_makefuzzy.r
 35404b9867bd535b82954dd0dc5a14a0 *R/cna-deprecated.R
-33e9dbbbac49a0ae9507048635551000 *R/cna.r
+824195ccad258c537c7b5c9a1bb39dfe *R/cna.r
 e11f08712ed21e70ba917c773407ea5b *R/cna_accel.r
 6d9bb9769ba185a5a7d47467c039ea68 *R/cna_aux.r
 c26c1220c8d2cd720a2388b998409dbf *R/coherence.r
@@ -15,7 +15,7 @@ dc6a7277b24c02a1b75220e1412f0e7f *R/configTable.R
 8f1b4db162a68b64a357f37d362cf620 *R/csf.R
 261bb3ee91cdd5a01996b9a36bf675d4 *R/ct2df.r
 2068796a80823595f8f13423dbed0d17 *R/cyclic.R
-f6e6f44904d3877d18cdaa0121cc91c1 *R/details.R
+5ad3f1709a50e068aef45922fb8d6b08 *R/details.R
 ca8e4d10541782488f9310e0696b2006 *R/equivClass.R
 11617ce3ca4c04c97dfe0be2379e52ee *R/exfaith.R
 2c902a10b3e81fa0f4f90331ffd54888 *R/exhaustive.R
@@ -52,13 +52,13 @@ dfa181b6390a1df889aae8a33f9d301c *data/d.pban.tab.gz
 8c018ee8a696fd2ce0b20b1576bf07ed *data/d.performance.tab.gz
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
-3d5f8f6e7bce556d008c52d3b01c3989 *inst/NEWS
-221cccc1ec49e7ac88c113f360d53ab9 *inst/doc/cna_vignette.R
-458a0b7287ee5ffbdd77f84657a0cc26 *inst/doc/cna_vignette.Rnw
-d3600afdc56e34815363c82639434b7d *inst/doc/cna_vignette.pdf
+349cc672b7058b9ca5fc9013fcb99f2f *inst/NEWS
+1f74dff5c4987f7938aa8bbb80198e27 *inst/doc/cna_vignette.R
+0cab4abc1d0c749f221535121912aa88 *inst/doc/cna_vignette.Rnw
+1434494240b3f7359f7ccd82fbe859ab *inst/doc/cna_vignette.pdf
 2fac996e4cf0b233343588cd953dd720 *man/allCombs.Rd
 a2062e1e6f0398bf180013b0e844cea7 *man/cna-deprecated.Rd
-58bd0ae3dfe8fb9758f0c7888bb9cc7b *man/cna-package.Rd
+4e7e161d76539c2987c8f6c17fc6e654 *man/cna-package.Rd
 e4d93c5e36df35b09dcffee325898b03 *man/cna.Rd
 5f5325f9f1a5f3f2f430832f0f6a07e8 *man/coherence.Rd
 5cdeed89da9a8551d7ea40c0be35fbd8 *man/condTbl.Rd
@@ -101,4 +101,4 @@ d3f573231043368b9a50cc4d4e1ac111 *src/headers.h
 8ee118edd348ea3f5481ca2a1e3f943d *src/typedefs.h
 273359272d284700ce806d5209badb5f *src/uniqueCombs.cpp
 6a0b18a0f24db8cbc8b1de5fcb7fa72d *src/utils.cpp
-458a0b7287ee5ffbdd77f84657a0cc26 *vignettes/cna_vignette.Rnw
+0cab4abc1d0c749f221535121912aa88 *vignettes/cna_vignette.Rnw

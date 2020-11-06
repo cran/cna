@@ -36,8 +36,10 @@ details <- function(cond, x,
     available = what, cycle.type, in.csf = FALSE){
   what <- clarify_details(what, available = available)
   qc_ct <- qcond_csf(cond, x$scores, flat = TRUE)
-  x_full <- full.ct(x)
-  qc_full <- qcond_csf(cond, x_full$scores, flat = TRUE)
+  if (any(c("redundant", "inus", "exhaustiveness", "faithfulness") %in% what)){
+    x_full <- full.ct(x)
+    qc_full <- qcond_csf(cond, x_full$scores, flat = TRUE)
+  }
   out <- data.frame(matrix(numeric(0), length(cond)), row.names = cond)
   if ("redundant" %in% what || (in.csf && "inus" %in% what)){
     red <- m_any(.redund.cti(x_full, cond, simplify = FALSE, full = TRUE, 

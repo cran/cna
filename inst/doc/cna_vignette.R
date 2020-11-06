@@ -101,7 +101,7 @@ cna(d.women)
 ###################################################
 dat.aut.1 <- d.autonomy[15:30, c("AU","EM","SP","CO")]
 ana.aut.1 <- fscna(dat.aut.1, ordering = list(c("EM","SP","CO"), "AU"), 
-  strict = TRUE, con = .91, cov = .91)
+  strict = TRUE, con = .9, cov = .9)
 printCols <- c("condition", "consistency", "coverage")
 csf(ana.aut.1)[printCols]
 
@@ -110,7 +110,7 @@ csf(ana.aut.1)[printCols]
 ### code chunk number 14: odering2
 ###################################################
 ana.aut.2 <- fscna(dat.aut.1, ordering = list(c("EM","SP","CO"), "AU"), 
-  strict = FALSE, con = .91, cov = .91)
+  strict = FALSE, con = .9, cov = .9)
 csf(ana.aut.2)[printCols]
 
 
@@ -178,6 +178,7 @@ csf(ana.aut.3)[printCols]
 ## vol2 <- cna(d.volatile, ordering = list("VO2"))
 ## msc(vol2)
 ## asf(vol2)
+## print(asf(vol2), Inf)
 
 
 ###################################################
@@ -372,19 +373,21 @@ group.by.outcome(fscond(asf(ana.aut.3)$condition, dat.aut.2))$AU
 ###################################################
 ### code chunk number 49: details (eval = FALSE)
 ###################################################
-## # Draw the ground truth.
+## # Draw a ground truth.
 ## fullData <- mvct(allCombs(c(4,4,4,4,4)))
 ## groundTruth <- randomCsf(fullData, n.asf = 2, compl = 2)
 ## # Generate ideal data for groundTruth.
-## x <- ct2df(selectCases(groundTruth, fullData))
+## idealData <- ct2df(selectCases(groundTruth, fullData))
 ## # Introduce 20% fragmentation.
-## x <- x[-sample(1:nrow(x), nrow(x)*0.2), ] 
-## # Introduce 10% random noise.
-## x <- rbind(ct2df(fullData[sample(1:nrow(fullData), nrow(x)*0.1), ]), x)  
+## fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
+## # Introduce 10% random noise (cases incompatible with ground truth).
+## incompCases <- dplyr::setdiff(ct2df(fullData), idealData)
+## x <- rbind(ct2df(fullData[sample(1:nrow(fullData), 
+##    nrow(incompCases) * 0.1), ]), fragData)  
 ## # Run CNA without an ordering.
 ## csfs <- csf(mvcna(x, con = .7, cov = .7, maxstep = c(3, 3, 12)))
 ## # Check whether no causal fallacy (no false positive) is returned.
 ## if(length(csfs$condition)==0) {
-##       FALSE } else {any(is.submodel(csfs$condition, groundTruth))}
+##   TRUE } else {any(is.submodel(csfs$condition, groundTruth))}
 
 

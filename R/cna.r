@@ -33,11 +33,11 @@ cna <- function (x, type,
 
   # more formal requirements  
   if (nrow(ct) <= 1 || ncol(ct) <= 1)
-    stop("Truth table must have at least two rows and two columns.")
+    stop("Config table must have at least two rows and two columns.")
   ordering <- check.ordering(ordering, ct)
   # details
   details <- clarify_details(details)
-  details <- union("inus", details)
+  if (!suff.only) details <- union("inus", details)
   details1 <- setdiff(details, c("coherence", "redundant", "cyclic"))
   if (acyclic.only){
     details <- union(details, c("cyclic"))
@@ -110,7 +110,8 @@ cna <- function (x, type,
                            maxstep, only.minimal.msc)
     if (all(m_is.null(minSuff))) next
     
-    msc <- lapply(minSuff, make.msc, outcome = zname, cti = cti, details = details1)
+    msc <- lapply(minSuff, make.msc, outcome = zname, cti = cti, 
+                  details = details1, suff.only = suff.only)
     msc <- do.call(rbind, msc)
     nstars <- gregexpr("*", msc$condition, fixed = TRUE)
     msc$complexity <- lengths(nstars) + 1L - (vapply(nstars, "[[", integer(1), 1L) == -1L)
@@ -193,7 +194,7 @@ findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.ms
   }
   minSuff
 }
-make.msc <- function(x, outcome, cti, details){
+make.msc <- function(x, outcome, cti, details, suff.only){
   if (is.null(x)) return(NULL)
   vnms <- colnames(cti$scores)
   out <- data.frame(
@@ -208,6 +209,7 @@ make.msc <- function(x, outcome, cti, details){
   } else {
     out$minimal <- TRUE
   }
+  details <- setdiff(details, "inus")
   if (length(details)){
     out[details] <- .det.cti(cti, paste0(out$condition, "->", out$outcome), 
                              what = details)

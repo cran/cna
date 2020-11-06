@@ -32,8 +32,8 @@ The package vignette, which presents the theoretical background of CNA and intro
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 3.0.0\cr
-Date:    \tab 2020-09-11\cr
+Version: \tab 3.0.1\cr
+Date:    \tab 2020-11-06\cr
 License: \tab GPL (>= 2)\cr
     }
 }

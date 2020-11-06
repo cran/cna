@@ -97,13 +97,13 @@ Causal structures featuring conjunctivity or disjunctivity often do not exhibit 
 
 
 
-Methods of data analysis capable of handling (M)INUS structures have been developed in various disciplines---independently of one another. Apart from CNA, the methods with the most advanced software implementations are \emph{Logic Regression} (LR; \citealp{Ruczinski2003}; \citealp{Kooperberg2005}) from biostatistics and \emph{Qualitative Comparative Analysis} (QCA; \citealp{Ragin:1987,Rihoux:2009,cronqvist2009}) from the social sciences.\footnote{In epidemiology, Rothman's (\citeyear{Rothman1976}))
+Methods of data analysis capable of handling (M)INUS structures have been developed in various disciplines---independently of one another. Apart from CNA, the methods with the most advanced software implementations are \emph{Logic Regression} (LR; \citealp{Ruczinski2003}; \citealp{Kooperberg2005}) from biostatistics and \emph{Qualitative Comparative Analysis} (QCA; \citealp{Ragin:1987,Rihoux:2009,cronqvist2009}) from the social sciences.\footnote{In epidemiology, Rothman's (\citeyear{Rothman1976})
  \emph{sufficient-component cause model} with its various extensions (%\citeNP{Vanderweele2008};
 \citealp{vanderweele2009}; %VanderWeele \citeyearNP{Vanderweele2010}; %\citeyearNP{VanderWeele:2015}; 
 \citealp{Wensink:2014}) is also designed for INUS discovery, but a proper software implementation is still lacking.} LR, which is implemented in the \proglang{R} package \href{https://cran.r-project.org/package=LogicReg}{\pkg{LogicReg}} \citep{LogicReg}\footnote{Another package implementing a variation of LR is \href{https://cran.r-project.org/package=logicFS}{\pkg{logicFS}}  \citep{logicFS}.} is mainly used to model higher-order interactions of SNPs in genetic association studies,\footnote{There is no methodological reason why the application of LR should be restricted to SNP studies. In fact, applying LR for (M)INUS discovery more generally would harness the potential for considerable synergies with CNA or QCA.} to which end it fits Boolean functions to data by embedding them in a generalized regression framework and using the residual sum of squares to measure the model fit.
 It is optimized for data with high noise levels, large numbers of exogenous factors, and data-generating structures with no more than one endogenous factor (outcome). LR does not aim to build all data-fitting models---not even for data of low dimensionality---but uses search heuristics (standardly a simulated annealing algorithm) that zoom in on one or a small number of best fitting models. QCA, whose most powerful implementations are provided by the \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}} \citep{Thiem2018} and \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}} \citep{Dusa:2007},\footnote{Other useful QCA software include \href{https://cran.r-project.org/package=QCAfalsePositive}{\pkg{QCAfalsePositive}} \citep{QCAfalsePositive} and \href{https://cran.r-project.org/package=SetMethods}{\pkg{SetMethods}} \citep{SetMethods}.}
 has been widely applied in diverse areas in the social sciences and beyond 
-(for an overview over corresponding publications see the bibliography section on the \href{http://compasss.org}{COMPASSS} website). It is optimized for data with low noise levels, a maximum of around 15 exogenous factors, and, like LR, tracks data-generating structures with single outcomes only. Unlike LR, however, QCA does not rely on techniques from regression analysis but from Boolean algebra. In particular, it uses consistency and coverage \citep{Ragin:2006} as model fit parameters and builds its models using Quine-McCluskey optimization (QMC; \citealp{mccluskey1965}; the QCA \proglang{R} packages use modern versions this optimization approach, see \citealp{DusaCCubes}), which is an algorithm from switching circuit theory that, for data of low dimensionality, can be used to build all data-fitting models. 
+(for an overview over corresponding publications see the bibliography section on the \href{http://compasss.org}{COMPASSS} website). It is optimized for data with low noise levels, a maximum of around 15 exogenous factors, and, like LR, tracks data-generating structures with single outcomes only. Unlike LR, however, QCA does not rely on techniques from regression analysis but from Boolean algebra. In particular, it uses consistency and coverage \citep{Ragin:2006} as model fit parameters and builds its models using Quine-McCluskey optimization (QMC; \citealp{mccluskey1965}; the QCA \proglang{R} packages use modern versions this optimization approach, see \citealp{DusaCCubes}), which is an algorithm from switching circuit theory that can be used to build all data-fitting models for data of low dimensionality. 
 
 
 
@@ -137,7 +137,7 @@ To further clarify that theory as well as the characteristics and requirements o
 
 \subsection{Factors and their values}
 
-Factors are the basic modeling devices of CNA. They are analogous to (random) variables in statistics, that is, they are functions from (measured) properties into a range of values (typically integers). They can be used to represent categorical properties that partition sets of units of observation (cases) either into two sets, in case of binary properties, or into more than two (but finitely many) sets, in case of multi-value properties. Factors representing binary properties can be \emph{crisp-set} ($cs$) or \emph{fuzzy-set} ($fs$); the former can take on $0$ and $1$ as possible values, whereas the latter can take on any (continuous) values from the unit interval $[0,1]$. Factors representing multi-value properties are called \emph{multi-value ($mv$) factors}; they can take on any of an open (but finite) number of non-negative integers.  
+Factors are the basic modeling devices of CNA. They are analogous to (random) variables in statistics, that is, they are functions from (measured) properties into a range of values (typically integers). They can be used to represent categorical properties that partition sets of units of observation (cases) either into two sets, in case of binary properties, or into more than two (but finitely many) sets, in case of multi-value properties, such that the resulting sets are exhaustive and pairwise disjoint. Factors representing binary properties can be \emph{crisp-set} ($cs$) or \emph{fuzzy-set} ($fs$); the former can take on $0$ and $1$ as possible values, whereas the latter can take on any (continuous) values from the unit interval $[0,1]$. Factors representing multi-value properties are called \emph{multi-value ($mv$) factors}; they can take on any of an open (but finite) number of non-negative integers.  
 
 Values of a $cs$ or $fs$ factor $X$ can be interpreted as membership scores in the set of cases exhibiting the property represented by $X$.
 A case of type $X\id 1$ is a full member of that set, a case of type $X\id 0$ is a (full) non-member, and a case of type $X\id \chi_i$, $0<\chi_i<1$, is a member to degree $\chi_i$. An alternative interpretation, which lends itself particularly well for causal modeling, is that ``$X\id 1$'' stands for the full presence of the property represented by $X$, ``$X\id 0$'' for its full absence, and ``$X\id \chi_i$'' for its partial presence (to degree $\chi_i$). By contrast, the values of an $mv$ factor $X$ designate the particular way in which the property represented by $X$ is exemplified. For instance, if $X$ represents the education of subjects, $X\id 2$ may stand for ``high school'', with $X\id 1$ (``no completed primary schooling'') and $X\id 3$ (``university'') designating other possible property exemplifications. $Mv$ factors taking on one of their possible values also define sets, but the values themselves must not be interpreted as membership scores; rather they denote the relevant property exemplification.
@@ -233,7 +233,7 @@ These considerations yield the following definition of causation:
 \end{description}
 
 
-MINUS-formulas whose elements satisfy the permanence constraint not only identify causally relevant factor values but also place a Boolean ordering over these causes, such that conjunctivity, disjunctivity, and outcome-interlinking can be directly read off their syntax. Take the following example:\begin{equation}\label{mt2}
+MINUS-formulas whose elements satisfy the permanence constraint not only identify causally relevant factor values but also place a Boolean ordering over these causes, such that conjunctivity, disjunctivity, and outcome-interlinking (e.g.\ sequentiality) can be directly read off their syntax. Take the following example:\begin{equation}\label{mt2}
 (A\att b\; +\;a\att B \;\leftrightarrow\; C)\;\att\;(C\att f\; +\; D \;\leftrightarrow\; E)\end{equation} 
 If \eqref{mt2} complies with (MINUS.I) and (MINUS.II), it entails these causal claims:%
 \begin{enumerate}\itemsep0pt
@@ -255,7 +255,7 @@ But for $n$ $cs$ factors there exist $2^{2^n}$ possible Boolean functions; and i
 Second, condition (MINUS.II) is not exhaustively testable. Once a MIN\-US-formula of an outcome $Y$ comprising a factor value $X$ has been inferred from data  $\delta$, the question arises whether the non-redundancy of $X$ in accounting for $Y$ is an artefact of $\delta$, due, for example, to the uncontrolled variation of confounders, or whether it is genuine and persists when further factors are taken into consideration. But expanding the set of factors is only feasible within narrow confines in scientific practice. To make up for the impossibility to  test  (MINUS.II), the analyzed data $\delta$ should be collected in such a way that Boolean dependencies in $\delta$ are not induced by an uncontrolled variation of latent causes but by actual causal dependencies among the measured factors. 
 If the dependencies in $\delta$ are not artefacts of latent causes, they cannot be neutralized by factor set expansions, meaning they are permanent and, hence, causal. It follows that in order for it to be certain that causal inferences drawn from $\delta$ are fallacy-free, $\delta$ must meet very high quality standards. In particular,  the uncontrolled causal background of $\delta$ must be \emph{homogeneous} \citep[286]{Baumgartner:simul}:
  \begin{description}\item[Homogeneity] The unmeasured causal background of data $\delta$ is homogeneous if, and only if, latent causes not connected to the outcome(s) in $\delta$ on causal paths via the measured exogenous factors (so-called \emph{off-path} causes) take constant values (i.e.\ do not vary) in the cases recorded in $\delta$.\end{description}
- 
+  
 However, third, real-life data often do not meet very high quality standards. Rather, they tend to be \emph{fragmented} to the effect that not all empirically possible configurations of analyzed factors are actually observed. Moreover, real-life data typically feature \emph{noise}, that is, configurations incompatible with data-generating causal structures. Noise is induced, for instance, by measurement error or limited control over latent causes, i.e.\ confounding. In the presence of noise there may be no strict Boolean sufficiency or necessity relations in the data, meaning that methods of MINUS discovery can only approximate strict MINUS structures by fitting their models more or less closely to the data using suitable parameters and thresholds of model fit. Moreover, noise stemming from the uncontrolled variation of latent causes gives rise to homogeneity violations, which yield that inferences to MINUS causation are not guaranteed to be fallacy-free. In order to nonetheless distill causal information from noisy data, strategies for avoiding over- and underfitting and estimating the fallacy-risk are needed.
 
 Fourth, according to the MINUS theory, the inference to \emph{causal irrelevance} is much more demanding than the inference to causal relevance. Establishing that $X$ is a MINUS cause of $Y$ requires demonstrating the existence of at least one context with a constant background in which a difference in $X$ is associated with a difference in $Y$, whereas establishing that $X$ is \emph{not} a MINUS cause of $Y$ requires demonstrating the \emph{non-existence} of such a context, which is impossible on the basis of the non-exhaustive data samples that are typically analyzed in real-life studies. Correspondingly, the fact that, say, $G$ does not appear in \eqref{mt2} does not imply that $G$ is causally irrelevant to $C$ or $E$. The non-inclusion of $G$ simply means that the data from which \eqref{mt2} has been derived do not contain evidence for the causal relevance of $G$. However, future research having access to additional data might reveal the existence of a difference-making context for $G$ and, hence, entail the causal relevance of $G$ to $C$ or $E$ after all.
@@ -293,7 +293,7 @@ This section explains most of these inputs and introduces some auxiliary functio
 
 
 
-Data $\delta$ processed by CNA have the form of $m\times k$ matrices, where $m$ is the number of units of observation (cases) and $k$ is the number of measured factors. $\delta$ can either be of type ``crisp-set'' ($cs$), ``multi-value'' ($mv$) or ``fuzzy-set'' ($fs$). Data that feature $cs$ factors only are $cs$. If the data contain at least one $mv$ factor, they count as $mv$. Data featuring at least one $fs$ factor are $fs$.\footnote{Mixing $mv$ and $fs$ factors in one analysis is (currently) not supported.} Examples of each data type are given in Table \ref{tab2}. Raw data collected in a study typically need to be suitably calibrated before they can be fed to \code{cna()}. We do not address the calibration problem here because it is the same for CNA as for QCA, in which context it has been extensively discussed, for example, by \cite{Thiem:2013} or \cite{Schneider:2012}. The \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}}, \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}, and \href{https://cran.r-project.org/package=SetMethods}{\pkg{SetMethods}} provide all tools necessary for automating data calibration.
+Data $\delta$ processed by CNA have the form of $m\times k$ matrices, where $m$ is the number of units of observation (cases) and $k$ is the number of measured factors. $\delta$ can either be of type ``crisp-set'' ($cs$), ``multi-value'' ($mv$) or ``fuzzy-set'' ($fs$). Data that feature $cs$ factors only are $cs$. If the data contain at least one $mv$ factor, they count as $mv$. Data featuring at least one $fs$ factor are treated as $fs$.\footnote{Note, first, that factors calibrated at crisp-set thresholds may appear with unsuitably extreme values if the data as a whole are treated as $fs$ due to some $fs$ factor, and second, that mixing $mv$ and $fs$ factors in one analysis is (currently) not supported.} Examples of each data type are given in Table \ref{tab2}. Raw data collected in a study typically need to be suitably calibrated before they can be fed to \code{cna()}. We do not address the calibration problem here because it is the same for CNA as for QCA, in which context it has been extensively discussed, for example, by \cite{Thiem:2013} or \cite{Schneider:2012}. The \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}}, \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}, and \href{https://cran.r-project.org/package=SetMethods}{\pkg{SetMethods}} provide all tools necessary for automating data calibration.
 \begin{table}[tb]\centering
 \subfloat[$cs$ data]{\begin{tabular}{r|cccc}
 & $A$ & $B$ & $C$ & $D$  \\\hline
@@ -370,7 +370,7 @@ mvct(d.pban)
 %
 \code{configTable()} provides a numeric argument called \code{case.cutoff}, which allows for setting a minimum frequency cutoff determining that configurations with less instances in the data are not included in the configuration table and the ensuing analysis. For instance, \code{configTable(x, case.cutoff = 3)} entails that configurations that are instantiated in less than 3 cases are excluded.
 
-Configuration tables produced by \code{configTable()} can be directly passed to \code{cna()}. Moreover, as configuration tables generated by \code{configTable} are objects that are very particular to the \pkg{cna} package, the function \code{ct2df()} is available to transform configuration tables back into ordinary \proglang{R} data frames.
+Configuration tables produced by \code{configTable()} can be directly passed to \code{cna()}. Moreover, as configuration tables generated by \code{configTable()} are objects that are very particular to the \pkg{cna} package, the function \code{ct2df()} is available to transform configuration tables back into ordinary \proglang{R} data frames.
 <<configTable2, eval = F>>=
 pact.ct <- configTable(d.pacts, type = "fs", case.cutoff = 2)
 ct2df(pact.ct)
@@ -470,7 +470,7 @@ In the presence of noise, it is generally advisable to vary the \code{con} and \
 
 \subsection[Ordering]{Ordering}\label{order}
 \nopagebreak
-In principle, the \code{cna()} function does not need to be told which factors in the data \code{x} are endogenous (i.e.\ effects) and which ones are exogenous (i.e.\ causes). It attempts to infer that from \code{x}. But if prior causal knowledge is available as to which factors can figure as effects and which ones cannot, this information can be given to \code{cna()} via a \emph{causal ordering}. A causal ordering is a relation $X_i\prec X_j$ defined on the factors in \code{x} entailing that $X_j$ cannot be a cause of $X_i$ (e.g.\ because $X_i$ is instantiated temporally before $X_j$). That is, an ordering excludes certain causal dependencies but does not stipulate any. If an ordering is provided, \code{cna()} only searches for MINUS-formulas in accordance with the ordering; if no ordering is provided, \code{cna()} treats all values of the factors in \code{x} as potential outcomes and explores whether a MINUS-formula for them can be inferred.
+In principle, the \code{cna()} function does not need to be told which factors in the data \code{x} are endogenous (i.e.\ outcomes) and which ones are exogenous (i.e.\ causes). It attempts to infer that from \code{x}. But if prior causal knowledge is available as to which factors can figure as effects and which ones cannot, this information can be given to \code{cna()} via a \emph{causal ordering}. A causal ordering is a relation $X_i\prec X_j$ defined on the factors in \code{x} entailing that $X_j$ cannot be a cause of $X_i$ (e.g.\ because $X_i$ is instantiated temporally before $X_j$). That is, an ordering excludes certain causal dependencies but does not stipulate any. If an ordering is provided, \code{cna()} only searches for MINUS-formulas in accordance with the ordering; if no ordering is provided, \code{cna()} treats all values of the factors in \code{x} as potential outcomes and explores whether a MINUS-formula for them can be inferred.
 
 An ordering is given to \code{cna()} via the argument \code{ordering}, which takes as value a list of character vectors specifying the causal ordering of the factors in \code{x}. For example, \code{ordering = list(c("A","B"),"C")} determines that $C$ is causally located after $A$ and $B$ (i.e.\ $A,B\prec C$), meaning that $C$ is not a potential cause of $A$ and $B$. The latter are located on the same level of the ordering, for $A$ and $B$ are unrelated by $\prec$, whereas $C$ is located on a level that is downstream of the $A,B$-level. \code{cna()} then only checks whether values of $A$ and $B$ can be modeled as causes of values of $C$; the test for a causal dependency in the upstream direction is skipped. If the argument ordering is not specified, \code{cna()} searches for dependencies between all factors in \code{x}. An ordering does not need to explicitly mention all factors in \code{x}. If only a subset of the factors are included in the ordering, the non-included factors are entailed to be causally before the included ones. Hence, \code{ordering = list("C")} means that $C$ is causally located after all other factors in \code{x}. 
 
@@ -481,14 +481,14 @@ Let us illustrate with the data set \code{d.autonomy}. Relative to the following
 <<odering1, message = FALSE, warning=FALSE>>=
 dat.aut.1 <- d.autonomy[15:30, c("AU","EM","SP","CO")]
 ana.aut.1 <- fscna(dat.aut.1, ordering = list(c("EM","SP","CO"), "AU"), 
-  strict = TRUE, con = .91, cov = .91)
+  strict = TRUE, con = .9, cov = .9)
 printCols <- c("condition", "consistency", "coverage")
 csf(ana.aut.1)[printCols]
 @
 If we set \code{strict} to \code{FALSE} and, thereby, allow for causal dependencies among $EM, SP$, and $CO$, it turns out that $SP$ not only causes $AU$, but, on another causal path, also makes a difference to $EM$:
 <<odering2, message = FALSE, warning=FALSE>>=
 ana.aut.2 <- fscna(dat.aut.1, ordering = list(c("EM","SP","CO"), "AU"), 
-  strict = FALSE, con = .91, cov = .91)
+  strict = FALSE, con = .9, cov = .9)
 csf(ana.aut.2)[printCols]
 @
 
@@ -502,11 +502,13 @@ cna(d.volatile, ordering = list("VO2"), maxstep = c(3,4,10))
 vol1 <- cna(d.volatile, ordering = list("VO2"), maxstep = c(4,4,10))
 csf(vol1, n.init = 3000)
 @
-If the values of \code{maxstep} are further increased, the analysis will quickly fail to terminate in reasonable time. When a complete analysis cannot be completed, \code{cna()} can be told to only search for minimally sufficient conditions (\emph{msc}) by setting the argument \code{suff.only} to its non-default value \code{TRUE}. As the search for \emph{msc} is the part of a CNA analysis that is least computationally demanding, it will typically terminate quickly and, thus, shed some light on the dependencies among the factors in \code{x} even when a complete analysis is infeasible. 
+If the values of \code{maxstep} are further increased, the analysis will quickly fail to terminate in reasonable time. When a complete analysis cannot be completed, \code{cna()} can be told to only search for minimally sufficient conditions (\emph{msc}) by setting the argument \code{suff.only} to its non-default value \code{TRUE}. As the search for \emph{msc} is the part of a CNA analysis that is least computationally demanding, it will typically terminate quickly and, thus, shed some light on the dependencies among the factors in \code{x} even when complete model construction is infeasible. 
 <<maxstep2, eval=F>>=
 cna(d.volatile, ordering = list("VO2"), maxstep = c(8,10,40), 
   suff.only = TRUE)
 @
+If \code{suff.only} is set to \code{TRUE}, CNA can process data of much higher dimensionality than at the argument's default value. \citet{Yakovchenko:2020}, for example, run \code{cna()} on data comprising 73 exogenous factors with \code{suff.only = TRUE}. Based on the resulting \emph{msc}, they then select a proper subset of those factors for further processing.
+
 
 While the \code{maxstep} argument is valuable for controlling the search space in case of large and ambiguous data sets, it also comes with a pitfall: it may happen that \code{cna()} fails to find a model because of a \code{maxstep} that is too low. An example is \code{d.jobsecurity}. At the default \code{maxstep}, \code{cna()} does not build a solution, but if \code{maxstep} is increased, two solutions are found.
 <<maxstep3>>=
@@ -527,13 +529,13 @@ If an \emph{asf} of an outcome $Y$ does not reach perfect consistency or coverag
 
 To this end, the argument \code{notcols} allows for negating the values of factors in $cs$ and $fs$ data (in case of $mv$ data, \code{cna()} automatically searches for models of all possible values of endogenous factors, thereby rendering \code{notcols} redundant). If \code{notcols = "all"}, all factors are negated, i.e.\ their values $i$ are replaced by $1-i$. If \code{notcols} is given a character vector of factors in the data, only the factors in that vector are negated. For example, \code{notcols = c("A", "B")} determines that only factors $A$ and $B$ are negated. 
 
-When processing $cs$ or $fs$ data, CNA should first be applied to recover solutions for the positive outcomes. If resulting \emph{asf} and \emph{csf} do not reach perfect consistency, coverage, and exhaustiveness scores, a second CNA should be run negating the values of all factors that have been modeled as outcomes in the first CNA. To illustrate, we revisit our analysis of \code{d.autonomy} from section \ref{order}, which identified $AU$ and $EM$ as outcomes.
+When processing $cs$ or $fs$ data, CNA should first be applied to recover solutions for the positive outcomes. If resulting \emph{asf} and \emph{csf} do not reach perfect consistency, coverage, and exhaustiveness scores (and the causes of the negated outcomes are of scientific interest), a second CNA should be run negating the values of all factors that have been modeled as outcomes in the first CNA. To illustrate, we revisit our analysis of \code{d.autonomy} from section \ref{order}, which identified $AU$ and $EM$ as outcomes.
 <<notcols, message = FALSE, warning=FALSE>>=
 ana.aut.3 <- fscna(dat.aut.1, ordering = list(c("EM","SP","CO"), "AU"),
   strict = FALSE, con = .88, cov = .82, notcols = c("AU", "EM")) 
 csf(ana.aut.3)[printCols]
 @
-
+\pagebreak
 
 \section[The CNA algorithm]{The CNA algorithm}\label{algo}
 
@@ -545,7 +547,7 @@ The \code{cna()} algorithm can be more specifically broken down into four stages
 
 
 \vspace{-.2cm}
-\begin{description}\item[Stage 1] On the basis of \code{ordering}, \code{cna()} first builds a set of potential outcomes \linebreak $\textbf{O}= \{O_h\id \omega_f,\ldots ,O_m\id \omega_g\}$ from the set of factors $\mathbf{F}=\{O_1,\ldots,O_n\}$ in \code{x},\footnote{Note that if \code{x} is a data frame, \code{cna()} first transforms \code{x} into a configuration table using \code{configTable(x)}, thereby passing the argument \code{type} (and the two additional arguments \code{rm.dup.factors} and \code{rm.const.factors}) to the \code{configTable()} function.} 
+\begin{description}\item[Stage 1] On the basis of \code{ordering}, \code{cna()} first builds a set of potential outcomes \linebreak $\textbf{O}= \{O_h\id \omega_f,\ldots ,O_m\id \omega_g\}$ from the set of factors $\mathbf{F}=\{O_1,\ldots,O_n\}$ in \code{x},\footnote{Note that if \code{x} is a data frame, \code{cna()} first transforms \code{x} into a configuration table by means of \code{configTable(x)}, thereby passing the argument \code{type} (and the two additional arguments \code{rm.dup.factors} and \code{rm.const.factors}) to the \code{configTable()} function.} 
 where $1\leq h \leq m\leq n$, and second assigns a set of potential cause factors $\textbf{C}_{O_i}$ from $\mathbf{F}\setminus \{O_i\}$ to every element $O_i\id \omega_k$ of $\mathbf{O}$. If no \code{ordering} is provided, all value assignments to all elements of $\mathbf{F}$ are treated as possible outcomes in case of $mv$ data, whereas in case of $cs$ and $fs$ data $\mathbf{O}$ is set to $\{O_1\id 1, \ldots, O_n\id 1\}$. %, where $O_1$ to $O_n$ are all the factors in $\mathbf{F}$.
 
 \item[Stage 2] \code{cna()} attempts to build a set \textbf{\textsc{msc}$_{O_i\id \omega_k}$} of minimally sufficient conditions that meet \code{con.msc} for each $O_i\id \omega_k\in \mathbf{O}$. To this end, it first checks for each value assignment $X_h\id \chi_j$ of each element of $\textbf{C}_{O_i}$, such that $X_h\id \chi_j$ has a membership score above 0.5 in at least one case in \code{x}, whether the consistency of $X_h\id \chi_j \,\rightarrow\, O_i\id \omega_k$ 
@@ -591,7 +593,7 @@ Finally, in stage 4  one redundancy-free \emph{csf} is built from the inventory 
 The default output of \code{cna()} first lists the provided ordering, second, the \emph{asf} that were recovered in accordance with the ordering, and third, the \emph{csf}. \emph{Asf} and \emph{csf} are ordered by complexity and the product of consistency and coverage.
 For \emph{asf} and \emph{csf}, four attributes are standardly computed: \code{consistency}, \code{coverage}, \code{complexity}, and \code{inus}. \code{consistency} and \code{coverage} correspond to a solution's consistency and coverage scores, which measures have been explained in section \ref{cons} above. The \code{complexity} score amounts to the number of factor values on the left-hand sides of "$\rightarrow$" or "$\leftrightarrow$" in \emph{asf} and \emph{csf}; and the \code{inus} attribute indicates whether a solution has the form of a well-formed MINUS structure (for more on the \code{inus} attribute cf.\ section \ref{inus} below).
 
-\code{cna()} can compute additional solution attributes, all of which will be  explained below: \code{exhaustiveness}, and \code{faithfulness} for both \emph{asf} and \emph{csf}, as well as \code{coherence}, \code{redundant}, and \code{cyclic} for \emph{csf}. These attributes are accessible via the \code{details} argument, which can be given the values \code{TRUE}/\code{FALSE}, for computing all/none of the additional attributes, or a character vector specifying the specific attributes to be computed: for example, \code{details = c("faithfulness", "exhaustiveness")}---the strings can also be abbreviated, e.g. \code{"f"} for \code{"faithfulness"}, \code{"e"} for \code{"exhaustiveness"}, etc. 
+\code{cna()} can compute additional solution attributes, all of which will be  explained below: \code{exhaustiveness}, and \code{faithfulness} for both \emph{asf} and \emph{csf}, as well as \code{coherence}, \code{redundant}, and \code{cyclic} for \emph{csf}. These attributes are accessible via the \code{details} argument, which can be given the values \code{TRUE}/\code{FALSE}, for computing all/none of the additional attributes, or a character vector specifying the attributes to be computed: for example, \code{details = c("faithfulness", "exhaustiveness")}---the strings can also be abbreviated, e.g. \code{"f"} for \code{"faithfulness"}, \code{"e"} for \code{"exhaustiveness"}, etc. 
 <<details, eval=F>>=
 cna(d.educate, details = TRUE)
 cna(d.educate, details = c( "co", "cy"))
@@ -609,6 +611,7 @@ As shown in section \ref{maxstep}, it can happen that many \emph{asf} and \emph{
 vol2 <- cna(d.volatile, ordering = list("VO2"))
 msc(vol2)
 asf(vol2)
+print(asf(vol2), Inf)
 @
 While \code{msc()} and \code{asf()} simply access the complete sets of \emph{msc} and \emph{asf} stored in \code{x}, the \emph{csf} are not stored in \code{x}. The construction of \emph{csf} in the fourth stage of the CNA algorithm is not conducted by the \code{cna()} function itself, rather, it is outsourced to the function \code{csf()} with the these main arguments:
 \begin{Code}
@@ -787,7 +790,7 @@ In sum, as of version 3.0 of the \pkg{cna} package, both structural and partial 
 
 \subsection[Cycles]{Cycles} \label{cycles}
 
-Detecting causal cycles is one of the most challenging tasks in causal data analysis---in all methodological traditions. In a nutshell, the reason is that factors in a cyclic structure are so highly interdependent that, even under optimal discovery conditions, the diversity of (observational) data tends to be too limited to draw informative conclusions about the data-generating structure. In consequence, various methods (most notably, Bayes nets methods, cf.\ \citealp{Spirtes2000}) assume that analyzed data-generating structures are acyclic.
+Detecting causal cycles is one of the most challenging tasks in causal data analysis---in all methodological traditions. One reason is that factors in a cyclic structure are so highly interdependent that, even under optimal discovery conditions, the diversity of (observational) data tends to be too limited to draw informative conclusions about the data-generating structure. Various methods in fact assume that analyzed data-generating structures are acyclic (most notably, Bayes nets methods, cf.\ \citealp{Spirtes2000}).
 
 \code{cna()} and \code{csf()} output cyclic \emph{csf} if they fit the data, and the optional solution attribute \code{cyclic} identifies those \emph{csf} that contain a cyclic substructure. A causal structure has a cyclic substructure if, and only if, it contains a directed causal path from at least one cause back to itself. The MINUS theory spells this criterion out more explicitly as follows: 
 \begin{description}\item[Cycle]
@@ -944,24 +947,26 @@ The \pkg{cna} package provides all the functionalities necessary to conduct inve
 
 
 
-Against that background, the following might be a core of a correctness benchmark test that simulates multi-value data with 20\% missing observations and 10\% random noise, and that runs \code{cna()} and \code{csf()} at \code{con} $=$ \code{cov} $=$ $0.7$ without giving the algorithm any prior causal information in an ordering.
+Against that background, the following might be a core of a fallacy-freeness benchmark test that simulates multi-value data with 20\% missing observations and 10\% random noise (i.e.\ cases incompatible with the ground truth), and that runs \code{cna()} and \code{csf()} at \code{con} $=$ \code{cov} $=$ $0.7$ without giving the algorithm any prior causal information in an ordering.
 <<details, eval=F>>=
-# Draw the ground truth.
+# Draw a ground truth.
 fullData <- mvct(allCombs(c(4,4,4,4,4)))
 groundTruth <- randomCsf(fullData, n.asf = 2, compl = 2)
 # Generate ideal data for groundTruth.
-x <- ct2df(selectCases(groundTruth, fullData))
+idealData <- ct2df(selectCases(groundTruth, fullData))
 # Introduce 20% fragmentation.
-x <- x[-sample(1:nrow(x), nrow(x)*0.2), ] 
-# Introduce 10% random noise.
-x <- rbind(ct2df(fullData[sample(1:nrow(fullData), nrow(x)*0.1), ]), x)  
+fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
+# Introduce 10% random noise (cases incompatible with ground truth).
+incompCases <- dplyr::setdiff(ct2df(fullData), idealData)
+x <- rbind(ct2df(fullData[sample(1:nrow(fullData), 
+   nrow(incompCases) * 0.1), ]), fragData)  
 # Run CNA without an ordering.
 csfs <- csf(mvcna(x, con = .7, cov = .7, maxstep = c(3, 3, 12)))
 # Check whether no causal fallacy (no false positive) is returned.
 if(length(csfs$condition)==0) {
-      FALSE } else {any(is.submodel(csfs$condition, groundTruth))}
+  TRUE } else {any(is.submodel(csfs$condition, groundTruth))}
 @
-Every re-run of this code chunk generates a different ground truth and different data; in some runs CNA passes the test, in others it does not. To determine CNA's correctness ratio under these test conditions, the above core must be embedded in a suitable test loop. To estimate CNA's overall correctness ratio, the test conditions should be systematically varied by, for instance, varying the complexity of the ground truth, the degree of fragmentation and noise, the consistency and coverage thresholds, or by drawing the noise with a  bias or supplying CNA with more or less prior causal information via an ordering. Fallacy-freeness and completeness tests can be designed analogously, by suitably modifying the last line that evaluates the solution object \code{csfs}. For single-outcome structures (\emph{asf}), benchmark tests with some of the above variations have been conducted in \citep{BaumgartnerfsCNA} and \citep{CNA_LR}; corresponding tests for multi-outcome structures (\emph{csf}) have been carried out in \citep{robustness}.
+Every re-run of this code chunk generates a different ground truth and different data; in some runs CNA passes the test, in others it does not. To determine CNA's fallacy-freeness ratio under these test conditions, the above core must be embedded in a suitable test loop. To estimate CNA's overall fallacy-freeness ratio, the test conditions should be systematically varied by, for instance, varying the complexity of the ground truth, the degree of fragmentation and noise, the consistency and coverage thresholds, or by drawing the noise with a  bias or supplying CNA with more or less prior causal information via an ordering. Correctness and completeness tests can be designed analogously, by suitably modifying the last line that evaluates the solution object \code{csfs}. For single-outcome structures (\emph{asf}), benchmark tests with some of the above variations have been conducted in \citep{BaumgartnerfsCNA} and \citep{CNA_LR}; corresponding tests for multi-outcome structures (\emph{csf}) have been carried out in \citep{robustness}.
 
 
 
@@ -976,11 +981,11 @@ CNA is currently the only method searching for (M)INUS causation in data that bu
 Moreover, it builds causal models on the basis of a bottom-up algorithm that is unique among configurational comparative methods and gives CNA an edge over QCA not only with respect to multi- but also single-outcome structures. Overall, CNA constitutes a powerful methodological alternative for researchers interested in (M)INUS structures and the Boolean dimensions of causality, more generally. The \pkg{cna} package makes that inferential power available to end-users.
 
 \section*{Acknowledgments}
-We are grateful to Alrik Thiem and Martyna Swiatczak for helpful comments on earlier drafts of this vignette, and we thank the Toppforsk-program of the Bergen Research Foundation and the University of Bergen (grant nr.\ 811886) and the Swiss National Science Foundation (grant nr.\ PP00P1\_144736/1) for generous support of this research.
+We are grateful to Alrik Thiem, Martyna Swiatczak, and Jonathan Freitas for helpful comments on earlier drafts of this vignette, and we thank the Toppforsk-program of the Bergen Research Foundation and the University of Bergen (grant nr.\ 811886) and the Swiss National Science Foundation (grant nr.\ PP00P1\_144736/1) for generous support of this research.
 
 
-% \bibliography{integra,bibliography,baumgartner-thiem}
-\begin{thebibliography}{46}
+ % \bibliography{integra,bibliography,baumgartner-thiem}
+\begin{thebibliography}{47}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -1274,6 +1279,15 @@ VanderWeele TJ, Robins JM (2009).
 \newblock \enquote{The Causal Pie Model: An Epidemiological Method Applied to
   Evolutionary Biology and Ecology.}
 \newblock \emph{Ecology and Evolution}, \textbf{4}, 1924--1930.
+
+\bibitem[{Yakovchenko \emph{et~al.}(2020)Yakovchenko, Miech, Chinman, Chartier,
+  Gonzalez, Kirchner, Morgan, Park, Powell, Proctor, Ross, Waltz, and
+  Rogal}]{Yakovchenko:2020}
+Yakovchenko V, Miech EJ, Chinman MJ \emph{et~al.} (2020).
+\newblock \enquote{Strategy Configurations Directly Linked to Higher Hepatitis
+  C Virus Treatment Starts: An Applied Use of Configurational Comparative
+  Methods.}
+\newblock \emph{Medical Care}, \textbf{58}(5).
 
 \end{thebibliography}
 
