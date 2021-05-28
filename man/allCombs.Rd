@@ -17,7 +17,7 @@ allCombs(x)
   \item{x}{Integer vector with values >0}
 }
 
-\details{In combination with \code{selectCases}. \code{makeFuzzy}, and \code{is.submodel}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials benchmarking the output of \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data-generating causal structure (i.e. the ground truth, which can be randomly generated using \code{randomConds}), \code{makeFuzzy} fuzzifies those data, and \code{is.submodel} checks whether the models returned by \code{cna} are true of the ground truth.
+\details{In combination with \code{selectCases}. \code{makeFuzzy}, and \code{is.submodel}, \code{allCombs} is useful for simulating data, which are needed for inverse search trials benchmarking the output of \code{cna}. In a nutshell, \code{allCombs} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{selectCases} selects those configurations from this space that are compatible with a given data generating causal structure (i.e. the ground truth, which can be randomly generated using \code{randomConds}), \code{makeFuzzy} fuzzifies those data, and \code{is.submodel} checks whether the models returned by \code{cna} are true of the ground truth.
 
 The \pkg{cna} package provides another function to the same effect, \code{\link{full.ct}}, which is more flexible than \code{allCombs}.
 }

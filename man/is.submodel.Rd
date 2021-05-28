@@ -6,7 +6,7 @@
 Identify correctness-preserving submodel relations
 }
 \description{
-The function \code{is.submodel} checks for each element of a vector of \code{\link{cna}} solution formulas whether it is a submodel of a specified target model \code{y}. If \code{y} is the true model in an inverse search (i.e. the ground truth), \code{is.submodel} identifies the correct models in the \code{\link{cna}} output (see Baumgartner and Thiem 2017, Baumgartner and Ambuehl 2018).
+The function \code{is.submodel} checks for each element of a vector of \code{\link{cna}} solution formulas whether it is a submodel of a specified target model \code{y}. If \code{y} is the true model in an inverse search (i.e. the ground truth), \code{is.submodel} identifies the correct models in the \code{\link{cna}} output (see Baumgartner and Thiem 2020, Baumgartner and Ambuehl 2020).
 }
 
 \usage{
@@ -21,9 +21,9 @@ identical.model(x, y)
 }
 \details{
 
-To benchmark the reliability of a method of causal inference it must be tested to what degree the method recovers the true data-generating structure \eqn{\Delta} or proper substructures of \eqn{\Delta} from data of varying quality. Reliability benchmarking is done in so-called \emph{inverse searches}, which reverse the order of causal discovery as normally conducted in scientific practice. An inverse search comprises three steps: (1) a causal structure \eqn{\Delta} is drawn/presupposed (as ground truth), (2) artificial data \eqn{\delta} is simulated from \eqn{\Delta}, possibly featuring various deficiencies (e.g. noise, limited diversity, measurement error etc.), and (3) \eqn{\delta} is processed by the benchmarked method in order to check whether its output meets the tested reliability benchmark (e.g. whether the output is true of or identical to \eqn{\Delta}). 
+To benchmark the reliability of a method of causal inference it must be tested to what degree the method recovers the true data generating structure \eqn{\Delta} or proper substructures of \eqn{\Delta} from data of varying quality. Reliability benchmarking is done in so-called \emph{inverse searches}, which reverse the order of causal discovery as normally conducted in scientific practice. An inverse search comprises three steps: (1) a causal structure \eqn{\Delta} is drawn/presupposed (as ground truth), (2) artificial data \eqn{\delta} is simulated from \eqn{\Delta}, possibly featuring various deficiencies (e.g. noise, limited diversity, measurement error etc.), and (3) \eqn{\delta} is processed by the benchmarked method in order to check whether its output meets the tested reliability benchmark (e.g. whether the output is true of or identical to \eqn{\Delta}). 
 
-The main purpose of \code{is.submodel} is to execute step (3) of an inverse search that is tailor-made to test the reliability of \code{\link{cna}} [with \code{\link{randomConds}} and \code{\link{selectCases}} designed for steps (1) and (2), respectively]. A solution formula \code{x} being a submodel of a target formula \code{y} means that all the causal claims entailed by \code{x} are true of \code{y}, which is the case if a causal interpretation of \code{x} entails conjunctive and disjunctive causal relevance relations that are all likewise entailed by a causal interpretation of \code{y}. More specifically, \code{x} is a submodel of \code{y} if, and only if, the following conditions are satisfied: (i) all factor values causally relevant according to \code{x} are also causally relevant according to \code{y}, (ii) all factor values contained in two different disjuncts in \code{x} are also contained in two different disjuncts in \code{y}, (iii) all factor values contained in the same conjunct in \code{x} are also contained in the same conjunct in \code{y}, and (iv) if \code{x} is a csf with more than one asf, (i) to (iii) are satisfied for all asfs in \code{x}. For more details see Baumgartner and Thiem (2020) or Baumgartner and Ambuehl (2018, online appendix).
+The main purpose of \code{is.submodel} is to execute step (3) of an inverse search that is tailor-made to test the reliability of \code{\link{cna}} [with \code{\link{randomConds}} and \code{\link{selectCases}} designed for steps (1) and (2), respectively]. A solution formula \code{x} being a submodel of a target formula \code{y} means that all the causal claims entailed by \code{x} are true of \code{y}, which is the case if a causal interpretation of \code{x} entails conjunctive and disjunctive causal relevance relations that are all likewise entailed by a causal interpretation of \code{y}. More specifically, \code{x} is a submodel of \code{y} if, and only if, the following conditions are satisfied: (i) all factor values causally relevant according to \code{x} are also causally relevant according to \code{y}, (ii) all factor values contained in two different disjuncts in \code{x} are also contained in two different disjuncts in \code{y}, (iii) all factor values contained in the same conjunct in \code{x} are also contained in the same conjunct in \code{y}, and (iv) if \code{x} is a csf with more than one asf, (i) to (iii) are satisfied for all asfs in \code{x}. For more details see Baumgartner and Thiem (2020) or Baumgartner and Ambuehl (2020, online appendix).
 
 
 
@@ -35,7 +35,7 @@ The function \code{identical.model} returns \code{TRUE} only if \code{x} (which 
 \value{Logical vector of the same length as \code{x}.}
 
 \references{
-Baumgartner, Michael and Mathias Ambuehl. 2018. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. doi:10.1017/psrm.2018.45. 
+Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.
 
 Baumgartner, Michael and Alrik Thiem. 2020. \dQuote{Often Trusted But Never (Properly) Tested: Evaluating Qualitative Comparative Analysis}. \emph{Sociological Methods & Research} 49:279-311.
 
@@ -49,10 +49,10 @@ Baumgartner, Michael and Alrik Thiem. 2020. \dQuote{Often Trusted But Never (Pro
 # Binary expressions
 # ------------------
 trueModel.1 <- "(A*b + a*B <-> C)*(C*d + c*D <-> E)"
-candidates.1 <- c("(A + B <-> C)*(C + c*D <-> E)", "(A + B <-> C)", 
-                 "(A <->  C)*(C <-> E)", "(C <-> E)")
-candidates.2 <- c("(A*B + a*b <-> C)*(C*d + c*D <-> E)", "(A*b*D + a*B <-> C)", 
-                 "(A*b + a*B <-> C)*(C*A*D <-> E)", "(D <-> C)", 
+candidates.1 <- c("(A + B <-> C)*(C + c*D <-> E)", "A + B <-> C", 
+                 "(A <->  C)*(C <-> E)", "C <-> E")
+candidates.2 <- c("(A*B + a*b <-> C)*(C*d + c*D <-> E)", "A*b*D + a*B <-> C", 
+                 "(A*b + a*B <-> C)*(C*A*D <-> E)", "D <-> C", 
                  "(A*b + a*B + E <-> C)*(C*d + c*D <-> E)")
 
 is.submodel(candidates.1, trueModel.1)

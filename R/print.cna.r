@@ -31,6 +31,11 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
         "\n", sep = "")
   else cat("\nFactors:", C_concat(names(x$configTable), sep = ", "), "\n")
 
+  if (!is.null(outc <- eval(x$call$outcome))){
+    cat("Outcome", if (length(outc)>1) "s", ": ", paste0(outc, collapse = ", "), 
+        "\n", sep = "")
+  }
+  
   if (whatl["m"]){
     msc.df <- msc(x)
     cat("\nMinimally sufficient conditions:\n",
@@ -64,18 +69,21 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
         "--------------------------\n", sep = "")
     if (nrow(asf.df) == 0){
       n.csf <- 0L
+      cat("*none*\n")
+    } else if (length(unique(asf.df$outcome)) == 1L && whatl["a"]){
+      cat("Same as asf\n")
     } else {
       csf1 <- csf(x, asfx = asf.df, details = details,
                   inus.only = inus.only, acyclic.only = acyclic.only, 
                   cycle.type = cycle.type, verbose = verbose)
       n.csf <- nrow(csf1)
+      if (n.csf == 0){
+        cat("*none*\n")
+      } else {
+        names(csf1)[names(csf1) == "condition"] <- "solution"
+        print(csf1, n = nsolutions, digits = digits, row.names = FALSE, ...)
+      }
     }  
-    if (n.csf == 0){
-      cat("*none*\n")
-    } else {
-      names(csf1)[names(csf1) == "condition"] <- "solution"
-      print(csf1, n = nsolutions, digits = digits, row.names = FALSE, ...)
-    }
   }
 
   invisible(x)

@@ -46,14 +46,6 @@ dat2 <- selectCases("(A*b + a*B <-> C)*(C*d + c*D <-> E)", dat1)
 (dat3 <- makeFuzzy(dat2, fuzzvalues = seq(0, 0.45, 0.01)))
 condition("(A*b + a*B <-> C)*(C*d + c*D <-> E)", dat3)
 
-# First, generate all configurations of 5 dichotomous factors that are compatible with
-# the causal chain (A*b + a*B <-> C)*(C*d + c*D <-> E) and, second, fuzzify those 
-# crisp-set data.
-dat1 <- full.ct(5)
-dat2 <- selectCases("(A*b + a*B <-> C)*(C*d + c*D <-> E)", dat1)
-(dat3 <- makeFuzzy(dat2, fuzzvalues = seq(0, 0.45, 0.01)))
-condition("(A*b + a*B <-> C)*(C*d + c*D <-> E)", dat3)
-
 # Inverse search for the data generating causal structure A*b + a*B + C*D <-> E from
 # fuzzy-set data with non-perfect consistency and coverage scores.
 dat1 <- full.ct(5)

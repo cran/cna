@@ -19,12 +19,12 @@ Character vector specifying complex solution formulas (csf); only strings of typ
 An optional argument providing a \code{configTable}, a data frame, or a list specifying the factors' value ranges if \code{cond} contains multi-value factors; if \code{x} is not \code{NULL}, \code{cond} is tested for redundancy-freeness relative to \code{full.ct(x)}, otherwise relative to \code{full.ct(cond)}.
 }
   \item{simplify}{
-Logical; if \code{TRUE} the result for csfs with the same number of component asfs is presented as a matrix, otherwise all results are presented as a list of logical vectors.  
+Logical; if \code{TRUE}, the result for csfs with the same number of component asfs is presented as a matrix, otherwise all results are presented as a list of logical vectors.  
 }
 }
 
 \details{
-According to the regularity theory of causation underlying CNA, a Boolean dependency structure is causally interpretable only if it does not contain any redundant elements. Boolean dependency structures may feature various types of redundancies, one of which are so-called \emph{structural redundancies}. A csf \eqn{\Phi} has a structural redundancy if, and only if, reducing \eqn{\Phi} by one or more of the asf it is composed of results in a csf \eqn{\Phi'} that is logically equivalent to \eqn{\Phi}. To illustrate, suppose that \eqn{\Phi} is composed of three asf: asf1 * asf2 * asf3; and suppose that \eqn{\Phi} is logically equivalent to \eqn{\Phi'}: asf1 * asf2. In that case, asf3 makes no difference to the behavior of the factors in \eqn{\Phi} and \eqn{\Phi'}; it is structurally redundant and, accordingly, must not be causally interpreted. For more details see the \pkg{cna} package vignette or Baumgartner and Falk (2019).
+According to the regularity theory of causation underlying CNA, a Boolean dependency structure is causally interpretable only if it does not contain any redundant elements. Boolean dependency structures may feature various types of redundancies, one of which are so-called \emph{structural redundancies}. A csf \eqn{\Phi} has a structural redundancy if, and only if, reducing \eqn{\Phi} by one or more of the asf it is composed of results in a csf \eqn{\Phi'} that is logically equivalent to \eqn{\Phi}. To illustrate, suppose that \eqn{\Phi} is composed of three asf: asf1 * asf2 * asf3; and suppose that \eqn{\Phi} is logically equivalent to \eqn{\Phi'}: asf1 * asf2. In that case, asf3 makes no difference to the behavior of the factors in \eqn{\Phi} and \eqn{\Phi'}; it is structurally redundant and, accordingly, must not be causally interpreted. For more details see the package vignette (\code{vignette("cna")}) or Baumgartner and Falk (2019).
 
 
 
@@ -45,7 +45,7 @@ Falk, Christoph: identification and solution of the problem of structural redund
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
 
 }
 

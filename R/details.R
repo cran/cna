@@ -3,7 +3,6 @@
 details <- function(cond, x, 
   what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
   cycle.type = c("factor", "value")){
-  cycle.type <- match.arg(cycle.type)
   .det(x, noblanks(cond), what = what, cycle.type = cycle.type)
 }
 
@@ -17,27 +16,41 @@ details <- function(cond, x,
 #  Converts x to a configTable and then calls the .det.cti
 .det.default <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-    type, cycle.type){
+    type, cycle.type = "factor"){
   if (!inherits(x, "configTable")){
     if (missing(type)) type <- "cs"
-    x <- configTable(x, type = type)
+    x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
+                     verbose = FALSE)
   }
-  .det.cti(ctInfo(x), cond = cond, what = what, available = x$details, cycle.type)
+  cti <- ctInfo(x)
+  qtypes <- .qcondType(cond, colnames(cti$scores), cti$type,
+                       stdComplex.multiple.only = FALSE) 
+  ok <- qtypes %in% c("stdAtomic", "stdComplex")
+  if (any(!ok)){
+    stop("Invalid condition(s):\n", 
+         paste0("  ", cond[!ok], collapse = "\n"),
+         "\ndetails() expects valid conditions in standard form.",
+         call. = FALSE)
+  }
+  if (useCtiList(cti)) cti <- ctiList(cti, cond)
+  .det(cti, cond = cond, what = what, available = x$details, cycle.type = cycle.type)
 }
 
 # ==== Method for class 'cti' ====
 #   x        cti
 #   cond     character vector with the csf
 #   what     char-vector: list of required measures
+#   available, cycle.type
+#            Passed to details/clarify_details
 #   in.csf   special shortcut for the case where .det.cti is called from within csf()
 # value: A data.frame with columns according to what
 .det.cti <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-    available = what, cycle.type, in.csf = FALSE){
+    available = what, cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE){
+
   what <- clarify_details(what, available = available)
-  qc_ct <- qcond_csf(cond, x$scores, flat = TRUE)
   if (any(c("redundant", "inus", "exhaustiveness", "faithfulness") %in% what)){
-    x_full <- full.ct(x)
+    x_full <- full.ct(x, cond = cond)
     qc_full <- qcond_csf(cond, x_full$scores, flat = TRUE)
   }
   out <- data.frame(matrix(numeric(0), length(cond)), row.names = cond)
@@ -49,12 +62,12 @@ details <- function(cond, x,
     if (in.csf){
       out$inus <- !red
       const <- rep(FALSE, length(cond))
-      const[out$inus] <- apply(qcond_csf(cond[out$inus], x_full$scores, force.bool = TRUE), 2, isConstant)
-      out$inus[const] <- FALSE
+      const[out$inus] <- constCols(qcond_csf(cond[out$inus], x_full$scores, force.bool = TRUE))
+      if (any(const)) out$inus[const] <- FALSE
       constFact <- constFact(cond[out$inus], x_full)
-      out$inus[out$inus][constFact] <- FALSE
+      if (any(constFact)) out$inus[out$inus][constFact] <- FALSE
       partStrRed <- partiallyRedundant(extract_asf(cond[out$inus]), x_full)
-      out$inus[out$inus][partStrRed] <- FALSE
+      if (any(partStrRed)) out$inus[out$inus][partStrRed] <- FALSE
     } else {
       out$inus <- .inus.cti(x_full, cond, full = TRUE)
     }
@@ -64,12 +77,17 @@ details <- function(cond, x,
   }
   ex_ff <- c("exhaustiveness", "faithfulness") %in% what
   if (any(ex_ff)){
-    exf <- exff.cti(x, cond, names = FALSE, cti.full = x_full,
-                    qc_full = qc_full)[, ex_ff, drop = FALSE]
+    if (is.ctiList){
+      exf <- calcExff(cti = x, cti.full = x_full, cond, names = FALSE)
+    } else {
+      ctiL <- ctiList(x, cond)
+      exf <- exff.ctiList(ctiL, cond, cti.full = full.ct(ctiL),
+                          names = FALSE)[, ex_ff, drop = FALSE]
+    }
     out <- cbind(out, exf)
   }
   if ("coherence" %in% what)
-    out$coherence <- .coher(cond, std = TRUE, cti = x, qc_ct = qc_ct, names = FALSE)
+    out$coherence <- coherence.cti(x, cond, names = FALSE)
   if ("redundant" %in% what){
     out$redundant <- red
   }

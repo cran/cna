@@ -1,12 +1,17 @@
 
 # randAsf: Determine a random asf
-randomAsf <- function(x, outcome = NULL, compl = NULL, how = c("inus", "minimal")){
+randomAsf <- function(x, outcome = NULL, maxVarNum = if (type == "mv") 8 else 16,
+                      compl = NULL, how = c("inus", "minimal")){
   how <- match.arg(how)
+  if (!is.data.frame(x) && !is.matrix(x)) x <- full.ct(x)
   x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
-  if (how == "inus") x <- full.ct(x)
+  type <- attr(x, "type")
+  if (length(x) > maxVarNum){
+    keep <- union(outcome, sample(names(x), maxVarNum - length(outcome)))
+    x <- x[keep]
+  }
   stopifnot(length(x) >= 3)
   if (!is.null(outcome)) stopifnot(length(outcome) == 1, outcome %in% names(x))
-  type <- attr(x, "type")
   
   if (is.null(compl)){
     compl <- pmin(ncol(x)-1, 4)
@@ -52,10 +57,15 @@ randomAsf <- function(x, outcome = NULL, compl = NULL, how = c("inus", "minimal"
   
   # condition (lhs)
   vals1 <- vals[-match(rhsFactor, names(vals))]
+
   repeat {
-    lhs <- hconcat(list(lapply(len.msc, msamp, vals1)), c("+", "*"))
+    lhs.ini <- lapply(len.msc, msamp, vals1)
+    lhs <- hconcat(list(lhs.ini), c("+", "*"))
+    keepvars <- unlist(lhs.ini)
+    keepvars <- if (type == "mv") sub("=.+$", "", keepvars) else toupper(keepvars)
+    x4rreduce <- if (how == "inus") full.ct(x[unique(keepvars)]) else x
     # minimalize if no-inus
-    lhs <- rreduce(lhs, x, full = how == "inus")
+    lhs <- rreduce(lhs, x4rreduce, full = how == "inus")
     if (!lhs %in% c("0", "1")) break     # if resulting lhs-condition is a tautology -> repeat
   }
   structure(paste0(lhs, "<->", rhs), class = c("stdAtomic", "character"))
@@ -68,10 +78,12 @@ msamp <- function(i, v) vapply(sample(v, i), sample, 1, FUN.VALUE = character(1)
 
 # === randomCsf === 
 # randCsf: Determine a random csf
-randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL){
-  x <- full.ct(x)
-  stopifnot(length(x) >= 4)
+randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL, maxVarNum = if (type == "mv") 8 else 16){
+  if (!is.data.frame(x) && !is.matrix(x)) x <- full.ct(x)
   type <- attr(x, "type")
+  if (is.null(type)) type <- "cs"
+  stopifnot(length(x) >= 4, length(maxVarNum) == 1)
+  maxVarNum <- min(maxVarNum, length(x))
 
   # outcome, number and complexity of asf's
   if (is.null(outcome)){
@@ -90,11 +102,33 @@ randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL){
   for (i in seq_along(outcome)){
     if (i > 1) lhs_factors <- c(lhs_factors, outc)
     outc <- outcome[[i]]
-    xx <- x[c(lhs_factors, outc)]
-    if (nzchar(outCsf)){
-      xx <- selectCases(outCsf, xx)
-    }
     repeat{
+      if (length(lhs_factors) <= maxVarNum){
+        xx <- full.ct(x[c(lhs_factors, outc)])
+      } else {
+        # Case wide data: preselect a subset of factors for this asf before applying full.ct()
+        used_factors <- outc
+        if(nzchar(outCsf)){
+          used_factors <- unique(
+            c(used_factors, 
+              extractFactors(extract_asf(outCsf)[[1]], type, split = c("<->", "+", "*"),
+                             fixed = TRUE)))
+        }
+        if (length(used_factors) < maxVarNum){
+          lhs_candidates <- setdiff(lhs_factors, used_factors)
+          selected_factors <- if (length(lhs_candidates) <= maxVarNum - length(used_factors)){
+            lhs_candidates
+          } else {
+            sample(lhs_candidates, maxVarNum - length(used_factors))
+          }
+        } else {
+          selected_factors <- character(0)
+        }
+        xx <- full.ct(x[c(used_factors, selected_factors)])
+      }
+      if (nzchar(outCsf)){
+        xx <- selectCases(outCsf, xx)
+      }
       rasf <- randomAsf(xx, outcome = outc, compl = compl, how = "minimal")
       if (!(lhs(rasf) %in% c("0", "1"))) break
     }
@@ -102,4 +136,3 @@ randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL){
   }
   structure(outCsf, class = c("stdComplex", "character"))
 }
-

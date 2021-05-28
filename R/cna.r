@@ -1,6 +1,6 @@
 
 cna <- function (x, type,
-    ordering = NULL, strict = FALSE,
+    ordering = NULL, strict = FALSE, outcome = TRUE, 
     con = 1, cov = 1, con.msc = con, 
     notcols = NULL, rm.const.factors = TRUE, rm.dup.factors = TRUE,  
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf,
@@ -34,7 +34,7 @@ cna <- function (x, type,
   # more formal requirements  
   if (nrow(ct) <= 1 || ncol(ct) <= 1)
     stop("Config table must have at least two rows and two columns.")
-  ordering <- check.ordering(ordering, ct)
+  
   # details
   details <- clarify_details(details)
   if (!suff.only) details <- union("inus", details)
@@ -42,6 +42,51 @@ cna <- function (x, type,
   if (acyclic.only){
     details <- union(details, c("cyclic"))
   }
+
+  # Check con and cov values and reduce them slightly to avoid failing 
+  # to find conditions due to rounding issues
+  if (length(con) != 1 || con < 0 || con > 1 || 
+      length(cov) != 1 || cov < 0 || cov > 1){
+    stop("Invalid input for 'con' or 'cov'")
+  }
+  d.eps <- nrow(ct) * .Machine$double.eps
+  con <- max(con - d.eps, 0)
+  cov <- max(cov - d.eps, 0)
+
+  # maxstep
+  stopifnot(length(maxstep) == 3, maxstep > 0)
+  maxstep[1:2] <- pmin(maxstep[1:2], maxstep[3])
+
+  # Define config, uniqueValues, resp_nms, factMat, nVal, valueId, scores
+  cti <- ctInfo(ct, cutoff = cutoff, border = match.arg(border))
+  vnms <- colnames(cti$scores)
+  freqs <- cti$freq
+  
+  # setup output object
+  sol <- vector("list", length(cti$resp_nms))
+  names(sol) <- cti$resp_nms
+  
+  # ordering and outcome
+  ordering <- check.ordering(ordering, cti)
+  if (isTRUE(outcome)){ 
+    outcome <- cti$resp_nms
+  } else {
+    if (!all(outcome %in% c(names(x), colnames(cti$scores))))
+      stop("Invalid 'outcome' value specified: ", 
+           setdiff(outcome, c(names(x), cti$resp_nms)))
+  }
+  if (any(neg.outcome <- outcome == tolower(outcome))){
+    outcome <- toupper(outcome)
+    notcols <- union(notcols, outcome[neg.outcome])
+  }
+  if (is.list(ordering) && (strict || length(ordering[[1]]) == 1)) 
+    outcome <- setdiff(outcome, ordering[[1]])
+  if (type == "mv" && any(outcome %in% names(ct))){
+    mvnms <- intersect(outcome, names(ct))
+    outcome <- union(setdiff(outcome, mvnms), 
+                     cti$resp_nms[unlist(cti$config[mvnms], use.names = FALSE)])
+  }
+  outcome <- intersect(cti$resp_nms, outcome) # order!
 
   # notcols and ct.out
   if (!is.null(notcols)){
@@ -67,36 +112,14 @@ cna <- function (x, type,
     ct.out <- ct
   }
 
-  # Check con and cov values and reduce them slightly to avoid failing 
-  # to find conditions due to rounding issues
-  if (length(con) != 1 || con < 0 || con > 1 || 
-      length(cov) != 1 || cov < 0 || cov > 1){
-    stop("Invalid input for 'con' or 'cov'")
-  }
-  d.eps <- nrow(ct) * .Machine$double.eps
-  con <- max(con - d.eps, 0)
-  cov <- max(cov - d.eps, 0)
-
-  # maxstep
-  stopifnot(length(maxstep) == 3, maxstep > 0)
-  maxstep[1:2] <- pmin(maxstep[1:2], maxstep[3])
-
-  # Define config, uniqueValues, resp_nms, factMat, nVal, valueId, scores
-  cti <- ctInfo(ct, cutoff = cutoff, border = match.arg(border))
-  vnms <- colnames(cti$scores)
-  freqs <- attr(ct, "n")
-  
-  # setup output object
-  sol <- vector("list", length(cti$resp_nms))
-  names(sol) <- cti$resp_nms
-  
-  for (zname in cti$resp_nms){
+  # main loop over outcomes  
+  for (zname in outcome){
   
     # Identify minimal sufficient conditions
     # --------------------------------------
     # Initialize minSuff, list of minimal sufficient combinations
-    .znm <- sub("(.+)=.+", "\\1", zname)
-    poteff <- potential.effects(ct, .znm, ordering, strict)
+    # .znm <- sub("(.+)=.+", "\\1", zname)
+    poteff <- potential.effects(cti, zname, ordering, strict)
     if (length(poteff) == 0L) next
     
     y <- cti$scores[, zname, drop = TRUE]
@@ -105,7 +128,6 @@ cna <- function (x, type,
       names(sol) <- sub(paste0("^", zname, "$"), tolower(zname), names(sol))
       zname <- tolower(zname)
     }  
-    
     minSuff <- findMinSuff(cti, y, poteff, freqs, con.msc, 
                            maxstep, only.minimal.msc)
     if (all(m_is.null(minSuff))) next
@@ -138,6 +160,9 @@ cna <- function (x, type,
 
   out <- structure(list(), class = "cna")
   out$call <- cl
+  if (!is.null(out$call$outcome)){ 
+    out$call$outcome <- ifelse(outcome %in% notcols, tolower(outcome), outcome)
+  }
   out$x <- x
   out$ordering <- ordering
   out$configTable <- ct
@@ -153,6 +178,7 @@ cna <- function (x, type,
 
 
 findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.msc){
+  if (cti$type == "mv") poteff <- unique(sub("(.+)=.+", "\\1", poteff))
   nsteps <- min(length(poteff), maxstep[1L])
   minSuff <- vector("list", nsteps)
   if (!only.minimal.msc) minimList <- vector("list", nsteps)
@@ -204,6 +230,10 @@ make.msc <- function(x, outcome, cti, details, suff.only){
                           sep = "*"),
     setNames(data.frame(t(attr(x, "conCov"))), c("consistency", "coverage")),
     stringsAsFactors = FALSE)
+  # if (cti$type == "mv"){
+  #   out <- out[out$outcome != out$condition, , drop = FALSE]
+  #   if (nrow(out) == 0) return(NULL)
+  # }
   if (!is.null(attr(x, "minimal"))){
     out$minimal <- attr(x, "minimal")
   } else {
@@ -260,10 +290,13 @@ make.asf <- function(cti, zname, .sol, inus.only, details){
   asf$complexity <- 
     lengths(n_plus_stars) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
   asf <- asf[order(asf$complexity, -asf$consistency * asf$coverage), , drop = FALSE]
-  if (length(details))
+  if (length(details)){
+    if (useCtiList(cti)) 
+      cti <- ctiList(cti, paste0(asf$condition, "<->", asf$outcome))
     asf <- cbind(asf, 
-                 .det.cti(cti, paste0(asf$condition, "<->", asf$outcome), 
-                          what = details))
+                 .det(cti, paste0(asf$condition, "<->", asf$outcome), 
+                      what = details, cycle.type = NULL))
+  }
   if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
   rownames(asf) <- NULL
   asf

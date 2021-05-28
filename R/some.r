@@ -24,7 +24,10 @@ some.configTable <- function (x, n = 10, replace = TRUE, ...){
   if (!replace) n <- min(n, nr)
   i <- sort(sample(nr, n, replace = replace))
   xx <- x[i, ]
-  attr(xx, "cases") <- lapply(attr(xx, "cases"), make.unique)
+  hasDupCases <- vapply(attr(xx, "cases"), anyDuplicated, 1L) > 0L
+  if (any(hasDupCases)){
+    attr(xx, "cases")[any(hasDupCases)] <- lapply(attr(xx, "cases")[any(hasDupCases)], make.unique)
+  }
   configTable(xx, rm.dup.factors = FALSE, rm.const.factors = FALSE, ...)
 }
 

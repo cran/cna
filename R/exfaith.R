@@ -10,50 +10,6 @@ exfaith <- function(cond, x, ...){
 # Switch order of first 2 args to provide dispatching on x
 exff <- function(x, cond, ...) UseMethod("exff")
 
-# ==== Method for class 'cti' ====
-#   cond      character vector with the cond
-#   x         configTable
-#   num       Return numeric value in [0, 1] (if FALSE: logical)
-#   cti.full  full.ct(x)
-exff.cti <- function(x, cond, num = TRUE, names = TRUE, cti.full = full.ct(x), 
-                     qc_full = qcond_csf(cond, cti.full$scores, flat = TRUE),
-                     ...){
-  stopifnot(identical(x[c("resp_nms", "nVal", "uniqueValues", 
-      "config")], cti.full[c("resp_nms", "nVal", "uniqueValues", 
-      "config")]))
-  IDdata <- rowID(x)
-  IDfull <- rowID(cti.full)
-  n <- length(IDfull)
-  stopifnot(IDdata %in% IDfull, anyDuplicated(IDfull) == 0L)
-  in.data <- !is.na(match(IDfull, IDdata))
-  #qc_full <- qcond_csf(cond, cti.full$scores, flat = TRUE)
-  ll <- attr(qc_full, "csflengths")
-  eq <- matrix(qc_full[, 1, ] == qc_full[, 2, ], 
-               nrow = n, ncol = dim(qc_full)[3])
-  r <- rep(seq_along(ll), ll)
-  cond.ok <- as.matrix(Matrix(eq, sparse = TRUE) %*% 
-                       Matrix(outer(r, seq_along(ll), "=="), sparse = TRUE)) == 
-             rep(ll, each = n)
-  if (num){  
-    out <- cbind(
-      colSums(in.data & cond.ok) / colSums(cond.ok), # exhaustiveness
-      colSums(in.data & cond.ok) / sum(in.data))     # faithfulness
-  } else {
-    out <- cbind(
-      !colAnys(cond.ok & !in.data), # exhaustive
-      !colAnys(!cond.ok & in.data)) # faithful
-  }
-  colnames(out) <- c("exhaustiveness", "faithfulness")
-  if (names) rownames(out)  <- cond
-  out
-}
-
-# ==== Method for class 'configTable' ====
-# Function suited for interactive use
-exff.configTable <- function(x, cond, ...){
-  cti <- ctInfo(x)
-  exff.cti(cti, cond, ...)
-}
 
 # ==== Default Method (for matrix or data.frame) ====
 # builds 
@@ -61,58 +17,96 @@ exff.configTable <- function(x, cond, ...){
 # value:    configTable, mv if original is mv, cs else
 exff.default  <- function(x, cond, ...){
   if (is.matrix(x) || is.data.frame(x)){
-    x <- configTable(x)
+    x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
     exff.configTable(x, cond, ...)
   } else {
     stop("Invalid specification of arguments")
   }
 }
 
-# ------------------------------------------------------------------------------
 
-if (F){
-  library(cna)
-  cna:::internals()
-  
-  dat1 <- allCombs(c(2,2,2,2,2))-1
-  dat2 <- selectCases("A*D + B*e <-> C", dat1)
-  
-  exfaith(c("A*D + B*e <-> C", "A*D <-> C", "A*D + B*e <-> E"), 
-          dat2)
-  exfaith(c("A*D + B*e <-> C", "A*D <-> C", "A*D + B*e <-> E"), 
-          cna:::ctInfo(dat2), num = F)
-  
-  condTbl(c("A*D + B*e <-> C", "A*D <-> C", "A*D + B*e <-> E"), 
-          dat2)
-  
-  # exhaustive but not faithful
-  dat3 <- selectCases("A*D + B*e -> C", dat1)
-  exfaith("A*D + B*e <-> C", cna:::ctInfo(dat3))
-  
-  # faithful but not exhaustive
-  dat4 <- selectCases("A*D + B*e <-> C", dat1)[-1, ]
-  exfaith("A*D + B*e <-> C", cna:::ctInfo(dat4))
-  
-  
-  
-  mycond <- "A*D + B*e <-> C" # consequens C or E
-  mydata <- dat3
-  
-  full <- full.ct(mydata)
-  D <- as.integer(cna:::rowID(cna:::ctInfo(full)) %in% cna:::rowID(cna:::ctInfo(mydata)))
-  cc <- condition(mycond, full)[[1]]
-  A <- cc[[1]]
-  C <- cc[[2]]
-  E <- condition(mycond, full, force.bool = TRUE)[[c(1, 1)]]
-  
-  condTbl(mycond, mydata)
-  sum(D*A*C) / sum(D*A)  # con
-  sum(D*A*C) / sum(D*C)  # cov
-  
-  exfaith(mycond, cna:::ctInfo(mydata))
-  sum(D*E) / sum(E)  # exhaustive
-  sum(D*E) / sum(D)  # faithful
-  
-  exfaith(mycond, cna:::ctInfo(mydata))
-  exhaustive(mycond, mydata)
-}  
+# ==== Method for class 'configTable' ====
+# Function suited for interactive use
+exff.configTable <- function(x, cond, ...){
+  cti <- ctInfo(x)
+  qtypes <- .qcondType(cond, colnames(cti$scores), cti$type,
+                        stdComplex.multiple.only = FALSE) 
+  ok <- qtypes %in% c("stdBoolean", "stdAtomic", "stdComplex", "constant")
+  if (any(!ok)){
+    stop("Invalid condition(s):\n", 
+         paste0("  ", cond[!ok], collapse = "\n"),
+         "\nexfaith() expects valid conditions in standard form.",
+         call. = FALSE)
+  }
+  # Always ctiList!
+  cti <- ctiList(unique_cti_cs(cti), cond)
+  exff(cti, cond, ...)
+}
+
+# Aux fun unique_cti_cs(): 
+# takes cti, removes duplicates and transforms fs to cs
+# (used in calculation of exhauxtiveness & faithfulness)
+unique_cti_cs <- function(cti){
+  cti <- subset(cti, !duplicated(cti$valueId))
+  cti$freq[] <- 1L
+  if (cti$type == "fs"){
+    cti$type <- "cs"
+    rnd <- round(cti$scores[, cti$resp_nms])
+    cti$scores[] <- as.vector(rbind(rnd, 1-rnd))
+  }
+  cti
+}
+if (FALSE){
+  # Checks:
+  # cs case:
+  cti <- ctInfo(csct(d.educate))
+  identical(
+    cna:::cti2ct(cti) %>% ct2df %>% unique %>% csct(rm.const.fact = F, rm.dup.fact = F) %>% ctInfo,
+    unique_cti_cs(cti)
+  )
+  # fs case:
+  cti <- ctInfo(fsct(d.pacts))
+  identical(
+    cna:::cti2ct(cti) %>% fs2cs %>% ct2df %>% unique %>% csct(rm.const.fact = F, rm.dup.fact = F) %>% 
+       ctInfo,
+    unique_cti_cs(cti)
+  )
+  # mv case:
+  cti <- ctInfo(mvct(d.pban))
+  identical(
+    cna:::cti2ct(cti) %>% ct2df %>% unique %>% 
+      mvct(rm.const.fact = F, rm.dup.fact = F) %>% ctInfo,
+    unique_cti_cs(cti)
+  )
+}
+
+
+# ==== Method for class 'cti' ====
+# There is NO method for cti, calculation of exhaustiveness and faithfulness is 
+# always performed at 'ctiList' level.
+
+
+# Calculation of exhaustiveness and faithfulness:
+#   Calculation is based on the assumption that 
+#   every tbls-comp of ctiList contains only the factors
+#   that are present in the respective cond's
+calcExff <- function(cti, cti.full, cond, 
+                     num = TRUE, names = TRUE){
+  # Number of factor configurations in actual data:
+  n_data <- sum(!duplicated(cti$valueId))
+  # Number of factor configurations in actual data matching cond:
+  n_data_cond <- colSums(qcond_csf(cond, unique.matrix(cti$scores), force.bool = TRUE))
+  # Number of factor configurations in full data matching cond:
+  n_cond <- colSums(qcond_csf(cond, unique.matrix(cti.full$scores), force.bool = TRUE))
+  # Output
+  out <- cbind(
+    exhaustiveness = n_data_cond / n_cond,
+    faithfulness = n_data_cond / n_data)
+  if (names) rownames(out)  <- cond
+  if (!num){
+    out[] <- abs(1-out) < 1e-12
+    mode(out) <- "logical"
+  }
+  out
+}
+

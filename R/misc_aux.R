@@ -17,6 +17,12 @@ m_is.null <- function(x, USE.NAMES = FALSE){
 # returns TRUE if all values in x are equal, FALSE otherwise
 isConstant <- function(x) if (length(x)) all(x==x[1]) else TRUE
 
+# constCols: matrix version of isConstant
+# applies isConstant columnswise
+constCols <- function(x){
+  matrixStats::colAlls(x == x[rep(1, nrow(x)), , drop = FALSE])
+}
+
 
 # function isASCII
 # Returns TRUE, if char vector x has only ASCII characters, otherwise FALSE

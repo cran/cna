@@ -12,7 +12,7 @@ rreduce <- function(cond, x = full.ct(cond), full = !missing(x),
   stopifnot(length(cond) == 1L, nrow(x) > 1L)
   cond <- noblanks(cond)
   if (x$type == "fs") stop("Invalid use of data of type 'fs'." )
-  if (full) x <- full.ct(x)
+  if (full) x <- full.ct(x, cond)
   sc <- x$scores
 
   evalCond0 <- drop(qcond_bool(cond, sc))

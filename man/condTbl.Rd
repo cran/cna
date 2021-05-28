@@ -55,7 +55,7 @@ as.condTbl(x, ...)
 \details{Depending on the processed data, the solutions (models) output by \code{\link{cna}} are often ambiguous, to the effect that many atomic and complex solutions fit the data equally well. To facilitate the inspection of the \code{\link{cna}} output, however, the latter standardly returns only 5 minimally sufficient conditions (msc), 5 atomic solution formulas (asf), and 5 complex solution formulas (csf) for each outcome. \code{msc} can be used to extract \emph{all} msc from an object \code{x} of class \dQuote{cna}, \code{asf} to extract \emph{all} asf, and \code{csf} to build approximately \code{n.init} csf from the asf stored in \code{x}. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well.
 The outputs of \code{msc}, \code{asf}, and \code{csf} can be further processed by the \code{\link{condition}} function.
 
-While \code{msc} and \code{asf} merely extract information stored in \code{x}, \code{csf} builds csf from the inventory of asf recovered in the second phase of the \code{\link{cna}} algorithm. That is, the \code{csf} function implements the fourth stage of that algorithm. It proceeds in a stepwise manner as follows.
+While \code{msc} and \code{asf} merely extract information stored in \code{x}, \code{csf} builds csf from the inventory of asf recovered at the end of the third stage of the \code{\link{cna}} algorithm. That is, the \code{csf} function implements the fourth stage of that algorithm. It proceeds in a stepwise manner as follows.
 \enumerate{\item \code{n.init} possible conjunctions featuring one asf of every outcome are built. \item  If \code{inus.only = TRUE} or \code{minimalizeCsf = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019). 
 \item If \code{inus.only = TRUE}, tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated. 
 [If \code{inus.only = FALSE} and \code{minimalizeCsf = TRUE}, only structural redundancies are eliminated, meaning only step 2, but not step 3, is executed.]
@@ -94,7 +94,7 @@ Falk, Christoph: development, testing
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
 
 Lam, Wai Fung, and Elinor Ostrom. 2010.
 \dQuote{Analyzing the Dynamic Complexity of Development Interventions: Lessons
@@ -126,14 +126,16 @@ csf(cna.irrigate, details = c("e", "f"))
 asf(cna.irrigate)
 
 # Extract all minimally sufficient conditions.
-msc(cna.irrigate)
+msc(cna.irrigate) # capped at 20 rows
+print(msc(cna.irrigate), n = Inf) # prints all rows
 
 # Extract only the conditions (solutions).
 csf(cna.irrigate)$condition
 asf(cna.irrigate)$condition
 msc(cna.irrigate)$condition
 
-# A CNA of d.irrigate without a presupposed ordering is even more ambiguous.
+# A CNA of d.irrigate without outcome specification and ordering is even more
+# ambiguous.
 cna2.irrigate <- cna(d.irrigate, cov = .9, maxstep = c(4,4,12), details = TRUE)
 
 # To speed up the construction of complex solution formulas, first extract atomic solutions

@@ -1,3 +1,15 @@
+Changes in version 3.1.0 (2021-05-28)
+  * The computational efficiency of cna() and other functions has been improved, especially for applications to larger data sets.
+  * The vignette has been reviewed.
+  * The definitions of exhaustiveness and faithfulness have been adapted - see section 5.3 in the vignette.
+  * rreduce() is now an exported function.
+  * new argument outcome in cna()
+  * new argument cond in full.ct()
+  * new argument maxVarNum in randomAsf() and randomCsf()
+  * new data set d.highdim
+  * coherence is now a generic function. Some of its arguments have changed names.
+  * The output of minimalizeCsf has changed - it has been aligned with the output of msc(), asf(), csf(), condTbl().
+
 Changes in version 3.0.1 (2020-11-06)
 	* A few minor changes in messages and vignette.
 

@@ -1,113 +1,83 @@
 
-# function "coherence"
+
+# Generic function minimalizeCsf
+coherence <- function(x, ...){
+  UseMethod("coherence")
+}
+
+# method coherence.default
 # coherence of conditions (typically complex conditions)
 # returns 1 for an atomicCond
-# returns NA for a booleanCond
-# cond   character vector
-# x      configTable or data frame
-# type   type of configTable 
-coherence <- function(cond, x, type, tt){
-  if (length(cond) == 0L) return(numeric(0))
+# generates error for a booleanCond
+# x      character vector
+# ct     configTable or data frame
+# type   type of configTable
+coherence.default <- function(x, ct, type, ..., tt){
   
     # Ensure backward compatibility of argument tt
     if (!missing(tt)){
-      warning("Argument tt is deprecated in coherence(); use x instead.", 
+      warning("Argument tt is deprecated in coherence(); use ct instead.", 
               call. = FALSE)
-      if (missing(x)) x <- tt
+      if (missing(ct)) ct <- tt
     }
 
-  if (inherits(x, "configTable")){
-    type <- attr(x, "type")
-    ct <- x
+  if (length(x) == 0L) return(numeric(0))
+  x <- noblanks(x)
+  if (inherits(ct, "configTable")){
+    type <- attr(ct, "type")
   } else {
     if (missing(type)) type <- "cs"
-    ct <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+    ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
-  stdClasses <- c("stdBoolean", "stdAtomic", "stdComplex")
-  inhStd <- stdClasses[as.logical(inherits(cond, stdClasses, which = TRUE))]
-  # Shortcut for stdBoolean and stdAtomic
-  if (length(inhStd) == 1 && inhStd %in% c("stdBoolean", "stdAtomic")){
-    val <- switch(inhStd, stdBoolean = NA_real_, stdAtomic = 1)
-    coh <- rep(val, length(cond))
-    names(coh) <- cond
-    return(coh)
+  cti <- ctInfo(ct)
+  qtypes <- .qcondType(x, colnames(cti$scores), cti$type, 
+                       stdComplex.multiple.only = FALSE) 
+  ok <- qtypes %in% c("stdAtomic", "stdComplex")
+  if (any(!ok)){
+    stop("Invalid condition(s):\n", 
+         paste0("  ", x[!ok], collapse = "\n"),
+         "\ncoherence() expects valid asf or csf in standard form.",
+         call. = FALSE)
   }
-  cond <- noblanks(cond) # don't use noblanks earlier because it removes the class attribute
-  .coher(cond, ct, 
-         std = identical(inhStd, "stdComplex"))
+  coherence(cti, cond = x)
 }
 
 
-# .coher(): internal function calculating coherence measures
-#   cond    char evtor, conditions, typically csf's
-#   ct      configTable
-#   std     Logical: Does cond contain csf's in standard form?
+# coherence.cti: internal function calculating coherence measures
+#   x       cti
+#   cond    char vector, conditions, typically csf's
 #   names   Logical: Add names to toutput vector?
-#   cti, qc_ct
-#           These "intermediate results" can be passed directly
-#           NOTE THAT THIS ONLY WORKS IF  STD=true !!
-.coher <- function(cond, ct, std = inherits(cond, "stdComplex"),
-                   names = TRUE, cti = ctInfo(ct), 
-                   qc_ct = qcond_csf(cond, cti$scores, flat = TRUE)){
-  coh <- rep(NA_real_, length(cond))
-  if (length(coh) == 0) return(coh)
-  if (std){
-    nms <- C_relist_Char(attr(qc_ct, "condition"), attr(qc_ct, "csflengths"))
-    isComplexCond <- rep(TRUE, length(cond))
-  } else {
-    cnd <- condition.default(cond, ct, rm.parentheses = FALSE)
-    nms <- nmsList(cnd)
-    isAtomicCond <- vapply(cnd, inherits, logical(1), "atomicCond", USE.NAMES = FALSE)
-    if (any(isAtomicCond)){
-      coh[isAtomicCond] <- 1
-    }
-    isComplexCond <- vapply(cnd, inherits, logical(1), "complexCond", USE.NAMES = FALSE)
+coherence.cti <- function(x, cond, names = TRUE, ...){
+  qc_ct <- qcond_csf(cond, x$scores, flat = TRUE)
+  out <- rep(NA_real_, length(cond))
+  nms <- C_relist_Char(attr(qc_ct, "condition"), attr(qc_ct, "csflengths"))
+  isComplexCond <- rep(TRUE, length(cond))
+  repr <- csf_representation(nms)
+  ccond1 <- strsplit(repr[isComplexCond], ",", fixed = TRUE)
+  ccond2 <- happly(ccond1, extract_asf)
+  hl <- hlengths(ccond2)
+  csflen1 <- vapply(relist1(hl[[2]], hl[[1]]), max, integer(1)) <= 1
+  out[isComplexCond][csflen1] <- 1
+  if (!all(csflen1)){
+    f <- x$freq
+    n <- length(f)
+    subs <- rep(!csflen1, collapse(hl, 2)[[1]])
+    x <- qc_ct[, , subs, drop = FALSE]
+    simil <- 1 - abs(x[, 1, , drop = FALSE] - x[, 2, , drop = FALSE])
+    dim(simil) <- dim(simil)[c(1, 3)]
+    r1 <- relist1(simil, hlengths(ccond2[!csflen1])[[2]]*n)
+    r2 <- lapply(r1, matrix, n)
+    out1 <- colSums(vapply(r2, rowMins, numeric(n))*f) / 
+      colSums(vapply(r2, rowMaxs, numeric(n))*f)
+    out[isComplexCond][!csflen1] <- 
+      vapply(relist1(out1, lengths(ccond2)[!csflen1]), min, numeric(1),
+             na.rm = TRUE)
   }
-  if (any(isComplexCond)){
-    repr <- csf_representation(nms)
-    ccond1 <- strsplit(repr[isComplexCond], ",", fixed = TRUE)
-    ccond2 <- happly(ccond1, extract_asf)
-    hl <- hlengths(ccond2)
-    csflen1 <- vapply(relist1(hl[[2]], hl[[1]]), max, integer(1)) <= 1
-    coh[isComplexCond][csflen1] <- 1
-    if (!all(csflen1)){
-      f <- if (missing(ct)) cti$freq else attr(ct, "n")
-      n <- length(f)
-      if (std){
-        subs <- rep(!csflen1, collapse(hl, 2)[[1]])
-        x <- qc_ct[, , subs, drop = FALSE]
-      } else {
-        cnd <- cnd[isComplexCond][!csflen1]
-        ll <- lengths(cnd, use.names = FALSE)
-        x <- array(unlist(cnd, use.names = F),
-                   c(n, 2, sum(ll)))
-      }  
-      simil <- 1 - abs(x[, 1, , drop = FALSE] - x[, 2, , drop = FALSE])
-      dim(simil) <- dim(simil)[c(1, 3)]
-      r1 <- relist1(simil, hlengths(ccond2[!csflen1])[[2]]*n)
-      r2 <- lapply(r1, matrix, n)
-      coh1 <- colSums(vapply(r2, rowMins, numeric(n))*f) / 
-        colSums(vapply(r2, rowMaxs, numeric(n))*f)
-      coh[isComplexCond][!csflen1] <- 
-        vapply(relist1(coh1, lengths(ccond2)[!csflen1]), min, numeric(1),
-               na.rm = TRUE)
-    }
-  }
-  if (names) names(coh) <- if (any(isComplexCond)) repr else cond
-  coh
+  if (names) names(out) <- ifelse(attr(qc_ct, "csflengths")>1, repr, cond)
+  out
 }
 
 # *** Auxiliary functions *** 
-
-# nmsList: returns names(x[[i]]) if inherits(x[i], "complexCond"),
-# or names(x)[[i]] otherwise
-nmsList <- function(x){
-  # x   a list of conds (value of condition)
-  out <- as.list(names(x))
-  isComplexCond <- vapply(x, inherits, logical(1), "complexCond")
-  out[isComplexCond] <- lapply(x[isComplexCond], names)
-  out
-}
 
 # csf_representation: Determines the connectivity pattern within a complexCond 
 #   x is a list of character vetors as retuned by extract_asf()

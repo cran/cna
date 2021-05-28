@@ -1,6 +1,19 @@
 
 is.inus <- function(cond, x = NULL, csf.info = FALSE){
-  .inus(x, noblanks(cond), csf.info = csf.info)
+  cond <- noblanks(cond)
+  out <- rep(NA, length(cond))
+  names(out) <- cond
+  result <- .inus(x, cond, csf.info = csf.info)
+  out[] <- result
+  attr(out, "csf.info") <- attr(result, "csf.info")
+  ok <- !is.na(out)
+  if (any(!ok)){
+    warning("Invalid condition(s):\n", 
+            paste0("  ", cond[!ok], collapse = "\n"),
+            "\nis.inus() expects valid conditions in standard form.",
+            call. = FALSE)
+  }
+  out
 }
 
 # ==== .inus() ====
@@ -10,10 +23,35 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE){
 .inus <- function(x, cond, ...) UseMethod(".inus")
 
 
-# aux fun
-constantCols <- function(x){
-  if (nrow(x)) return(matrixStats::colAlls(x == rep(x[1, ], each = nrow(x))))
-  rep(TRUE, ncol(x))
+# ==== Default Method (for matrix or data.frame) ====
+.inus.default  <- function(x, cond, ...){
+  if (is.null(x)){
+    x <- auxConfigTable(cond, check = TRUE)
+    if (attr(x, "type") == "mv") 
+      message("is.inus() with cond of type \"mv\" usually requires explicit specification of x")
+  } else {
+    x <- auxConfigTable(cond, x, check = TRUE)
+  }
+  .inus.configTable(x, cond, ...)
+}
+
+# ==== Method for class 'configTable' ====
+#   x         configTable
+#   cond      character vector with the csf
+# value: A logical vector with same length as cond
+.inus.configTable <- function(x, cond, ...){
+  cti <- ctInfo(x)
+  qtypes <- .qcondType(cond, colnames(cti$scores), cti$type, 
+                       stdComplex.multiple.only = FALSE) 
+  ok <- qtypes %in% c("stdBoolean", "stdAtomic", "stdComplex", "constant")
+  out <- rep(NA, length(cond))
+  if (all(!ok)) return(out)
+  cond <- cond[ok]
+  if (useCtiList(cti)) cti <- ctiList(cti, cond)
+  result <- .inus(cti, cond, ..., qtypes = qtypes[ok], full = FALSE) 
+  out[ok] <- result
+  attr(out, "csf.info") <- attr(result, "csf.info")
+  out
 }
 
 # ==== Method for class 'cti' ====
@@ -24,41 +62,42 @@ constantCols <- function(x){
 #   const.ok  If FALSE, the output will be FALSE for cond's evaluating to constant value
 # value: A logical vector of same length as cond
 # See examples
-.inus.cti <- function(x, cond, full = FALSE, const.ok = FALSE, csf.info = FALSE){
-  if (!full) x <- full.ct(x)
-
-  qtype <- .qcondType(cond, colnames(x$scores), x$type) 
-  # ok <- qtype %in% c("constant", "stdBoolean", "stdAtomic", "stdComplex")
+.inus.cti <- function(x, cond, 
+                      qtypes = .qcondType(cond, colnames(x$scores), x$type,  
+                                          stdComplex.multiple.only = FALSE), 
+                      full = FALSE, const.ok = FALSE, csf.info = FALSE){
   out <- rep(NA, length(cond))
-  names(out) <- cond
 
   # condition type "constant"
-  if (any(selCond <- !is.na(qtype) & qtype == "constant")){
+  if (any(selCond <- !is.na(qtypes) & qtypes == "constant")){
     out[selCond] <- .inusInternal_const(cond[selCond], const.ok = const.ok)
     if (all(!is.na(out) & out)) return(out)
   }
+  
+  if (!full) x <- full.ct(x, cond = cond)
 
   # condition type "stdBoolean"
-  if (any(selCond <- !is.na(qtype) & qtype == "stdBoolean")){
+  if (any(selCond <- !is.na(qtypes) & qtypes == "stdBoolean")){
     out[selCond] <- .inusInternal_bool(cond[selCond], x, const.ok = const.ok)
     if (all(!is.na(out) & out)) return(out)
   }
 
   # condition type "stdAtomic"
-  if (any(selCond <- !is.na(qtype) & qtype == "stdAtomic")){
-    out[selCond] <- .inusInteral_asf(cond[selCond], x)
+  if (any(selCond <- !is.na(qtypes) & qtypes == "stdAtomic")){
+    out[selCond] <- .inusInternal_asf(cond[selCond], x)
     if (all(!is.na(out) & out)) return(out)
   }
 
   # condition type "stdAtomic"
-  if (any(selCond <- !is.na(qtype) & qtype == "stdComplex")){
-    out_csf <- .inusInteral_csf(cond[selCond], x, info = csf.info)
+  if (any(selCond <- !is.na(qtypes) & qtypes == "stdComplex")){
+    out_csf <- .inusInternal_csf(cond[selCond], x, info = csf.info)
     out[selCond] <- out_csf
     attr(out, "csf.info") <- attr(out_csf, "csf.info")
   }
 
   out
 }
+
 
 # Internal function for conds of type "constant"
 .inusInternal_const <- function(cond, const.ok = FALSE){
@@ -116,7 +155,7 @@ constantCols <- function(x){
 #  * rhs a factor value
 #  * outcome is not part of the lhs
 #  * there is >=1 case & < nrow(full.ct) 
-.inusInteral_asf <- function(cond, cti){
+.inusInternal_asf <- function(cond, cti){
   out <- rep(NA, length(cond))
   names(out) <- cond
   .rhs <- unname(vapply(cond, rhs, character(1)))
@@ -138,7 +177,7 @@ constantCols <- function(x){
                      collapse(attr(lhsVals, "lengths"), 2))
   ok3 <- m_all(mapply("!=", getVar(.rhs), lhsVars, SIMPLIFY = FALSE))
   # 4) there is >=1 case & < nrow(full.ct) 
-  ok4 <- !apply(qcond_asf(cond, sc = cti$scores, force.bool = TRUE), 2, isConstant)
+  ok4 <- !constCols(qcond_asf(cond, sc = cti$scores, force.bool = TRUE))
   out[] <- ok1 & ok2 & ok3 & ok4
   out
 }
@@ -148,10 +187,10 @@ constantCols <- function(x){
 #   * there is >=1 case & < nrow(full.ct) 
 #   * struct redundancies
 #   * partial str red
-.inusInteral_csf <- function(cond, cti, info = FALSE){
+.inusInternal_csf <- function(cond, cti, info = FALSE){
   # asfs are inus
   asfs <- extract_asf(cond)
-  asf_not_inus <- !m_all(lapply(asfs, .inusInteral_asf, cti))
+  asf_not_inus <- !m_all(lapply(asfs, .inusInternal_asf, cti))
   # structural redundancies?
   redund <- m_any(.redund.cti(cti, cond, simplify = FALSE)) 
   # partial structural redundancies?
@@ -159,7 +198,7 @@ constantCols <- function(x){
   # constant Factor?
   constFact <- constFact(cond, cti)
   # constant?
-  const <- apply(qcond_csf(cond, cti$scores, force.bool = TRUE), 2, isConstant)
+  const <- constCols(qcond_csf(cond, cti$scores, force.bool = TRUE))
   # multiple outcomes?
   multOutcome <- vapply(happly(asfs, function(x) toupper(rhs(x))), 
                         anyDuplicated, 
@@ -180,6 +219,12 @@ constantCols <- function(x){
     attr(out, "csf.info") <- .info 
   }
   out
+}
+
+# aux fun
+constantCols <- function(x){
+  if (nrow(x)) return(matrixStats::colAlls(x == rep(x[1, ], each = nrow(x))))
+  rep(TRUE, ncol(x))
 }
 
 # Aux function: partial redundancy
@@ -219,20 +264,6 @@ constFact <- function(cond, cti.full){
         nrow = nrow(qc), ncol = ncol(qc), byrow = TRUE))
     out[foundConst] <- TRUE
   }  
-  # Below is a version that tests constancy only for factors that act as an outcome in the respective csf
-  # As always testing for all factors is simpler and usually faster, the selection of 
-  # outcome factors can be omitted.
-  # for (i in seq_along(xsplit)){
-  #   .col <- xsplit[[i]]
-  #   nm <- colnames(x)[[i]]
-  #   sel <- m_any(happly(outcomes, `==`, nm))
-  #   if (!any(sel)) next
-  #   firstVal <- .col[first[sel]]
-  #   foundConst <- !colAnys(qc[, sel, drop = FALSE] == 1 & .col != 
-  #                            matrix(firstVal, nrow = nrow(qc), ncol = sum(sel),
-  #                                   byrow = TRUE))
-  #   out[foundConst] <- TRUE
-  # }  
   out  
 }
 
@@ -249,25 +280,3 @@ allValuesOutcome <- function(asfs, cti){
   m_any(relist1(qwer %in% asdf, vapply(C_relist_Char(v, lengths(asfs)), nUnique, integer(1))))
 }
 
-
-
-# ==== Method for class 'configTable' ====
-#   x         configTable
-#   cond      character vector with the csf
-# value: A logical vector with same length as cond
-.inus.configTable <- function(x, cond, ...){
-  cti <- ctInfo(x)
-  .inus.cti(cti, cond, ..., full = FALSE) 
-}
-
-# ==== Default Method (for matrix or data.frame) ====
-.inus.default  <- function(x, cond, ...){
-  if (is.null(x)){
-    x <- full.ct(cond)
-    if (attr(x, "type") == "mv") message("is.inus() with cond of type \"mv\" usually requires explicit specification of x")
-  } else {
-    x <- full.ct(x)
-  }
-  cti <- ctInfo(x)
-  .inus.cti(cti, cond, ..., full = TRUE)
-}

@@ -23,11 +23,12 @@ ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
   stopifnot(inherits(ct, "configTable"))
   type <- attr(ct, "type")
   border <- match.arg(border)
+  ctmat <- as.matrix(ct)
   
   if (type == "cs") {
     uniqueValues <- lapply(ct, function(x) 1:0)
     resp_nms <- names(ct)
-    valueId <- 2 - as.matrix(ct)
+    valueId <- 2 - ctmat
   } else if (type == "mv") {
     uniqueValues <- lapply(ct, function(x) sort(unique.default(x)))
     resp_nms <- mapply(paste, names(ct), uniqueValues, MoreArgs = list(sep = "="), 
@@ -38,15 +39,15 @@ ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
       valueId <- matrix(valueId, nrow = nrow(ct), 
                         dimnames = list(NULL, names(uniqueValues)))
   } else if (type == "fs") {
-    ct.r <- fs2cs(as.data.frame(ct), cutoff = cutoff, border = border)
-    uniqueValues <- lapply(ct.r, function(x) 1:0)
+    ct.r <- fs2cs(ctmat, cutoff = cutoff, border = border)
+    rownames(ct.r) <- NULL
     resp_nms <- names(ct)
-    valueId <- 2 - as.matrix(ct.r)
+    uniqueValues <- sapply(resp_nms, function(x) 1:0, simplify = FALSE)
+    valueId <- 2 - ct.r
   }
   stopifnot(resp_nms == toupper(resp_nms))
   nVal <- lengths(uniqueValues)
-  valueId <- sweep(valueId, 
-                   2, 
+  valueId <- sweep(valueId, 2, 
                    c(if (length(nVal)) 0, cumsum(nVal[-length(nVal)])), 
                    "+")
   stopifnot(valueId%%1 == 0)
@@ -54,17 +55,43 @@ ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
   config <- split(seq_len(sum(nVal)), 
                   rep(seq_along(nVal), nVal))
   names(config) <- names(ct)
+  # 'scores' matrix
   if (prod(dim(ct)) == 0){
     scores <- matrix(numeric(0), 0, 0)
   } else {
-    scores <- do.call(cbind, lapply(resp_nms, factMat(type), ct = ct))
+    if (type %in% c("cs", "mv")){
+      scores <- do.call(cbind, 
+                        mapply(outer, asplit(valueId, 2), config, "==", 
+                               SIMPLIFY = FALSE))
+      mode(scores) <- "integer"
+    } else { # type=="fs"
+      scores <- rbind(ctmat, 1-ctmat)
+      dim(scores) <- c(nrow(ctmat), 2*ncol(ctmat))
+    }
+    colnames(scores) <- switch(type, 
+      mv = resp_nms,
+      as.vector(rbind(names(ct), tolower(names(ct)))))
   }
+  mode(scores) <- "numeric"
   freq <- attr(ct, "n")
   structure(mget(c("type", "resp_nms", "nVal", "uniqueValues", "config", 
                    "valueId", "scores", "freq")),
             class = c("cti", "tti"))
 }
+
+# subset method for class "cti"
+subset.cti <- function(x, i, ...){
+  x$valueId <- x$valueId[i, , drop = FALSE]
+  x$scores <- x$scores[i, , drop = FALSE]
+  x$freq <- x$freq[i]
+  x
+}
+
+# old function name (for compatibility of material outside the package)
+tt.info <- ctInfo
+
 # function to build 'scores' matrix
+# --- reintroduced because of cnaOpt dependence!
 factMat <- function(type){
   switch(type, 
     cs =  function(x, ct = tt, tt){
@@ -78,36 +105,42 @@ factMat <- function(type){
                 .Dimnames = list(NULL, c(x, tolower(x))))}
   )
 }
-  
-# subset method for class "cti"
-subset.cti <- function(x, i, ...){
-  x$valueId <- x$valueId[i, , drop = FALSE]
-  x$scores <- x$scores[i, , drop = FALSE]
-  x$freq <- x$freq[i]
-  x
-}
-
-# old function name (for compatibility of material outside the package)
-tt.info <- ctInfo
-
 
 # function check.ordering
 # =======================
-check.ordering <- function(ordering, ct){
+
+check.ordering <- function (ordering, cti){
   if (is.null(ordering)) return(NULL)
-  if (!is.list(ordering))
-    stop("ordering must be NULL or a list.")
-  # set all names to uppercase
-  ordering <- happly(ordering, toupper)
-  ord.vars <- unlist(ordering, use.names = FALSE)
-  if(!all(ord.vars %in% colnames(ct))){
-    stop("Factor listed in ordering does not exist: ",
-         setdiff(ord.vars, colnames(ct)))
+  # check ordering: object structure
+  if (!is.list(ordering) || 
+      !all(vapply(ordering, is.character, logical(1)) | 
+           (hasFactor <- vapply(ordering, is.factor, logical(1)))
+           )){
+    stop("ordering must be either NULL or a list of character vectors.")
   }
-  if (anyDuplicated(unlist(ordering)))
-    stop("At least one factors appears twice in the ordering.")
-  if (!all(colnames(ct) %in% ord.vars)){
-    ordering <- c(list(setdiff(colnames(ct), ord.vars)), ordering)
+  if (any(hasFactor)){
+    ordering[hasFactor] <- lapply(ordering[hasFactor], as.character)
+  }
+  ordering <- happly(ordering, toupper)
+  orderingUnlisted <- unlist(ordering, use.names = FALSE, recursive = FALSE)
+  # check ordering: names in config table
+  validEntries <- names(cti$nVal)
+  if (!all(orderingUnlisted %in% validEntries)){
+    stop("Factor listed in ordering does not exist in configTable: ", 
+         paste0(setdiff(orderingUnlisted, validEntries), collapse = ","))
+  }
+  # check ordering: no duplicates
+  if (anyDuplicated(orderingUnlisted))
+    stop("At least one factor appears twice in the ordering.")
+  # Complete ordering
+  expand.ordering(ordering, cti)
+}  
+expand.ordering <- function(ordering, cti){
+  orderingUnlisted <- unlist(ordering)
+  nms <- names(cti$nVal)
+  if (!all(nms %in% orderingUnlisted)){
+    ordering <- c(list(setdiff(nms, orderingUnlisted)), 
+                  ordering)
   }
   ordering
 }
@@ -115,21 +148,14 @@ check.ordering <- function(ordering, ct){
 
 # potential.effects:
 # ==================
-potential.effects <- function (x, zname, ordering = NULL, strict = FALSE){
-  poteff0 <- setdiff(names(x), zname)
-  if (is.null(ordering)){
-    out <- poteff0
-  } else {
-    rownames(x) <- NULL
-    ordLevelZ <- which(vapply(ordering, function(x) any(zname %in% x), logical(1)))
-    poteff <- unlist(ordering[seq_len(ordLevelZ - strict)], use.names = FALSE)
-    out <- poteff[match(poteff0, poteff, 0)]  # same order as columns in x
-  }
-  if (attr(x, "type") == "mv"){ # Case mv with expanded configTable... [nonstandard!!]
-    vname <- sub("(.+)=.+", "\\1", zname)
-    out <- setdiff(out, vname)
-  }
-  out
+potential.effects <- function(cti, zname, ordering = NULL, strict = FALSE){
+  if (cti$type == "mv") zname <- sub("=.", "", zname)
+  nms <- names(cti$nVal)
+  poteff0 <- setdiff(nms, zname)
+  if (is.null(ordering)) return(poteff0)
+  ordLevelZ <- which(vapply(ordering, function(x) any(zname %in% x), logical(1)))
+  poteff <- unlist(ordering[seq_len(ordLevelZ - strict)], use.names = FALSE)
+  intersect(poteff0, poteff)  # order taken from poteff0
 }
 
 

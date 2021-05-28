@@ -67,7 +67,7 @@ minimalize("!(A*B*C*D*E+a*b*c*d*e)", maxstep = c(3, 5, 15))
 # values must be specified by means of x. x can be a list or a configTable:
 values <- list(C = 0:3, F = 0:2, V = 0:4)
 minimalize(c("C=1 + F=2*V=0", "C=1 + C=0*V=1"), values)
-\donttest{minimalize("C=1 + F=2 <-> V=1", values, maxstep=c(3,40,40))}
+\donttest{minimalize("C=1 + F=2 <-> V=1", values, maxstep=c(3,10,20))}
 minimalize(c("C=1 + C=0 * C=2", "C=0 + C=1 + C=2"), mvct(d.pban))
 
 

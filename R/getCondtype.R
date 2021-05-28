@@ -127,7 +127,7 @@ maybeBoolean <- function(x, ct_type){
     "[\\<\\-\\>!\\(\\)=]"
   }
   out <- !grepl(invalidChars, x)
-  out[grepl("*+", x, fixed = TRUE)] <- FALSE
+  out[grepl("[*+]{2}", x)] <- FALSE
   if (ct_type == "mv"){
     mvValueString <- "^[[:alpha:]\\.][[:alnum:]\\._]*=[[:digit:]]+$"
     spl <- hstrsplit(x, c("+", "*"), relist = FALSE)
@@ -146,16 +146,20 @@ maybeBoolean <- function(x, ct_type){
 }
 maybeAtomic <- function(x, ct_type){
   ok <- grepl("[^+*<]<{0,1}->", x)
+  ok[ok][grepl("[\\(\\)]", x[ok])] <- FALSE
+  
+  leftright <- strsplit(x, "<*->")
+  ok[lengths(leftright) > 2L] <- FALSE
+  # right side has no operators:
+  ok[ok][grepl("[\\*\\+\\<\\>\\-]", vapply(leftright[ok], "[[", 2, FUN.VALUE = character(1)))] <- FALSE
+  # lhs is bool/dnf:
   if (any(ok)){
-    mbBool <- happly(strsplit(x[ok], "<*->"), maybeBoolean, ct_type = ct_type)
-    chk <- m_all(mbBool)
-    chk[is.na(chk)] <- FALSE
-    ok1 <- ok
-    ok[ok][!chk] <- FALSE
-    ok[ok1][chk & lengths(mbBool) != 2] <- NA  # NA = invalidSyntax
+    check_lhs <- maybeBoolean(vapply(leftright[ok], "[[", 1, FUN.VALUE = character(1)), ct_type = ct_type)
+    ok[ok][!check_lhs | is.na(check_lhs)] <- FALSE
   }
   ok
 }
+
 maybeComplex <- function(x, ct_type, multiple.only = TRUE){
   ok <- grepl("^\\(", x) & grepl("\\)$", x) 
   if (multiple.only) ok <- ok & grepl(")*(", x, fixed = TRUE)

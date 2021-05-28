@@ -51,7 +51,7 @@ Logical vector of the same length as \code{cond}; if \code{cond} is a csf and \c
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
 
 Grasshoff, Gerd and Michael May. 2001. \dQuote{Causal Regularities.} In W Spohn, M Ledwig, M Esfeld (eds.), \emph{Current Issues in Causation}, pp. 85-114. Mentis, Paderborn.
 
@@ -106,7 +106,7 @@ is.inus("(A + C <-> B)*(C + E <-> B)", csf.info = TRUE)
 
 # Multi-value case
 # ----------------
-# In case of multi-value data, is.inus() needs to be given a data set x determining
+# In case of multi-value data, is.inus() needs to be given a dataset x determining
 # the value ranges of the factors in cond.
 mvdata <- mvct(setNames(allCombs(c(2, 3, 2, 3)) -1, c("C", "F", "V", "O")))
 is.inus("C=1 + F=2*V=0 <-> O=2", mvdata)

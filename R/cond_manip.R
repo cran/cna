@@ -1,6 +1,10 @@
 
 # remove blanks
-noblanks <- function(x) gsub("[[:space:]]", "", as.character(x))
+noblanks <- function(x){
+  # avoids loss of class attributes stdBoolean/stdAtomic/stdComplex
+  if (inherits(x, c("stdBoolean", "stdAtomic", "stdComplex"))) return(x)
+  gsub("[[:space:]]", "", as.character(x))
+}
 # extract lhs from formula
 lhs <- function(x) sub("([^<]+)<*->.+", "\\1", x)
 

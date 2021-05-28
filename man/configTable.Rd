@@ -9,7 +9,7 @@
 \title{Assemble cases with identical configurations in a configuration table}
 
 \description{
-The \code{configTable} function assembles cases with identical configurations from a crisp-set (cs), multi-value (mv), or fuzzy-set (fs) data frame in a table called a \emph{configuration table}.
+The \code{configTable} function assembles cases with identical configurations from a crisp-set, multi-value, or fuzzy-set data frame in a table called a \emph{configuration table}.
 }
 
 \usage{
@@ -31,8 +31,8 @@ fsct(...)
   \item{case.cutoff}{Minimum number of occurrences (cases) of a configuration
         in \code{x}. Configurations with fewer than \code{case.cutoff} occurrences (cases)
         are not included in the configuration table.}
-  \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical values in \code{x} are eliminated.}
-  \item{rm.const.factors}{Logical; if \code{TRUE}, factors with constant values in \code{x} are eliminated.}
+  \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical values in \code{x} are removed.}
+  \item{rm.const.factors}{Logical; if \code{TRUE}, factors with constant values in \code{x} are removed.}
   \item{.cases}{Set case labels (row names): optional character vector of length \code{nrow(x)}.}
   \item{verbose}{Logical; if \code{TRUE}, some messages on the configuration table are printed.}
   \item{show.cases}{Logical; if \code{TRUE}, the attribute \dQuote{cases}
@@ -68,7 +68,7 @@ The \code{row.names} argument of the \code{print} function determines whether th
 An object of type \dQuote{configTable}, i.e. a data.frame with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
 }
 
-\note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{configuration table} is a very different type of object than a QCA \emph{truth table}. While a truth table is a list indicating whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a configuration table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A configuration table does not express relations of sufficiency.
+\note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{configuration table} is a different type of object than a QCA \emph{truth table}. While a truth table is a list indicating whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a configuration table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A configuration table does not express relations of sufficiency.
 }
 
 

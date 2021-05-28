@@ -8,7 +8,7 @@ Randomly select configurations from a data frame or \code{configTable}
 }
 
 \description{
-Randomly select configurations from a data frame or \code{configTable} with or without replacement.
+The function \code{some} randomly selects configurations from a data frame or \code{configTable} with or without replacement.
 }
 
 \usage{

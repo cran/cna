@@ -16,7 +16,8 @@ causal chain structures.
 }
 
 \usage{
-cna(x, type, ordering = NULL, strict = FALSE, con = 1, cov = 1, con.msc = con,
+cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE, 
+    con = 1, cov = 1, con.msc = con,
     notcols = NULL, rm.const.factors = TRUE, rm.dup.factors = TRUE,  
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf, 
     only.minimal.msc = TRUE,  only.minimal.asf = TRUE, 
@@ -41,11 +42,13 @@ fscna(...)
         the factors in \code{x}.}
   \item{strict}{Logical; if \code{TRUE}, factors on the same level of the causal
         ordering are \emph{not} potential causes of each other; if \code{FALSE}, factors on the same level \emph{are} potential causes of each other.}
+  \item{outcome}{Character vector specifying one or several factors values that are to be considered as potential outcome(s). For crisp- and fuzzy-set data, factor values are expressed by upper and lower cases, for multi-value data, they are expressed by the "factor=value" notation.  
+  Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are considered as potential outcomes.}
   \item{con}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every minimally sufficient condition (msc), atomic solution formula (asf), and complex solution formula (csf) must satisfy. (See also the argument \code{con.msc} below).}
   \item{cov}{Numeric scalar between 0 and 1 to set the minimum coverage threshold every asf and csf must satisfy.}
   \item{con.msc}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every msc must satisfy. Overrides \code{con} for msc and, thereby, allows for imposing a consistency threshold on msc that differs from the threshold \code{con} imposes on asf and csf. Defaults to \code{con}.}
   \item{maxstep}{Vector of three integers; the first specifies the maximum number of conjuncts in each disjunct of an asf, the second specifies the maximum number of disjuncts in an asf, the third specifies the maximum \emph{complexity} of an asf. The complexity of an asf is %an integer defined to be the sum of the number of conjuncts in all of its disjuncts, i.e. 
-  the total number of exogenous factors in the asf. Default: \code{c(3,4,10)}.}
+  the total number of exogenous factor values in the asf. Default: \code{c(3,4,10)}.}
   \item{inus.only}{Logical; if \code{TRUE}, only disjunctive normal forms that are free of redundancies are retained as asf (see also \code{\link{is.inus}}). \cr Defaults to \code{only.minimal.msc && only.minimal.asf}.}
   \item{only.minimal.msc}{Logical; if \code{TRUE} (the default), only minimal conjunctions are retained as msc. If \code{FALSE}, sufficient conjunctions are not required to be minimal.}
   \item{only.minimal.asf}{Logical; if \code{TRUE} (the default), only minimal disjunctions are retained as asf. If \code{FALSE}, necessary disjunctions are not required to be minimal.}
@@ -74,28 +77,33 @@ The \strong{first input \code{x}} of the \code{cna} function is a data frame or 
 
 The \code{cna} function must be told what \bold{type of data} \code{x} contains, unless \code{x} is a configuration table. In the latter case, the type of \code{x} is already defined. Data that feature factors taking values 1 or 0 only are called \emph{crisp-set}, in which case the \code{type} argument takes its default value \code{"cs"}. If the data contain at least one factor that takes more than two values, e.g. \{1,2,3\}, the data count as \emph{multi-value}, which is indicated by \code{type = "mv"}. Data featuring at least one factor taking real values from the interval [0,1] count as \emph{fuzzy-set}, which is specified by \code{type = "fs"}. (Note that mixing multi-value and fuzzy-set factors in one analysis is not (currently) supported). To abbreviate the specification of the data type using the \code{type} argument, the functions \code{cscna(x, ...)}, \code{mvcna(x, ...)}, and \code{fscna(x, ...)} are available as shorthands for \code{cna(x, type = "cs", ...)}, \code{cna(x, type = "mv", ...)}, and \code{cna(x, type = "fs", ...)}, respectively.
 
-A data frame or configuration table \code{x} with a corresponding type specification is the only mandatory input of the \code{cna} function. In particular, the \code{cna} function does not need an input specifying which factor(s) in \code{x} are endogenous, it tries to infer that from the data. Still, when prior causal knowledge about an investigated process is available, \code{cna} can be prohibited from treating certain factors as potential causes of other factors by means of the argument \code{ordering}. If specified, that argument defines a \bold{causal ordering} for the factors in \code{x}. For example,  \code{ordering = list(c("A",} \code{ "B"), "C")} determines that C is causally located \emph{after} A and B, meaning that C is \emph{not} a potential cause of A and B. In consequence, \code{cna} only checks whether values of A and B can be modeled as causes of values of C; the test for a causal dependency in the other direction is skipped. If the argument \code{ordering} is not specified or if it is given the \code{NULL} value (which is the argument's default value), \code{cna} searches for dependencies between all factors in \code{x}. An \code{ordering} does not need to explicitly mention all factors in \code{x}. If only a subset of the factors are included in the \code{ordering}, the non-included factors are entailed to be causally before the included ones. Hence, \code{ordering = list("C")}, for instance, means that C is causally located after all other factors in \code{x}, meaning that C is the ultimate outcome of the structure under scrutiny. 
+A data frame or configuration table \code{x} with a corresponding type specification is the only mandatory input of the \code{cna} function. In particular, \code{cna} does not need an input specifying which factor(s) in \code{x} are endogenous, it tries to infer that from the data. But if it is known prior to the analysis what factors have values that can figure as outcomes, an \strong{outcome specification} can be given to \code{cna} via the argument \code{outcome}, which takes as input a character vector identifying one or several factor values  as potential outcome(s). In case of  \code{"cs"} and \code{"fs"} data, factor values are expressed by upper and lower cases (e.g. \code{outcome = c("A", "b")}), in the \code{"mv"} case, they are expressed by the ``factor=value'' notation (e.g. \code{outcome = c("A=1","B=3")}). Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are potential outcomes.
 
-The argument \code{strict} determines whether the elements of one level in an ordering can be causally related or not. For example, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = TRUE}, then A and B---which are on the same level of the ordering---are excluded to be causally related and \code{cna} skips corresponding tests. By contrast, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = FALSE}, then \code{cna} also searches for dependencies among A and B. The default is \code{strict} \code{ = FALSE}. If the user knows prior to the analysis that the data contain exactly one endogenous factor E and that the remaining exogenous factors are mutually causally independent, the appropriate function call should feature \code{cna(..., ordering = list("E"), strict = TRUE,...)}.
+When the data \code{x} contain multiple potential outcomes, it may moreover be known, prior to the analysis, that these outcomes have a certain \strong{causal ordering}, meaning that some of them are causally upstream of the others. Such information can be given to \code{cna} by means of the argument \code{ordering}, which takes a list of character vectors as value.
+%Still, when prior causal knowledge about an investigated process is available, \code{cna} can be prohibited from treating certain factors as potential causes of other factors by means of the argument \code{ordering}. If specified, that argument defines a \bold{causal ordering} for the factors in \code{x}. 
+For example,  \code{ordering = list(c("A",} \code{ "B"), "C")} determines that C is causally located \emph{downstream} of A and B, meaning that C is \emph{not} a potential cause of A and B. In consequence, \code{cna} only checks whether values of A and B can be modeled as causes of values of C; the test for a causal dependency in the other direction is skipped. %If the argument \code{ordering} is not specified, \code{cna} searches for dependencies between all factors in \code{x} (in accordance with \code{outcome}). 
+An \code{ordering} does not need to explicitly mention all factors in \code{x}. If only a subset of the factors are included in the \code{ordering}, the non-included factors are entailed to be upstream of the included ones. Hence, \code{ordering = list("C")}, for instance, means that C is located downstream of all other factors in \code{x}.
+
+The argument \code{strict} determines whether the elements of one level in an ordering can be causally related or not. For example, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = TRUE}, then A and B---which are on the same level of the ordering---are excluded to be causally related and \code{cna} skips corresponding tests. By contrast, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = FALSE}, then \code{cna} also searches for dependencies among A and B. The default is \code{strict} \code{ = FALSE}. %If the user knows prior to the analysis that the data contain exactly one endogenous factor E and that the remaining exogenous factors are mutually causally independent, the appropriate function call should feature \code{cna(..., ordering = list("E"), strict = TRUE,...)}.
 
 
 
 
-If no causal ordering is provided, all factor values in \code{x} are treated as potential outcomes; more specifically, in case of \code{"cs"} and \code{"fs"} data, \code{cna} tests for all factors whether their presence (i.e. them taking the value 1) can be modeled as an outcome, and in case of  \code{"mv"} data, \code{cna} tests for all factors whether any of their possible values can be modeled as an outcome. That is done by searching for redundancy-free Boolean functions (in disjunctive normal form) that account for the behavior of an outcome in accordance with \code{cna}'s core model fit parameters of \bold{consistency and coverage} (for details see the \pkg{cna} package vignette or Ragin 2006). First, \code{cna} identifies all minimally sufficient conditions (msc) that meet the threshold given by the consistency threshold \code{con.msc} (resp. \code{con}, if \code{con.msc = con}) for each factor in \code{x}. Then, these msc are disjunctively combined to minimally
+If no outcomes are specified and no causal ordering is provided, all factor values in \code{x} are treated as potential outcomes; more specifically, in case of \code{"cs"} and \code{"fs"} data, \code{cna} tests for all factors whether their presence (i.e. them taking the value 1) can be modeled as an outcome, and in case of  \code{"mv"} data, \code{cna} tests for all factors whether any of their possible values can be modeled as an outcome. That is done by searching for redundancy-free Boolean functions (in disjunctive normal form) that account for the behavior of an outcome in accordance with \code{cna}'s core model fit parameters of \bold{consistency and coverage} (for details see the \pkg{cna} package vignette or Ragin 2006). First, \code{cna} identifies all minimally sufficient conditions (msc) that meet the threshold given by the consistency threshold \code{con.msc} (resp. \code{con}, if \code{con.msc = con}) for each potential outcome in \code{x}. Then, these msc are disjunctively combined to minimally
 necessary conditions that meet the coverage threshold given by \code{cov} such that the whole disjunction meets the solution consistency threshold given by \code{con}. The resulting expressions are the atomic solution formulas (asf) for every factor value that can be modeled as outcome. The default value for \code{con.msc}, \code{con}, and \code{cov} is 1. 
 
 
 
-The \code{cna} function builds its models in four stages using a \strong{\emph{bottom-up search algorithm}} (see Baumgartner and Ambuehl 2018). \describe{\item{First stage}{On the basis of the \code{ordering}, the algorithm builds a set of potential outcomes \strong{O} from the  factors in \code{x}.}
+The \code{cna} function builds its models in four stages using a \strong{\emph{bottom-up search algorithm}} (see Baumgartner and Ambuehl 2020). \describe{\item{First stage}{On the basis of \code{outcome} and \code{ordering}, the algorithm builds a set of potential outcomes \strong{O} from the factors in \code{x}.}
 
 \item{Second stage}{The algorithm
-checks whether single factor values, e.g. A, b, C, (where "A" stands for "A=1" and "b" for "B=0") or D=3, E=2, etc., (whose membership scores, in case of \code{"fs"} data, meet \code{cutoff} in at least one case) are sufficient for a potential outcome in \strong{O} (where a factor value counts as sufficient iff it meets the threshold given by \code{con.msc}). Next, conjuncts of two factor values, e.g. A*b, A*C, D=3*E=2 etc., (whose membership scores, in case of \code{"fs"} data, meet \code{cutoff} in at least one case) are tested for sufficiency. Then, conjuncts of three factors, and so on. Whenever a conjunction (or a single factor value) is found to be sufficient, all supersets of that conjunction contain redundancies and are, thus, not considered for the further analysis. The result is a set of msc for every outcome in \strong{O}. To recover certain target structures in cases of noisy data, it may be useful to allow \code{cna} to also consider sufficient conditions for further analysis that are not minimal. This can be accomplished by setting \code{only.minimal.msc} to \code{FALSE}. A concrete example illustrating the utility of \code{only.minimal.msc} is provided in the \dQuote{Examples} section below. (The ordinary user is advised not to change the default value of this argument.)} 
+checks whether single factor values, e.g. A, b, C, (where "A" stands for "A=1" and "b" for "B=0") or D=3, E=2, etc., (whose membership scores, in case of \code{"fs"} data, meet \code{cutoff} in at least one case) are sufficient for a potential outcome in \strong{O} (where a factor value counts as sufficient iff it meets the threshold given by \code{con.msc}). Next, conjuncts of two factor values, e.g. A*b, A*C, D=3*E=2 etc., (whose membership scores, in case of \code{"fs"} data, meet \code{cutoff} in at least one case) are tested for sufficiency. Then, conjuncts of three factors, and so on. Whenever a conjunction (or a single factor value) is found to be sufficient, all supersets of that conjunction contain redundancies and are, thus, not considered for the further analysis. The result is a set of msc for every potential outcome in \strong{O}. To recover certain target structures in cases of noisy data, it may be useful to allow \code{cna} to also consider sufficient conditions for further analysis that are not minimal. This can be accomplished by setting \code{only.minimal.msc} to \code{FALSE}. A concrete example illustrating the utility of \code{only.minimal.msc} is provided in the \dQuote{Examples} section below. (The ordinary user is advised not to change the default value of this argument.)} 
 
-\item{Third stage}{Minimally necessary disjunctions are built for each outcome in \strong{O} by first testing whether single msc are necessary, then disjunctions of two msc, then of three, etc. (where a disjunction of msc counts as necessary iff it meets the threshold given by \code{cov}). Whenever a disjunction of msc (or a single msc) is found to be necessary, all supersets of that disjunction contain redundancies and are, thus, excluded from the further analysis. Finally, all and only those disjunctions of msc that meet both \code{cov} and \code{con} are issued as redundancy-free \strong{atomic solution formulas} (asf). To recover certain target structures in cases of noisy data, it may be useful to allow \code{cna} to also consider necessary conditions for further analysis that are not minimal. This can be accomplished by setting \code{only.minimal.asf} to \code{FALSE}, in which case \emph{all} disjunctions of msc reaching the con and cov thresholds will be returned. (The ordinary user is advised not to change the default value of this argument.)  %A concrete example illustrating the purpose of \code{only.minimal.msc} is provided in the example section below.
+\item{Third stage}{Minimally necessary disjunctions are built for each potential outcome in \strong{O} by first testing whether single msc are necessary, then disjunctions of two msc, then of three, etc. (where a disjunction of msc counts as necessary iff it meets the threshold given by \code{cov}). Whenever a disjunction of msc (or a single msc) is found to be necessary, all supersets of that disjunction contain redundancies and are, thus, excluded from the further analysis. Finally, all and only those disjunctions of msc that meet both \code{cov} and \code{con} are issued as redundancy-free \strong{atomic solution formulas} (asf). To recover certain target structures in cases of noisy data, it may be useful to allow \code{cna} to also consider necessary conditions for further analysis that are not minimal. This can be accomplished by setting \code{only.minimal.asf} to \code{FALSE}, in which case \emph{all} disjunctions of msc reaching the con and cov thresholds will be returned. (The ordinary user is advised not to change the default value of this argument.)  %A concrete example illustrating the purpose of \code{only.minimal.msc} is provided in the example section below.
 
 As the combinatorial search space for asf is potentially too large to be exhaustively scanned in reasonable time, the argument \bold{\code{maxstep}} allows for setting an upper bound for the complexity of the generated asf. \code{maxstep} takes a vector of three integers \code{c(i, j, k)} as input, entailing that the generated asf have maximally \code{j} disjuncts with maximally \code{i} conjuncts each and a total of maximally \code{k} factor values (\code{k} is the maximal complexity). The default is \code{maxstep = c(3, 4, 10)}.
 
-Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to suitable values in the interval [0.7, 1]. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2020), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both the over- and underfitting. }
+Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to suitable values in the interval [0.7, 1]. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. }
 
 \item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)}
 }
@@ -105,12 +113,13 @@ The \bold{default output} of \code{cna} lists asf and csf, ordered by complexity
 \code{only.minimal.asf} are set to \code{FALSE}, non-INUS solutions may also be returned. 
 
 Apart from the standard solution attributes, \code{cna} can calculate a number of  \bold{further solution attributes}: \code{exhaustiveness}, \code{faithfulness}, \code{coherence}, \code{redundant}, and \code{cyclic} all of which are recovered by setting \code{details} to its non-default value \code{TRUE} or to a character vector specifying the attributes to be calculated. 
-These attributes require explication (see also the package vignette):
+These attributes require explication (see also \code{vignette("cna")}):
 \itemize{
 
 
 \item \code{exhaustiveness} and \code{faithfulness} are two measures of model fit that quantify the degree of correspondence between the configurations that are, in principle, compatible with a solution and the configurations contained in the data from which that solution is derived. %Roughly, exhaustiveness is high when \emph{all} or most configurations \emph{compatible} with a solution are in the data, whereas faithfulness is high when \emph{no} or only few configurations that are \emph{incompatible} with a solution are in the data. More specifically,
-\itemize{\item \code{exhaustiveness} amounts to the ratio of the number of configurations in the data that are compatible with a solution to the number of configurations in total that are compatible with a solution.}\itemize{ \item \code{faithfulness} amounts to the ratio of the number of configurations in the data that are compatible with a solution to the total number of configurations in the data.} High exhaustiveness and faithfulness means that the configurations in the data are all and only the configurations that are compatible with the solution. Low exhaustiveness and/or faithfulness means that the data do not contain all configurations compatible with the solution and/or the data contain many configurations not compatible with the solution. In general, solutions with higher exhaustiveness and faithfulness scores are preferable over solutions with lower scores because they are better supported by the evidence in the data.
+\itemize{\item \code{exhaustiveness} amounts to the ratio of the number of configurations in the data that are compatible with a solution to the number of configurations in total that are compatible with a solution.}\itemize{ \item \code{faithfulness} amounts to the ratio of the number of configurations in the data that are compatible with a solution to the total number of configurations in the data.} 
+%High exhaustiveness and faithfulness means that the configurations in the data are all and only the configurations that are compatible with the solution. Low exhaustiveness and/or faithfulness means that the data do not contain all configurations compatible with the solution and/or the data contain many configurations not compatible with the solution. In general, solutions with higher exhaustiveness and faithfulness scores are preferable over solutions with lower scores because they are better supported by the evidence in the data.
 
 \item  \code{coherence} measures the degree to which the asf combined in a csf cohere, i.e. are instantiated together in the data rather than independently of one another. For more details see \code{\link{coherence}}. 
 
@@ -159,14 +168,14 @@ The option \dQuote{spaces} controls how the conditions are rendered. The current
 \tabular{rl}{
 \code{call}: \tab the executed function call\cr
 \code{x}:\tab the processed data frame or configuration table\cr
-\code{ordering}:\tab the implemented ordering\cr
+%\code{ordering}:\tab the implemented ordering\cr
 \code{configTable}: \tab the object of class \dQuote{configTable}, as input to \code{cna}\cr
 \code{configTable_out}: \tab the object of class \dQuote{configTable}, after modification according to \code{notcols}\cr
-\code{solution}: \tab the solution object, which itself is composed of lists exhibiting msc, asf, and csf for\cr\tab all factors in \code{x}\cr
+\code{solution}: \tab the solution object, which itself is composed of lists exhibiting msc, asf,\cr\tab and csf for all factors in \code{x}\cr
 \code{what}:\tab the values given to the \code{what} argument\cr
 \code{details}:\tab the calculated solution attributes\cr
-\code{...}:\tab plus additional list elements reporting the values given to the parameters \code{con}, \code{cov},\cr
-\tab\code{con.msc}, \code{inus.only}, \code{acyclic.only}, and \code{cycle.type}. 
+\code{...}:\tab plus additional list elements reporting the values given to the parameters \code{con},\cr
+\tab \code{cov}, \code{con.msc}, \code{inus.only}, \code{acyclic.only}, and \code{cycle.type}. 
   }
 }
 
@@ -195,9 +204,10 @@ Twenty Years of Biodiversity Conservation in Costa Rica.} \emph{Global Environme
 Baumgartner, Michael. 2009a. \dQuote{Inferring Causal Complexity.}
 \emph{Sociological Methods & Research} 38(1):71-101.
 
-Baumgartner, Michael and Mathias Ambuehl. 2018. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis}. \emph{Political Science Research and Methods.} doi:10.1017/psrm.2018.45.
+Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.\cr 
+doi:10.1017/psrm.2018.45. 
 
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
 
 Hartmann, Christof, and Joerg Kemmerzell. 2010. \dQuote{Understanding Variations 
 in Party Bans in Africa.} \emph{Democratization} 17(4):642-65.
@@ -209,7 +219,7 @@ Krook, Mona Lena. 2010.
 
 Mackie, John L. 1974. \emph{The Cement of the Universe: A Study of Causation.} Oxford: Oxford University Press.
 
-Parkkinen, Veli-Pekka and Michael Baumgartner. 2020. \dQuote{Robustness and Model Selection in Configurational Causal Modeling}, forthcoming in \emph{Sociological Methods & Research}. \cr url: https://people.uib.no/mba110/docs/rccm.pdf
+Parkkinen, Veli-Pekka and Michael Baumgartner. 2021. \dQuote{Robustness and Model Selection in Configurational Causal Modeling}, \emph{Sociological Methods & Research}.  doi:10.1177/0049124120986200
 
 Ragin, Charles C. 2006. \dQuote{Set Relations in Social Research: Evaluating Their Consistency and Coverage}. \emph{Political Analysis} 14(3):291-310.
 
@@ -218,7 +228,9 @@ Wollebaek, Dag. 2010.
 \emph{Rural Sociology} 75:144-166.
 }
 
-\seealso{\code{\link{configTable}}, \code{\link{condition}}, \code{\link{cyclic}}, \code{\link{condTbl}}, \code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link{some}},  \code{\link{coherence}}, \code{\link{minimalizeCsf}}, \code{\link{randomConds}}, \code{\link{is.submodel}},  \code{\link{is.inus}},  \code{\link{redundant}}, \code{\link{full.ct}}, \code{\link{d.educate}}, \code{\link{d.women}}, \code{\link{d.pban}}, \code{\link{d.autonomy}}}
+\seealso{\code{\link{configTable}}, \code{\link{condition}}, \code{\link{cyclic}}, \code{\link{condTbl}}, \code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link{some}},  \code{\link{coherence}},\cr
+\code{\link{minimalizeCsf}}, \code{\link{randomConds}}, \code{\link{is.submodel}},  \code{\link{is.inus}},  \code{\link{redundant}}, \code{\link{full.ct}}, \code{\link{d.educate}},\cr
+\code{\link{d.women}}, \code{\link{d.pban}}, \code{\link{d.autonomy}}, \code{\link{d.highdim}}}
 
 \examples{
 # Ideal crisp-set data from Baumgartner (2009a) on education levels in western democracies
@@ -245,6 +257,8 @@ print(cna.educate, what = "t")
 
 # CNA with negations of the factors E and L.
 cna(d.educate, notcols = c("E","L"))
+# The same by use of the outcome argument.
+cna(d.educate, outcome = c("e","l"))
 
 # CNA with negations of all factors.
 cna(d.educate, notcols = "all")
@@ -268,10 +282,10 @@ options(spaces = c("<->", "->", "+"))
 
 
 # Crisp-set data from Krook (2010) on representation of women in western-democratic parliaments
-# ---------------------------------------------------------------------------------------------
-# This example shows that CNA can infer which factors are causes and which ones
-# are effects from the data. Without being told which factor is the outcome, 
-# CNA reproduces the original QCA of Krook (2010).
+# ------------------------------------------------------------------------------------------
+# This example shows that CNA can distinguish exogenous and endogenous factors in the data.
+# Without being told which factor is the outcome, CNA reproduces the original QCA 
+# of Krook (2010).
 \donttest{ana1 <- cna(d.women, details = c("e", "f"))
 ana1}
 
@@ -302,10 +316,10 @@ cna(d.volatile, ordering = list("VO2"), maxstep = c(6, 6, 16), suff.only = TRUE)
 
 # Multi-value data from Hartmann & Kemmerzell (2010) on party bans in Africa
 # ---------------------------------------------------------------------------
-# mvCNA with causal ordering that corresponds to the ordering in Hartmann & Kemmerzell 
+# mvCNA with an outcome specification taken from Hartmann & Kemmerzell 
 # (2010); coverage cutoff at 0.95 (consistency cutoff at 1), maxstep at c(6, 6, 10).
-cna.pban <- mvcna(d.pban, ordering = list(c("C","F","T","V"),"PB"), cov = .95,
-                  maxstep = c(6, 6, 10), what = "all")
+cna.pban <- mvcna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(6, 6, 10), 
+                  what = "all")
 cna.pban
 
 # The previous function call yields a total of 14 asf and csf, only 5 of which are 
@@ -330,22 +344,21 @@ print(cna.pban, nsolutions = "all")
 print(cna.pban, what = "t", show.cases = TRUE)
 
 # Build solution formulas with maximally 4 disjuncts.
-\donttest{mvcna(d.pban, ordering = list(c("C","F","T","V"),"PB"), cov = .95, maxstep = c(4, 4, 10))
+\donttest{mvcna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(4, 4, 10))
 
 # Only print 2 digits of consistency and coverage scores.
 print(cna.pban, digits = 2)
 
 # Build all but print only two msc for each factor and two asf and csf.
-print(mvcna(d.pban, ordering = list(c("C","F","T","V"),"PB"), cov = .95,
+print(mvcna(d.pban, outcome = "PB=1", cov = .95,
       maxstep = c(6, 6, 10), what = "all"), nsolutions = 2)
 
 # Lowering the consistency instead of the coverage threshold yields further models with
 # excellent fit scores; print only asf.
-mvcna(d.pban, ordering = list(c("C","F","T","V"),"PB"), con = .93, what = "a",
-      maxstep = c(6, 6, 10))
-
-# Importing an ordering from prior causal knowledge is unnecessary for d.pban. PB  
-# is the only factor in those data that could possibly be an outcome.
+mvcna(d.pban, outcome = "PB=1", con = .93, what = "a", maxstep = c(6, 6, 10))
+      
+# Specifying an outcome is unnecessary for d.pban. PB=1 is the only 
+# factor value in those data that could possibly be an outcome.
 mvcna(d.pban, cov = .95, maxstep = c(6, 6, 10))
 }
 
@@ -378,15 +391,29 @@ fscna(dat2, ordering = list("AU"), con = .9, con.msc = .85, cov = .85)
 # that fare equally well.
 fscna(dat2, ordering = list("AU"), con = .85, cov = .9, details = TRUE)
 
-# Finally, here is an analysis of the whole data set, showing that across the whole period 
+# Finally, here is an analysis of the whole dataset, showing that across the whole period 
 # 1986-2006, the best causal model of local autonomy (AU) renders that outcome dependent
 # only on local direct spending (SP):
-\donttest{fscna(d.autonomy, ordering = list("AU"), strict = TRUE, con = .85, cov = .9, 
+\donttest{fscna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
       maxstep = c(5, 5, 11), details = TRUE)}
 
 # Also build non-INUS solutions.
-\donttest{asf(fscna(d.autonomy, ordering = list("AU"), strict = TRUE, con = .85, cov = .9, 
+\donttest{asf(fscna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
       maxstep = c(5, 5, 11), details = TRUE, inus.only = FALSE))}
+      
+      
+# High-dimensional data
+# ---------------------
+# As of package version 3.1, cna's handling of data with more than 20 factors
+# has been improved. Here's an analysis of the data d.highdim with 50 factors, massive 
+# fragmentation, and 20\% noise. (Takes about 15 seconds to compute.)
+head(d.highdim)
+\donttest{cna(d.highdim,  outcome = c("V13", "V11"), con = .8, cov = .8)}
+
+# By lowering maxstep, computation time can be reduced to less than 1 second
+# (at the cost of an incomplete solution).
+cna(d.highdim,  outcome = c("V13", "V11"), con = .8, cov = .8,
+  maxstep = c(2,3,10))      
 
 
 # Highly ambiguous artificial data to illustrate exhaustiveness and acyclic.only
@@ -398,7 +425,7 @@ dat1 <- selectCases(mycond)
 # additional messages about the csf building process:
 first.csf <- csf(ana1, verbose = TRUE)
 # Most of these csf are compatible with more configurations than are contained in 
-# dat1. Only 105 csf in first.csf are perfectly exhaustive (i.e. all compatible 
+# dat1. Only 193 csf in first.csf are perfectly exhaustive (i.e. all compatible 
 # configurations are contained in dat1):
 subset(first.csf, exhaustiveness == 1)
 
@@ -435,14 +462,14 @@ is.submodel(csf(test2)$condition, target)
 # [Repeated runs will generate different targets and data. In some runs, no solutions
 # are found.]
 target <- randomAsf(full.ct(5), compl = c(2,3))
-outcome <- as.vector(cna:::rhs(target))
+outcome <- cna:::rhs(target)
 # Simulate the data with con =  cov = 0.8.
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- some(configTable(dat1), n = 200, replace = TRUE)
 dat3 <- makeFuzzy(ct2df(dat2), fuzzvalues = seq(0, 0.45, 0.01))
 dat4 <- selectCases1(target, con = .8, cov = .8, type = "fs", dat3)
 # Analyze the simulated data with CNA.
-test3 <- fscna(dat4, ordering = list(outcome), strict = TRUE, con = .8, cov = .8)
+test3 <- fscna(dat4, outcome = outcome, con = .8, cov = .8)
 # Check whether a correctness-preserving submodel of the target is among the 
 # returned solutions. 
 is.submodel(asf(test3)$condition, target)
@@ -469,11 +496,11 @@ as.condTbl(fscond("a*B*d + A*c*D <-> E", dat1))
 # con = cov = 0.8 because one of the disjuncts (a*B*d) does not meet the con
 # threshold:
 as.condTbl(fscond(c("a*B*d <-> E", "A*c*D <-> E"), dat1))
-fscna(dat1, ordering=list("E"), strict = TRUE, con = .8, cov = .8)
+fscna(dat1, outcome = "E", con = .8, cov = .8)
 
 # With the argument con.msc we can lower the con threshold for msc, but this does not
 # recover "a*B*d + A*c*D <-> E" either:
-cna2 <- fscna(dat1, ordering=list("E"), strict = TRUE, con = .8, cov = .8, con.msc = .78)
+cna2 <- fscna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78)
 cna2
 msc(cna2)
 
@@ -481,7 +508,7 @@ msc(cna2)
 # therefore,  "A*c*D -> E" is not contained in the msc---because of violated minimality.
 # In a situation like this, lifting the minimality requirement via 
 # only.minimal.msc = FALSE allows CNA to find the intended target:
-fscna(dat1, ordering=list("E"), strict=TRUE, con = .8, cov = .8, con.msc = .78,
+fscna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78,
       only.minimal.msc = FALSE)
 }
 

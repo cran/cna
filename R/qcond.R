@@ -3,12 +3,17 @@
 #   condstr  string in 'visible' syntax with 'standard boolean' format, i.e. a disjunction of conjunctions
 #   sc       'scores' matrix
 qcond_bool <- function(condstr, sc){
+  if (inherits(sc, "cti")) sc <- sc$scores
   spl <- strsplit(condstr, "+", fixed = TRUE)
   conjs <- as.character(unique(unlist(spl, use.names = FALSE, recursive = FALSE)))
   splc <- strsplit(conjs, "*", fixed = TRUE)
   # Check for presence of the factors in the data
-  factors <- unique(toupper(unlist(splc, recursive = FALSE, use.names = FALSE)))
+  usplc <- unlist(splc, recursive = FALSE, use.names = FALSE)
   nms <- colnames(sc)
+  if (!all(usplc %in% nms)) 
+    stop("Invalid factor value(s) in condition: ", paste0(setdiff(usplc, nms), collapse = ","), 
+         call. = FALSE)
+  factors <- unique(toupper(usplc))
   factor_ok <- !is.na(match(factors, nms))
   if (any(!factor_ok)) stop("Invalid condition specified.", call. = FALSE)
   n <- nrow(sc)
@@ -31,6 +36,7 @@ qcond_bool <- function(condstr, sc){
 # value: array of dimension nrow(sc) x 2 x length(condstr),
 #   with attributes 'condition' and 'response'
 qcond_asf <- function(condstr, sc, force.bool = FALSE){
+  if (inherits(sc, "cti")) sc <- sc$scores
   l <- length(condstr)
   n <- nrow(sc)
   lr <- strsplit(condstr, "<*->")
@@ -98,6 +104,7 @@ cond2condTbl <- function(cond, freqs){
 # - if flat = FALSE: Returns a list with a separate object as returned by qcond_asf() for each csf
 qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
                       freqs = NULL){
+  if (inherits(sc, "cti")) sc <- sc$scores
   n <- nrow(sc)
   asfs <- extract_asf(condstr)
   lengths <- lengths(asfs)
@@ -109,10 +116,10 @@ qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
     } else {
       list()
     }
-    out <- vapply(
+    out <- matrix(vapply(
       relisted, 
       function(x){ rowMins(matrix(x, nrow = n)) },
-      numeric(n))
+      numeric(n)), nrow = nrow(sc))
     colnames(out) <- condstr
     return(out)
   } else if (!flat & !is.null(freqs)){

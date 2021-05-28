@@ -18,7 +18,8 @@ make.dnf <- function(expr, ct, disj = "+"){
 .minim1 <- function(cond, x, maxstep = c(4, 4, 12)){
   cond <- make.dnf(cond, x)
   if (cond %in% c("0", "1")) return(cond)
-  y <- as.vector(qcond_bool(cond, ctInfo(configTable(x))$scores))
+  y <- as.vector(qcond_bool(cond, 
+    ctInfo(configTable(x, rm.const.factors = FALSE, rm.dup.factors = FALSE, verbose = FALSE))$scores))
   if (isConstant(y)) return(as.character(y[[1]]))
   x$..RESP.. <- y
   suppressMessages({
@@ -37,7 +38,7 @@ minimalize <- function(cond, x = NULL, maxstep = c(4, 4, 12)){
   if (is.null(x)){
     x <- full.ct(cond)
   } else {
-    x <- full.ct(x)
+    x <- full.ct(x, cond = cond)
   }
   cti <- ctInfo(x)
   out <- vector("list", length(cond))

@@ -16,7 +16,7 @@ csf <- function (x, n.init = 1000, details = x$details,
   }
   # Checking/enforcing compatibility of inus.only and minimalizeCsf
   if (inus.only && !minimalizeCsf){
-    minimalizeCsf <- FALSE
+    minimalizeCsf <- TRUE
     message("Calling csf() with inus.only=TRUE and minimalizeCsf=FALSE is not meaningful - setting minimalizeCsf=TRUE")
   }
   if (acyclic.only){
@@ -58,9 +58,7 @@ csf <- function (x, n.init = 1000, details = x$details,
 
   # ---- Identify structural redundancies from list solutions and reshape result ----
   if (minimalizeCsf){
-    out <- minimalizeCsf_and_reshape(out, x$configTable, 
-                                     outcomes = names(splitasf),
-                                     details = details)
+    out <- minimalizeCsf(cti, out$condition)
     if (verbose){
       cat("Reduction of csf with structural redundancies (as minimalizeCsf=TRUE): no. of csf: ", 
           n.out, "->", n.out <- nrow(out), "\n", sep = "")
@@ -70,10 +68,13 @@ csf <- function (x, n.init = 1000, details = x$details,
   # ---- Calculate required details if not done in the previous step ----
   if (length(details_without_cyclic <- setdiff(details, "cyclic"))){
     if (!x$inus.only) inus_from_asfs <- out$inus
+    if (useCtiList(cti)){
+      cti <- ctiList(cti, out$condition)
+    }
     out[details_without_cyclic] <- 
-      .det.cti(cti, out$condition, 
-               what = details_without_cyclic, available = details,
-               cycle.type = cycle.type, in.csf = TRUE)[details_without_cyclic]
+      .det(cti, out$condition, 
+           what = details_without_cyclic, available = details,
+           cycle.type = cycle.type, in.csf = TRUE)[details_without_cyclic]
     if (!x$inus.only) out$inus <- out$inus & inus_from_asfs
   }
 
@@ -140,7 +141,9 @@ combineAsf <- function(csflist, n){
   n.asf <- vapply(csflist, nrow, integer(1))
   n.asfCombs <- prod(n.asf)
   l <- length(csflist)
-  a <- csflist[[1]][c("complexity", "consistency", "coverage", "inus")]
+  use.inus <- "inus" %in% names(csflist[[1]])
+  colnms <- c("complexity", "consistency", "coverage", if (use.inus) "inus")
+  a <- csflist[[1]][colnms]
   a$id1 <- seq_len(nrow(a))
   if (nrow(a) > n){
     ord <- order(a$complexity)
@@ -148,7 +151,7 @@ combineAsf <- function(csflist, n){
     a <- a[head_with_ties(a$complexity, n), , drop = FALSE]
   }
   if (l >= 2) for (i in seq(2, l)){
-    b <- csflist[[i]][c("complexity", "consistency", "coverage", "inus")]
+    b <- csflist[[i]][colnms]
     names(b) <- paste0(names(b), ".",  1)
     b[[paste0("id", i)]] <- seq_len(nrow(b))
     ab <- expand.frames(a, b)
@@ -157,7 +160,7 @@ combineAsf <- function(csflist, n){
     ab$consistency[con.smaller] <- ab$consistency.1[con.smaller]
     cov.smaller <- ab$coverage.1 < ab$coverage
     ab$coverage[cov.smaller] <- ab$coverage.1[cov.smaller]
-    ab$inus <- ab$inus & ab$inus.1
+    if (use.inus) ab$inus <- ab$inus & ab$inus.1
     ord <- order(ab$complexity)
     ab <- ab[ord, , drop = FALSE]
     a <- ab[head_with_ties(ab$complexity, n), , drop = FALSE]
@@ -172,13 +175,14 @@ combineAsf <- function(csflist, n){
   allAsfs <- mapply(function(x, i) x$condition[i], csflist, id,
                     SIMPLIFY = FALSE, USE.NAMES = FALSE)
   allAsfs <- C_relist_Char(do.call(rbind, allAsfs), rep(l, nrow(a)))
-  data.frame(
+  out <- data.frame(
     outcome = C_concat(names(csflist), sep = ","),
     condition = C_mconcat(happly(allAsfs, function(x) paste0("(", x, ")")), 
                           "*"),
     consistency = a$consistency, coverage = a$coverage, complexity = a$complexity, 
-    inus = a$inus,
     stringsAsFactors = FALSE)
+  if (use.inus) out$inus <- a$inus
+  out
 }
 
 # Auxiliary function expand.frames
@@ -207,27 +211,6 @@ head_with_ties <- function(x, n){
   seq_len(n)
 }
 
-# Identify structural redundancies, list solutions and reshape result
-minimalizeCsf_and_reshape <- function(out, ct, outcomes, details){
-  out1 <- minimalizeCsf(sub(",", "*", out$condition, fixed = TRUE),
-                        ct = ct)
-  redundancies <- out1$n.asf < length(outcomes)
-  out1$n.asf <- out1$redundantParts <- NULL
-  nms <- names(out1)
-  names(out1)[match("con", nms)] <- "consistency"
-  names(out1)[match("cov", nms)] <- "coverage"
-  # Add (known) complexity values for unreduced conditions
-  unreduced <- !is.na(.pos <- match(out1$condition, out$condition))
-  out1$complexity <- rep(NA_integer_, nrow(out1))
-  out1$complexity[unreduced] <- out$complexity[.pos[unreduced]]
-  out1$inus <- rep(NA, nrow(out1))
-  out1$inus[unreduced] <- out$inus[.pos[unreduced]]
-  class(out1) <- c("condTbl", "data.frame")
-  class(out1$outcome) <- "outcomeString"
-  attributes(out1$condition) <- list(class = c("stdComplex", "character"))
-  out1$redundant <- rownames(out1) <- NULL
-  out1
-}
 # Aux fun to read complexity of csf (read from character string)
 getComplexity <- function(cond){
   if (length(cond) == 0) return(integer(0))

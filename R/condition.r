@@ -18,10 +18,6 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
               call. = FALSE)
       if (missing(ct)) ct <- tt
     }
-
-  stopifnot(is.character(x.in <- x))
-  x[] <- noblanks(x)   # remove blanks
-  x[] <- gsub(",", "*", x, fixed = TRUE)
   if (inherits(ct, "configTable")){
     type <- attr(ct, "type")
   } else {
@@ -29,15 +25,25 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
     ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
   cti <- ctInfo(ct)
+  condFromCti(x = x, cti = cti, ct = ct, type = type, 
+              add.data = add.data, force.bool = force.bool, rm.parentheses = rm.parentheses)
+}
 
+condFromCti <- function(x, cti, ct = cti2ct(cti), type = cti$type, 
+                        add.data = FALSE, force.bool = FALSE, rm.parentheses = FALSE, 
+                        x.in = x){
+  stopifnot(is.character(x.in <- x))
+  x[] <- noblanks(x)   # remove blanks
+  x[] <- gsub(",", "*", x, fixed = TRUE)
+  
   # Determine the conditions' types
   condTypes <- getCondType(x, cti, force.bool = force.bool, rm.parentheses = rm.parentheses)
   x <- attr(condTypes, "x")
   px <- attr(condTypes, "px")
   px_ind <- attr(condTypes, "px_ind")
   condTypes <- as.vector(condTypes)
-
-  n.cases <- attr(ct, "n", exact = TRUE)
+  
+  n.cases <- cti$freq
   negateCase <- type %in% c("cs", "fs") # use lower case negation in conditions' syntax?
   reshaped <- !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
                       x, noblanks(x.in), 
@@ -83,8 +89,8 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
     out[atomic] <- atomicCond(px[match(which(atomic), px_ind)], 
                               ct = ct, negateCase = negateCase)
     info <- updateInfo(info, atomic,
-      getInfo_asf(structure(out[atomic], response = rhs(x[atomic])), 
-                  n.cases))
+                       getInfo_asf(structure(out[atomic], response = rhs(x[atomic])), 
+                                   n.cases))
   }
   if (any(complx <- (condTypes == "complex"))){
     i_x <- which(complx) 
@@ -93,7 +99,7 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
       out[[i_x[i]]] <- complexCond(px[[i_px[i]]], ct = ct, negateCase = negateCase)
     }
     info <- updateInfo(info, complx,
-      getInfo_customCsf(out[i_x], lengths(out[i_x]), n.cases))
+                       getInfo_customCsf(out[i_x], lengths(out[i_x]), n.cases))
   }
   
   # temp: insert complexity for "std" cases
@@ -101,7 +107,7 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
     isStd <- condTypes %in% c("stdBoolean", "stdAtomic", "stdComplex")
     info$complexity[isStd] <- getComplexity(info$input[isStd])
   }  
-
+  
   ok <- condTypes %in% c("stdBoolean", "stdAtomic", "stdComplex", "boolean", "atomic", "complex")
   out[!ok] <- rep(list(invalidCond()), sum(!ok))
   names(out) <- x
@@ -117,6 +123,30 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
   class(out) <- "condList"
   out
 }
+
+# ------------------------------------------------------------------------------
+
+# Aux fn: Generate a data.frame from a cti
+cti2ct <- function(x, cases = TRUE){
+  out <- x$valueId
+  if (x$type == "fs"){
+    out[] <- x$scores[, colnames(out)]
+  } else {
+    out[] <- unlist(x$uniqueValues, use.names = FALSE)[as.vector(out)]
+  }
+  out <- as.data.frame(out)
+  class(out) <- c("configTable", "data.frame")
+  attr(out, "type") <- x$type
+  attr(out, "n") <- x$freq
+  if (cases)
+    attr(out, "cases") <- C_relist_Char(as.character(seq_len(sum(x$freq))), x$freq)
+  out
+}
+
+# require(dplyr)
+# d.educate %>% configTable %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.educate)
+# d.pban %>% mvct %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.pban %>% mvct)
+# d.jobsecurity %>% fsct %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.jobsecurity)
 
 # ------------------------------------------------------------------------------
 

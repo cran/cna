@@ -2,7 +2,6 @@
 \alias{minimalizeCsf}
 \alias{minimalizeCsf.default}
 \alias{minimalizeCsf.cna}
-\alias{print.minimalizeCsf}
 
 \title{
 Eliminate structural redundancies from csf
@@ -15,24 +14,22 @@ Eliminate structural redundancies from csf
 \usage{
 minimalizeCsf(x, ...)
 
-\method{minimalizeCsf}{default}(x, ct = full.ct(x), verbose = FALSE, ..., data)
+\method{minimalizeCsf}{default}(x, ct = NULL, verbose = FALSE, ..., data)
 \method{minimalizeCsf}{cna}(x, n = 20, verbose = FALSE, ...)
-\method{print}{minimalizeCsf}(x, subset = 1:5, ...)
 }
 
 \arguments{
   \item{x}{In the default method, \code{x} is a character vector of csf. The \code{cna} method uses the strings representing the csf contained in an output object of \code{cna} (see details).}
-  \item{ct}{Data frame, matrix or \code{\link{configTable}} with the data; optional if all factors in \code{x} are binary but required if some factors are multi-value. }
+  \item{ct}{Data frame, matrix or \code{\link{configTable}} with the data; optional if all factors in \code{x} are binary but required if some factors are multi-value. In the default case, \code{ct} is \code{NULL} and a dataset containing all possible configurations of the variables in the condition \code{x} is used.}
   \item{verbose}{Logical; if \code{TRUE} additional messages on the number of csf that are found to be reducible are printed.}
   \item{n}{Minimal number of csf to use.}
-  \item{subset}{Integer vector specifying the numbers of csf to be displayed.}
   \item{\dots}{Further arguments passed to the methods.}
   \item{data}{Argument \code{data} is deprecated in \code{minimalizeCsf()}; use \code{ct} instead.}
 }
 
 \details{As of version 3.0 of the \pkg{cna} package, the function \code{minimalizeCsf} is automatically executed, where needed, by the default calls of the \code{\link{cna}} and \code{\link{csf}} functions. In consequence, applying the stand-alone \code{minimalizeCsf} function to an output object of \code{cna} is no longer required. The stand-alone function is kept in the package for reasons of backwards compatibility and for developing purposes. Its automatic execution can be suppressed by calling \code{csf} with \code{minimalizeCsf = FALSE}, which emulates outputs of older versions of the package.
 
-The core criterion that Boolean dependency structures must satisfy in order to be causally interpretable is \emph{redundancy-freeness}. In atomic solution formulas (asf), both sufficient and necessary conditions are completely free of redundant elements. However, when asf are conjunctively combined to complex solution formulas (csf), new redundancies may arise. A csf may contain redundant parts. To illustrate, assume that a csf is composed of three asf: asf1 * asf2 * asf3. It can happen that the conjunction asf1 * asf2 * asf3 is logically equivalent to a proper part of itself, say, to asf1 * asf2. In that case, asf3 is a so-called \emph{structural redundancy} in asf1 * asf2 * asf3 and must not be causally interpreted. See the \pkg{cna} package vignette or Baumgartner and Falk (2019) for more details. 
+The core criterion that Boolean dependency structures must satisfy in order to be causally interpretable is \emph{redundancy-freeness}. In atomic solution formulas (asf), both sufficient and necessary conditions are completely free of redundant elements. However, when asf are conjunctively combined to complex solution formulas (csf), new redundancies may arise. A csf may contain redundant parts. To illustrate, assume that a csf is composed of three asf: asf1 * asf2 * asf3. It can happen that the conjunction asf1 * asf2 * asf3 is logically equivalent to a proper part of itself, say, to asf1 * asf2. In that case, asf3 is a so-called \emph{structural redundancy} in asf1 * asf2 * asf3 and must not be causally interpreted. See the package vignette (\code{vignette("cna")}) or Baumgartner and Falk (2019) for more details. 
 
 \code{minimalizeCsf} recursively tests the \code{asf} contained in a \code{csf} for structural redundancies and eliminates the redundant ones. It takes a character vector \code{x} specifying csf as input and builds all redundancy-free csf that can be inferred from \code{x}. There are two possibilities to use \code{minimalizeCsf}. Either the csf to be tested for structural redundancies is passed to \code{minimalizeCsf} as a character vector (this is the default method), or \code{minimalizeCsf} is applied directly to the output of \code{\link{cna}}---which however, as indicated above, is superfluous as of version 3.0 of the \pkg{cna} package. %In the latter case, the csf are extracted from the \code{cna}-object. 
 
@@ -51,7 +48,7 @@ Falk, Christoph: identification and solution of the problem of structural redund
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}. doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
 
 }
 
@@ -64,22 +61,14 @@ Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making
 minimalizeCsf("(f + a*D <-> C)*(C + A*B <-> D)*(c + a*E <-> F)")
 minimalizeCsf("(f + a*D <-> C)*(C + A*B <-> D)*(c + a*E <-> F)", 
               verbose = TRUE) # Same result, but with some messages.
-
+              
 # The cna method.
 dat1 <- selectCases("(C + A*B <-> D)*(c + a*E <-> F)")
-ana1 <- cna(dat1, details = c("r"))
+ana1 <- cna(dat1, details = c("r"), inus.only = FALSE)
 csf(ana1, minimalizeCsf = FALSE)
 # The attribute "redundant" taking the value TRUE in ana1 shows that this csf contains 
-# at least one redundant element. Applying minimalizeCsf() identifies 
+# at least one redundant element. Applying minimalizeCsf() identifies and removes
 # the redundant element.
 minimalizeCsf(ana1)
 
-\donttest{# Mv data.
-ct.pban <- mvct(d.pban)
-cna.pban <- cna(ct.pban, con = .75, cov = .75)
-csf.pban <- csf(cna.pban, minimalizeCsf = FALSE)
-sol.pban <- csf.pban$condition
-minim.pban <- minimalizeCsf(sol.pban, ct.pban)
-as.character(minim.pban$condition)
-}
 }

@@ -28,9 +28,8 @@ configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
     #if (inherits(.cases, "try-error")){
     if (anyNA(iconv(.cases, "", "ASCII"))){
       warning("The row names contain special (non-ASCII) characters and are therefore not used.")
-      .cases <- seq_len(nrow(x))
+      .cases <- as.character(seq_len(nrow(x)))
     }
-    .cases <- as.list(.cases)
   } else {
     if (length(.cases) != nrow(x)) stop("length(.cases) must be the same as nrow(x)")
     if (is.atomic(.cases)) .cases <- as.character(.cases)
@@ -61,13 +60,17 @@ configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
       stop("Inadmissible frequency argument")
     f <- as.integer(as.vector(rowsum(frequency, cx)))
   }
-  .cases <- lapply(split(.cases, as.integer(cx)), unlist, recursive = FALSE, use.names = FALSE)
+  # If there are duplicated rows: group case names accordingly
+  if (anyDuplicated(cx)){
+    .cases <- lapply(unname(split.default(.cases, as.integer(cx))), unlist, 
+                     recursive = FALSE, use.names = FALSE)
+  }
   ll <- lengths(.cases)
-  if (!isTRUE(all.equal(f, ll, check.attributes = FALSE)) && length(ll) > 0){
+  if (length(ll) > 0 && !isTRUE(all.equal(f, ll, check.attributes = FALSE))){
     .cases <- mapply(rep_len, .cases, f, SIMPLIFY = FALSE, USE.NAMES = FALSE)
-    .cases <-
+    .cases <- unname(
       split.default(make.unique(unlist(.cases, use.names = FALSE)),
-                    rep(seq_along(.cases), f))
+                    rep(seq_along(.cases), f)))
   }
   # case.cutoff
   del.cases <- f < case.cutoff
@@ -114,17 +117,29 @@ configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
   }
   # Warn if names are not syntactically valid
   nms <- names(ct) <- toupper(names(ct))
-  if (!identical(nms, make.names(nms, unique = TRUE))){
-    warning("configTable has syntactically invalid names. condition(), cna() and other functions may not work.",
-            call. = FALSE)
-  }
+  checkFactorNames(nms)
   # output
   class(ct) <- c("configTable", "data.frame", "truthTab")
   attr(ct, "n") <- as.vector(f)
-  attr(ct, "cases") <- lapply(.cases, function(x) sort(unlist(x, use.names = FALSE, recursive = FALSE)))
+  if (any(lc <- lengths(.cases)>1L)){
+    .cases[lc] <- lapply(.cases[lc], function(x) sort(unlist(x, use.names = FALSE, recursive = FALSE)))
+  }
+  attr(ct, "cases") <- .cases
   attr(ct, "type") <- type
   ct
 }
+
+checkFactorNames <- function(nms, warn = TRUE){
+  nms <- gsub("[\\._]+", "", as.character(nms))
+  ok <- nms == make.names(nms, unique = TRUE) & !grepl("[[:punct:][:space:]]", nms)
+  if (any(!ok) && warn){
+    warning("configTable has invalid names (", paste0(nms[!ok], collapse = ""), 
+            "). condition(), cna() and other functions may not work.",
+            call. = FALSE)
+  }
+  ok
+}
+
 
 # print-method for configTable
 # ============================
@@ -150,8 +165,7 @@ print.configTable <- function(x, show.cases = NULL, ...){
   } else if (!cases.ok){
     warning("Number of case labels does not match nrow(x) - case labels are ignored.")
     attr(x, "cases") <- NULL
-  } else if (max(lengths(attr(x, "cases")))>100){
-    # message("Case labels are suppressed.")
+  } else if (any(lengths(attr(x, "cases")) > 100)){
     cases.ok <- FALSE
   }
   # create data frame for printing

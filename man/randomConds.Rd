@@ -10,16 +10,20 @@ Based on a set of factors and a corresponding data type---given as a data frame 
 }
 
 \usage{
-randomAsf(x, outcome = NULL, compl = NULL, how = c("inus", "minimal"))
-randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL)
+randomAsf(x, outcome = NULL, maxVarNum = if (type == "mv") 8 else 16,
+          compl = NULL, how = c("inus", "minimal"))
+randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL, 
+          maxVarNum = if (type == "mv") 8 else 16)
 }
 
 \arguments{
   \item{x}{Data frame or \code{configTable}; determines the number of factors, their names and their possible values.}
   \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor(s) in the solution formula; must be a subset of \code{names(x)}.}
+  \item{maxVarNum}{Maximal number of factors that can appear in a generated asf or csf.
+}
   \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf).}
   \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details).}
-  \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by \cr\code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \code{ncol(x)-2}.}
+  \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by\cr \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \cr \code{ncol(x)-2}.}
 }
 
 
@@ -28,7 +32,9 @@ randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL)
 
 The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{configTable} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
 
-The optional argument \code{outcome} determines which factors in \code{x} shall be treated as outcomes. If \code{outcome} is at its default value \code{NULL}, \code{randomAsf} and \code{randomCsf} randomly draw factor(s) from \code{x} to be treated as outcome(s). 
+The optional argument \code{outcome} determines which factors in \code{x} shall be treated as outcomes. If \code{outcome} is at its default value \code{NULL}, \code{randomAsf} and \code{randomCsf} randomly draw factor(s) from \code{x} to be treated as outcome(s). If \code{type} is \code{"mv"}, then values of distinct factors are chosen as outcomes.
+
+The maximal number of factors included in the generated asf and csf can be controlled via the argument \code{maxVarNum}. This is particularly relevant when \code{x} is of high dimension, as generating solution formulas with more than 20 factors is computationally demanding and, accordingly, may take a long time (or even exhaust computer memory).
 
 The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. Assigning unduly high values to \code{compl} results in an error.
 
@@ -92,6 +98,10 @@ randomCsf(d.volatile, outcome = c("RB","SE"))
 randomCsf(d.volatile, outcome = c("RB","SE"), compl = 2)
 randomCsf(full.ct(7), compl = 3:4)
 
+# Specify the maximal number of factors.
+randomCsf(d.highdim, maxVarNum = 10)
+\donttest{randomCsf(d.highdim, maxVarNum = 20) # takes a while to complete}
+
 # Specify the number of asf.
 randomCsf(full.ct(7), n.asf = 3)
 
@@ -99,7 +109,7 @@ randomCsf(full.ct(7), n.asf = 3)
 randomCsf(mvct(allCombs(c(3,4,3,5,3,4))))
 
 # Generate 20 csf.
-\donttest{replicate(20, randomCsf(full.ct(7), n.asf = 2, compl = 2:3))
+\donttest{replicate(20, randomCsf(full.ct(7), n.asf = 2, compl = 2:3))}
 
 
 # Inverse searches
@@ -154,5 +164,4 @@ csfs <- csf(mycna)
 # Check whether no causal fallacy (no false positive) is returned.
 if(nrow(csfs)==0) {
       TRUE } else {any(is.submodel(csfs$condition, target))}
-}
 }
