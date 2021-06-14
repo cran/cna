@@ -65,7 +65,7 @@ redundant(edu.sol, d.educate, simplify = FALSE)
 
 
 # Default application of csf() with automatic elimination of structural redundancies.
-\donttest{ct.pban <- mvct(d.pban)
+\donttest{ct.pban <- configTable(d.pban)
 cna.pban <- cna(ct.pban, con = .75, cov = .75)
 csf.pban <- csf(cna.pban)
 redundant(csf.pban$condition, ct.pban) # no solutions with structural redundancies are returned

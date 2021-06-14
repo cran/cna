@@ -67,22 +67,23 @@ rreduce <- function(cond, x = full.ct(cond), full = !missing(x),
 
 
 # getCond: Define a condition from a data.frame/matrix:
-#   "Internal" facility: If asf is NULL, aresult is returned as an 'intList'
+#   "Internal" facility: If asf is NULL, a result is returned as an 'intList'
 #   [used in cnaOpt::cnaOpt]
-getCond <- function(x, outcome = NULL, type, asf = TRUE){
-  if (!is.null(attr(x, "type"))) type <- attr(x, "type")
-  if (missing(type)) type <- "cs"
+getCond <- function(x, outcome = NULL, type = "auto", asf = TRUE){
+  if (!inherits(x, "configTable")){
+    x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
+                      verbose = FALSE)
+  }
+  type <- attr(x, "type")
   if (type == "fs") stop("getCond is not applicable to fs data.")
-  ct <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
-                    verbose = FALSE)
   if (!is.null(outcome)){
     outcomeName <- sub("=.+", "", outcome)
     stopifnot(length(outcome) == 1, outcomeName %in% names(x))
-    outcomePositive <- condition(outcome, ct)[[1]] == 1
-    xx <- as.matrix(ct)[outcomePositive, setdiff(colnames(x), outcomeName), drop = FALSE]
+    outcomePositive <- condition(outcome, x)[[1]] == 1
+    xx <- as.matrix(x)[outcomePositive, setdiff(colnames(x), outcomeName), drop = FALSE]
     xx <- unique(xx)
   } else {
-    xx <- as.matrix(ct)
+    xx <- as.matrix(x)
   }
   if (type == "cs"){
     b <- matrix(colnames(xx), nrow(xx), ncol(xx), byrow = TRUE)

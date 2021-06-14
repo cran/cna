@@ -48,7 +48,7 @@ cyclic(csf(cnaedu)$condition)
 # At con = .82 and cov = .82, cna() infers 47 csf for the d.pacts data, some
 # of which are cyclic, others are acyclic. If there are independent
 # reasons to assume acyclicity, here is how to extract all acyclic csf.
-cnapacts <- fscna(d.pacts, con = .82, cov = .82)
+cnapacts <- cna(d.pacts, con = .82, cov = .82)
 cyclic(csf(cnapacts)$condition)
 subset(csf(cnapacts, n.init = Inf, details = "cyclic"), !cyclic)
 

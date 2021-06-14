@@ -21,11 +21,11 @@ condition.default <- function(x, ct = full.ct(x), type, add.data = FALSE,
   if (inherits(ct, "configTable")){
     type <- attr(ct, "type")
   } else {
-    if (missing(type)) type <- "cs"    # "hidden" Default value!
+    if (missing(type)) type <- "auto"    # "hidden" Default value!
     ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
   cti <- ctInfo(ct)
-  condFromCti(x = x, cti = cti, ct = ct, type = type, 
+  condFromCti(x = x, cti = cti, ct = ct, type = cti$type, 
               add.data = add.data, force.bool = force.bool, rm.parentheses = rm.parentheses)
 }
 

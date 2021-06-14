@@ -12,7 +12,7 @@ cna <- function (x, type,
   # call and type
   cl <- match.call()
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
-  if (missing(type)) type <- "cs"
+  if (missing(type)) type <- "auto"
 
   # Checking/enforcing compatibility of inus.only with only.minimal.msc and only.minimal.asf
   if (inus.only){

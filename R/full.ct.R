@@ -69,7 +69,7 @@ full.ct.configTable <- function(x, cond = NULL, ...){
 # ==== Default Method (for matrix or data.frame) ====
 # builds full.ct
 # cases: character, list, matrix/data.frame
-full.ct.default  <- function(x, type = c("cs", "mv", "fs"), cond = NULL, ...){
+full.ct.default  <- function(x, type = "auto", cond = NULL, ...){
   if (is.numeric(x) && length(x) == 1 && x %in% 1:length(LETTERS)){
     x <- LETTERS[seq_len(x)]
   }

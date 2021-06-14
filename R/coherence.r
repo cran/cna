@@ -26,7 +26,7 @@ coherence.default <- function(x, ct, type, ..., tt){
   if (inherits(ct, "configTable")){
     type <- attr(ct, "type")
   } else {
-    if (missing(type)) type <- "cs"
+    if (missing(type)) type <- "auto"
     ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
   }
   cti <- ctInfo(ct)

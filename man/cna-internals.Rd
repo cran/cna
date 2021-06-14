@@ -43,7 +43,7 @@ These functions are mainly for internal purposes and will not normally be called
       Extract condition type and complexity values from a character vector containing conditions.
     }
     \item{\code{fs2cs}:}{
-      Convert a \dQuote{fs} configTable to \dQuote{cs}.
+      Convert an \dQuote{fs} configTable to \dQuote{cs}.
     }
     \item{\code{stdCond}, \code{matchCond}:}{
       Standardize and match conditions.

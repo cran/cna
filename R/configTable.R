@@ -4,7 +4,7 @@
 # Modifications:
 #   - types "cs", "mv", und "fs"
 #   - Behaviour if x already is a configTable
-configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
+configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
                         case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
                         .cases = NULL, verbose = TRUE){
   nm.x <- deparse(substitute(x))
@@ -23,6 +23,7 @@ configTable <- function(x, type = c("cs", "mv", "fs"), frequency = NULL,
   }
   type <- tolower(type)
   type <- match.arg(type)
+  if (type == "auto") type <- type_from_data(x)
   if (is.null(.cases)){
     .cases <- try(as.character(rownames(x)))
     #if (inherits(.cases, "try-error")){
@@ -138,6 +139,15 @@ checkFactorNames <- function(nms, warn = TRUE){
             call. = FALSE)
   }
   ok
+}
+
+# Determine data type from input data (for case type = "auto")
+type_from_data <- function(d){
+  vals <- unique(unlist(d, use.names = FALSE))
+  if (all(vals %in% 0:1)) return("cs")
+  if (all(vals>=0) && all(vals<=1)) return("fs")
+  if (all(vals>=0) && all(vals%%1==0)) return("mv")
+  stop("Could not determine data type for data ", deparse(substitute(d)))
 }
 
 

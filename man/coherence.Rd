@@ -19,7 +19,7 @@ coherence(x, ...)
 \arguments{
   \item{x}{Character vector specifying an asf or csf.}
   \item{ct}{Data frame or \code{configTable}.}
-  \item{type}{Character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). Defaults to the type of \code{x}, if \code{x} is a \code{configTable} or to \code{"cs"} otherwise.}
+  \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
   \item{\dots}{Arguments passed to methods.}
   \item{tt}{Argument \code{tt} is deprecated in \code{coherence()}; use \code{x} instead.}
 }

@@ -7,15 +7,13 @@
 #   cond  character string specifying a condition on the variables in x
 #   type
 # Value: Reduced data frame
-selectCases <- function(cond, x = full.ct(cond), type, cutoff = 0.5, 
+selectCases <- function(cond, x = full.ct(cond), type = "auto", cutoff = 0.5, 
                         rm.dup.factors = FALSE, rm.const.factors = FALSE){
-  if (inherits(x, "configTable")){
-    type <- attr(x, "type")
-  } else {
-    if (missing(type)) type <- "cs"    # "hidden" Default value!
+  if (!inherits(x, "configTable")){
     x <- configTable(x, type = type, rm.dup.factors = FALSE, 
                      rm.const.factors = FALSE, verbose = FALSE)
   }
+  type <- attr(x, "type")
   stopifnot(length(cond) == 1)
   co <- condition.default(cond, x, force.bool = TRUE)[[1]]
   if (inherits(co, "invalidCond")){
@@ -29,15 +27,13 @@ selectCases <- function(cond, x = full.ct(cond), type, cutoff = 0.5,
 # macht keinen Unterschied zwischen "->" und "<->"!!
 #   selectCases("A->B", ...) entspricht selectCases1 mit con=1 und cov=0
 #   selectCases("A<->B", ...) entspricht selectCases1 mit con=1 und cov=1
-selectCases1 <- function(cond, x = full.ct(cond), type, con = 1, cov = 1, 
+selectCases1 <- function(cond, x = full.ct(cond), type = "auto", con = 1, cov = 1, 
                          rm.dup.factors = FALSE, rm.const.factors = FALSE){
-  if (inherits(x, "configTable")){
-    type <- attr(x, "type")
-  } else {
-    if (missing(type)) type <- "cs"    # "hidden" Default value!
-      x <- configTable(x, type = type, rm.dup.factors = FALSE, 
-                       rm.const.factors = FALSE, verbose = FALSE)
+  if (!inherits(x, "configTable")){
+    x <- configTable(x, type = type, rm.dup.factors = FALSE, 
+                     rm.const.factors = FALSE, verbose = FALSE)
   }
+  type <- attr(x, "type")
   # Check inputs
   if (length(con) != 1 || con < 0 || con > 1 || 
       length(cov) != 1 || cov < 0 || cov > 1){

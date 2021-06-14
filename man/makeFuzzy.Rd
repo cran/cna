@@ -52,5 +52,5 @@ dat1 <- full.ct(5)
 set.seed(55)
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
 dat3 <- selectCases1("A*b + a*B + C*D <-> E", con = .8, cov = .8, dat2)
-fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
+cna(dat3, outcome = "E", con = .8, cov = .8)
 }

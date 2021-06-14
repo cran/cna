@@ -18,7 +18,7 @@ details <- function(cond, x,
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
     type, cycle.type = "factor"){
   if (!inherits(x, "configTable")){
-    if (missing(type)) type <- "cs"
+    if (missing(type)) type <- "auto"
     x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
                      verbose = FALSE)
   }

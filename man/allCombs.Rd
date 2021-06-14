@@ -51,8 +51,7 @@ dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 # Generate all configurations of 5 multi-value factors that are compatible with the causal
 # chain (A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=4*D=4 <-> E=3).
 dat1 <- allCombs(c(3, 3, 4, 4, 3))
-dat2 <- selectCases("(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=4*D=4 <-> E=3)", dat1, 
-                    type = "mv")
+dat2 <- selectCases("(A=2*B=1 + A=3*B=3 <-> C=1)*(C=1*D=2 + C=4*D=4 <-> E=3)", dat1)
 nrow(dat1)
 nrow(dat2)                    
 
@@ -69,6 +68,6 @@ groundTruth <- "A*b + a*B + C*D <-> E"
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- makeFuzzy(dat1, fuzzvalues = 0:4/10)
 dat3 <- selectCases1(groundTruth, con = .8, cov = .8, dat2)
-ana1 <- fscna(dat3, ordering = list("E"), strict = TRUE, con = .8, cov = .8)
+ana1 <- cna(dat3, outcome = "E", con = .8, cov = .8)
 any(is.submodel(asf(ana1)$condition, groundTruth))
 }

@@ -111,12 +111,14 @@ factMat <- function(type){
 
 check.ordering <- function (ordering, cti){
   if (is.null(ordering)) return(NULL)
+  if (is.character(ordering) && length(ordering) == 1L)
+    ordering <- ordering_from_string(ordering)
   # check ordering: object structure
   if (!is.list(ordering) || 
       !all(vapply(ordering, is.character, logical(1)) | 
            (hasFactor <- vapply(ordering, is.factor, logical(1)))
            )){
-    stop("ordering must be either NULL or a list of character vectors.")
+    stop("ordering must be either NULL or a list of character vectors or a character string.")
   }
   if (any(hasFactor)){
     ordering[hasFactor] <- lapply(ordering[hasFactor], as.character)
@@ -144,12 +146,15 @@ expand.ordering <- function(ordering, cti){
   }
   ordering
 }
+ordering_from_string <- function(x){
+  hstrsplit(noblanks(x), split = c("<", ","))[[1]]
+}
 
 
 # potential.effects:
 # ==================
 potential.effects <- function(cti, zname, ordering = NULL, strict = FALSE){
-  if (cti$type == "mv") zname <- sub("=.", "", zname)
+  if (cti$type == "mv") zname <- sub("=.+$", "", zname)
   nms <- names(cti$nVal)
   poteff0 <- setdiff(nms, zname)
   if (is.null(ordering)) return(poteff0)

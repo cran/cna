@@ -1,9 +1,5 @@
 \name{configTable}
-
 \alias{configTable}
-\alias{csct}
-\alias{mvct}
-\alias{fsct}
 \alias{print.configTable}
 
 \title{Assemble cases with identical configurations in a configuration table}
@@ -13,19 +9,16 @@ The \code{configTable} function assembles cases with identical configurations fr
 }
 
 \usage{
-configTable(x, type = c("cs", "mv", "fs"), frequency = NULL,
+configTable(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
             case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
            .cases = NULL, verbose = TRUE)
-csct(...)
-mvct(...)
-fsct(...)
 
 \method{print}{configTable}(x, show.cases = NULL, ...)
 }
 
 \arguments{
   \item{x}{Data frame or matrix.}
-  \item{type}{Character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
+  \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
   \item{frequency}{Numeric vector of length \code{nrow(x)}. All elements must be
         non-negative.}
   \item{case.cutoff}{Minimum number of occurrences (cases) of a configuration
@@ -38,7 +31,6 @@ fsct(...)
   \item{show.cases}{Logical; if \code{TRUE}, the attribute \dQuote{cases}
         is printed.}
   \item{\dots}{
-        In \code{csct}, \code{mvct}, \code{fsct}: any formal argument of \code{configTable} except \code{type}.
         In \cr\code{print.configTable}: arguments passed to \code{\link{print.data.frame}}.}
 }
 
@@ -49,7 +41,7 @@ The \code{configTable} function merges multiple rows of \code{x} featuring the s
 The number of occurrences (cases) and an enumeration of the cases are saved as attributes
 \dQuote{n} and \dQuote{cases}, respectively. The attribute \dQuote{n} is always printed in the output of \code{configTable}, the attribute \dQuote{cases} is printed if the argument \code{show.cases} is \code{TRUE} in the \code{print} method. 
 
-The argument \code{type} specifies the type of data. \code{"cs"} stands for crisp-set data featuring factors that only take values 1 and 0; \code{"mv"} stands for multi-value data with factors that can take any non-negative integers as values; \code{"fs"} stands for fuzzy-set data comprising factors taking real values from the interval [0,1], which are interpreted as membership scores in fuzzy sets. To abbreviate the specification of the data type using the \code{type} argument, the functions \code{csct(x, ...)}, \code{mvct(x, ...)}, and \code{fsct(x, ...)} are available as shorthands for \code{configTable(x, type = "cs", ...)}, \cr\code{configTable(x, type = "mv", ...)}, and \code{configTable(x, type = "fs", ...)}, respectively.
+The argument \code{type} allows for manually specifying the type of data; it defaults to \code{"auto"}, which induces automatic detection of the data type. \code{"cs"} stands for crisp-set data featuring factors that only take values 1 and 0; \code{"mv"} stands for multi-value data with factors that can take any non-negative integers as values; \code{"fs"} stands for fuzzy-set data comprising factors taking real values from the interval [0,1], which are interpreted as membership scores in fuzzy sets. 
 
 Instead of multiply listing identical configurations in \code{x}, the \code{frequency} argument can
 be used to indicate the frequency of each configuration in the data frame. \code{frequency} takes a numeric vector of length \code{nrow(x)} as value. For instance, \code{configTable(x, frequency = c(3,4,2,3))} determines that the first configuration in \code{x} is featured in 3 cases, the second in 4, the third in 2, and the fourth in 3 cases.
@@ -134,27 +126,27 @@ set.seed(32)
 m <- nrow(dat1)
 wei <- rexp(m)
 dat2 <- dat1[sample(nrow(dat1), 100, replace = TRUE, prob = wei),]
-configTable(dat2, type = "mv") # 100 cases with 51 configurations instantiated only once.
-mvct(dat2, case.cutoff = 2) # removing the single instances.
+configTable(dat2) # 100 cases with 51 configurations instantiated only once.
+configTable(dat2, case.cutoff = 2) # removing the single instances.
 
 # Duplicated factors are not eliminated, constant factors are not eliminated.
 dat3 <- selectCases("(A=1+A=2+A=3 <-> C=2)*(B=3<->D=3)*(B=2<->D=2)*(A=2 + B=1 <-> E=2)",
-                    dat1, type = "mv")
-mvct(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+                    dat1)
+configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE)
 
 # The same without messages about constant and duplicated factors.
-mvct(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 
 
 # configTable with fuzzy-set data from Aleman (2009)
 # --------------------------------------------------
 # Include all cases.
-ct.pacts <- fsct(d.pacts) 
-fscna(ct.pacts, con = .93, cov = .86, details = TRUE)
+ct.pacts <- configTable(d.pacts) 
+cna(ct.pacts, con = .93, cov = .86, details = TRUE)
 
 # Only include configurations with at least 3 cases.
-ct.pacts2 <- fsct(d.pacts, case.cutoff = 3) 
-fscna(ct.pacts2, con = .93, cov = .86, details = TRUE)
+ct.pacts2 <- configTable(d.pacts, case.cutoff = 3) 
+cna(ct.pacts2, con = .93, cov = .86, details = TRUE)
 
 
 # Large-N data with crisp sets from Greckhamer et al. (2008)
@@ -166,13 +158,13 @@ configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff
 
 # Various large-N CNAs of d.performance with varying case cut-offs.
 \donttest{cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 4),
-    ordering = list("SP"), con = .75, cov = .6)
+    ordering = "SP", con = .75, cov = .6)
 cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 5),
-    ordering = list("SP"), con = .75, cov = .6)
+    ordering = "SP", con = .75, cov = .6)
 cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 10),
-    ordering = list("SP"), con = .75, cov = .6)
+    ordering = "SP", con = .75, cov = .6)
 print(cna(configTable(d.performance[1:8], frequency = d.performance$frequency, 
-    case.cutoff = 15), ordering = list("SP"), con = .75, cov = .6, what = "a"), 
+    case.cutoff = 15), ordering = "SP", con = .75, cov = .6, what = "a"), 
     nsolutions = "all")
 }
 }

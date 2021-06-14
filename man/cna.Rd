@@ -1,10 +1,6 @@
 \name{cna}
 \alias{cna}
-\alias{cscna}
-\alias{mvcna}
-\alias{fscna}
 \alias{print.cna}
-
 
 \title{Perform Coincidence Analysis}
 
@@ -25,9 +21,6 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
     what = if (suff.only) "m" else "ac", cutoff = 0.5, 
     border = c("down", "up", "drop"), details = FALSE, 
     acyclic.only = FALSE, cycle.type = c("factor", "value"))
-cscna(...)
-mvcna(...)
-fscna(...)
 
 \method{print}{cna}(x, what = x$what, digits = 3, nsolutions = 5, 
       details = x$details, show.cases = NULL, inus.only = x$inus.only, 
@@ -37,8 +30,8 @@ fscna(...)
 
 \arguments{
   \item{x}{Data frame or \code{configTable} (as output by \code{\link{configTable}}).}
-  \item{type}{Character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
-  \item{ordering}{List of character vectors specifying the causal ordering of
+  \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
+  \item{ordering}{Character string or list of character vectors specifying the causal ordering of
         the factors in \code{x}.}
   \item{strict}{Logical; if \code{TRUE}, factors on the same level of the causal
         ordering are \emph{not} potential causes of each other; if \code{FALSE}, factors on the same level \emph{are} potential causes of each other.}
@@ -68,23 +61,22 @@ fscna(...)
   \item{show.cases}{Logical; if \code{TRUE}, the \code{configTable}'s attribute \dQuote{cases}
         is printed. \cr See \code{\link{print.configTable}}}
   \item{\dots}{
-        In \code{cscna}, \code{mvcna}, \code{fscna}: any formal argument of \code{cna} except \code{type}.
         In \code{print.cna}: arguments passed to other \code{print}-methods.}
 }
 
 \details{
 The \strong{first input \code{x}} of the \code{cna} function is a data frame or a configuration table. To ensure that no misinterpretations of returned asf and csf can occur, users are advised to use only upper case letters as factor (column) names. Column names may contain numbers, but the first sign in a column name must be a letter. Only ASCII signs should be used for column and row names.
 
-The \code{cna} function must be told what \bold{type of data} \code{x} contains, unless \code{x} is a configuration table. In the latter case, the type of \code{x} is already defined. Data that feature factors taking values 1 or 0 only are called \emph{crisp-set}, in which case the \code{type} argument takes its default value \code{"cs"}. If the data contain at least one factor that takes more than two values, e.g. \{1,2,3\}, the data count as \emph{multi-value}, which is indicated by \code{type = "mv"}. Data featuring at least one factor taking real values from the interval [0,1] count as \emph{fuzzy-set}, which is specified by \code{type = "fs"}. (Note that mixing multi-value and fuzzy-set factors in one analysis is not (currently) supported). To abbreviate the specification of the data type using the \code{type} argument, the functions \code{cscna(x, ...)}, \code{mvcna(x, ...)}, and \code{fscna(x, ...)} are available as shorthands for \code{cna(x, type = "cs", ...)}, \code{cna(x, type = "mv", ...)}, and \code{cna(x, type = "fs", ...)}, respectively.
+The argument \code{type} allows for specifying the \bold{type of data} \code{x} contains. As of package version 3.2, that argument has the default value \code{"auto"} inducing automatic detection of the data type. But the user can still manually set the data type. Data that feature factors taking values 1 or 0 only are called \emph{crisp-set}, which can be indicated by \code{type = "cs"}. If the data contain at least one factor that takes more than two values, e.g. \{1,2,3\}, the data count as \emph{multi-value}: \code{type = "mv"}. Data featuring at least one factor taking real values from the interval [0,1] count as \emph{fuzzy-set}: \code{type = "fs"}. (Note that mixing multi-value and fuzzy-set factors in one analysis is not (currently) supported). 
 
-A data frame or configuration table \code{x} with a corresponding type specification is the only mandatory input of the \code{cna} function. In particular, \code{cna} does not need an input specifying which factor(s) in \code{x} are endogenous, it tries to infer that from the data. But if it is known prior to the analysis what factors have values that can figure as outcomes, an \strong{outcome specification} can be given to \code{cna} via the argument \code{outcome}, which takes as input a character vector identifying one or several factor values  as potential outcome(s). In case of  \code{"cs"} and \code{"fs"} data, factor values are expressed by upper and lower cases (e.g. \code{outcome = c("A", "b")}), in the \code{"mv"} case, they are expressed by the ``factor=value'' notation (e.g. \code{outcome = c("A=1","B=3")}). Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are potential outcomes.
+A data frame or configuration table \code{x} is the only mandatory input of the \code{cna} function. In particular, \code{cna} does not need an input specifying which factor(s) in \code{x} are endogenous, it tries to infer that from the data. But if it is known prior to the analysis what factors have values that can figure as outcomes, an \strong{outcome specification} can be given to \code{cna} via the argument \code{outcome}, which takes as input a character vector identifying one or several factor values  as potential outcome(s). In case of  \code{"cs"} and \code{"fs"} data, factor values are expressed by upper and lower cases (e.g. \code{outcome = c("A", "b")}), in the \code{"mv"} case, they are expressed by the ``factor=value'' notation (e.g. \code{outcome = c("A=1","B=3")}). Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are potential outcomes.
 
-When the data \code{x} contain multiple potential outcomes, it may moreover be known, prior to the analysis, that these outcomes have a certain \strong{causal ordering}, meaning that some of them are causally upstream of the others. Such information can be given to \code{cna} by means of the argument \code{ordering}, which takes a list of character vectors as value.
+When the data \code{x} contain multiple potential outcomes, it may moreover be known, prior to the analysis, that these outcomes have a certain \strong{causal ordering}, meaning that some of them are causally upstream of the others. Such information can be given to \code{cna} by means of the argument \code{ordering}, which takes either a character string or a list of character vectors as value.
 %Still, when prior causal knowledge about an investigated process is available, \code{cna} can be prohibited from treating certain factors as potential causes of other factors by means of the argument \code{ordering}. If specified, that argument defines a \bold{causal ordering} for the factors in \code{x}. 
-For example,  \code{ordering = list(c("A",} \code{ "B"), "C")} determines that C is causally located \emph{downstream} of A and B, meaning that C is \emph{not} a potential cause of A and B. In consequence, \code{cna} only checks whether values of A and B can be modeled as causes of values of C; the test for a causal dependency in the other direction is skipped. %If the argument \code{ordering} is not specified, \code{cna} searches for dependencies between all factors in \code{x} (in accordance with \code{outcome}). 
-An \code{ordering} does not need to explicitly mention all factors in \code{x}. If only a subset of the factors are included in the \code{ordering}, the non-included factors are entailed to be upstream of the included ones. Hence, \code{ordering = list("C")}, for instance, means that C is located downstream of all other factors in \code{x}.
+For example,  \code{ordering = "A, B < C"} or, equivalently, \code{ordering = list(c("A",} \code{ "B"), "C")} determines that C is causally located \emph{downstream} of A and B, meaning that C is \emph{not} a potential cause of A and B. In consequence, \code{cna} only checks whether values of A and B can be modeled as causes of values of C; the test for a causal dependency in the other direction is skipped. %If the argument \code{ordering} is not specified, \code{cna} searches for dependencies between all factors in \code{x} (in accordance with \code{outcome}). 
+An \code{ordering} does not need to explicitly mention all factors in \code{x}. If only a subset of the factors are included in the \code{ordering}, the non-included factors are entailed to be upstream of the included ones. Hence, \code{ordering = "C"}, for instance, means that C is located downstream of all other factors in \code{x}.
 
-The argument \code{strict} determines whether the elements of one level in an ordering can be causally related or not. For example, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = TRUE}, then A and B---which are on the same level of the ordering---are excluded to be causally related and \code{cna} skips corresponding tests. By contrast, if \code{ordering = list(c("A", "B"), "C")} and \code{strict = FALSE}, then \code{cna} also searches for dependencies among A and B. The default is \code{strict} \code{ = FALSE}. %If the user knows prior to the analysis that the data contain exactly one endogenous factor E and that the remaining exogenous factors are mutually causally independent, the appropriate function call should feature \code{cna(..., ordering = list("E"), strict = TRUE,...)}.
+The argument \code{strict} determines whether the elements of one level in an ordering can be causally related or not. For example, if \code{ordering = "A, B < C"} and \code{strict = TRUE}, then A and B---which are on the same level of the ordering---are excluded to be causally related and \code{cna} skips corresponding tests. By contrast, if \code{ordering = "A, B < C"} and \code{strict = FALSE}, then \code{cna} also searches for dependencies among A and B. The default is \code{strict} \code{ = FALSE}. %If the user knows prior to the analysis that the data contain exactly one endogenous factor E and that the remaining exogenous factors are mutually causally independent, the appropriate function call should feature \code{cna(..., ordering = list("E"), strict = TRUE,...)}.
 
 
 
@@ -145,11 +137,10 @@ determines that only factors A and B are negated. The default is no negations, i
 The argument \code{what} can be specified both for the \code{cna} and the \code{print()}
 function. It regulates what items of the output of \code{cna} are printed. If
 \code{what} is given the value \dQuote{\code{t}}, the configuration table is printed; if
-it is given an \dQuote{\code{m}}, the msc are printed; if it is given an \dQuote{\code{a}},
-the asf are printed; if it is given a \dQuote{\code{c}}, the csf are printed.
+it is given an \dQuote{\code{m}}, the msc are printed; if it is given an \dQuote{\code{a}}, the asf are printed; if it is given a \dQuote{\code{c}}, the csf are printed.
 \code{what = "all"} or \code{what = "tmac"} determine that all output items are
 printed. Note that \code{what} has no effect on the computations that are performed when executing \code{cna}; it only determines how the result is printed.
-The default output of \code{cna} is \code{what = "ac"}. It first returns the implemented ordering. Second, the top 5 asf and, third, the top 5 csf are reported, along with an indication of how many solutions in total exist. To print all msc, asf, and csf, the corresponding functions in \code{\link{condTbl}} should be used. %If csf are the same as asf, this is indicated by "Same as asf". 
+The default output of \code{cna} is \code{what = "ac"}. It first returns an implemented ordering or outcome specification. Second, the top 5 asf and, third, the top 5 csf are reported, along with an indication of how many solutions in total exist. To print all msc, asf, and csf, the corresponding functions in \code{\link{condTbl}} should be used. %If csf are the same as asf, this is indicated by "Same as asf". 
 In case of \code{suff.only = TRUE}, \code{what} defaults to \code{"m"}. msc are printed with an attribute \code{minimal} specifying whether a sufficient condition is minimal as required by the INUS-theory of causation. If \code{inus.only = TRUE}, all msc are minimal by default. 
 
 \code{cna} only includes factor configurations in the analysis that are actually instantiated in the data. The argument \code{cutoff} determines the minimum membership score required for a factor or a combination of factors to count as instantiated. It takes values in the unit interval [0,1] with a default of 0.5. \code{border} specifies whether configurations with membership scores equal to \code{cutoff} are rounded up (\code{border = "up"}), rounded down (\code{border = "down"}), which is the default, or dropped from the analysis (\code{border = "drop"}).
@@ -229,7 +220,7 @@ Wollebaek, Dag. 2010.
 }
 
 \seealso{\code{\link{configTable}}, \code{\link{condition}}, \code{\link{cyclic}}, \code{\link{condTbl}}, \code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link{some}},  \code{\link{coherence}},\cr
-\code{\link{minimalizeCsf}}, \code{\link{randomConds}}, \code{\link{is.submodel}},  \code{\link{is.inus}},  \code{\link{redundant}}, \code{\link{full.ct}}, \code{\link{d.educate}},\cr
+\code{\link{minimalizeCsf}}, \code{\link{randomConds}}, \code{\link{is.submodel}},  \code{\link{is.inus}},  \code{\link{redundant}}, \code{\link{full.ct}}, \code{\link{shortcuts}}, \code{\link{d.educate}},\cr
 \code{\link{d.women}}, \code{\link{d.pban}}, \code{\link{d.autonomy}}, \code{\link{d.highdim}}}
 
 \examples{
@@ -292,7 +283,7 @@ ana1}
 # The two resulting asf only reach an exhaustiveness score of 0.438, meaning that
 # not all configurations that are compatible with the asf are contained in the data
 # "d.women". Here is how to extract the configurations that are compatible with 
-# the first asf but are not contained in "d.women":
+# the first asf but are not contained in "d.women".
 \donttest{library(dplyr)
 setdiff(ct2df(selectCases(asf(ana1)$condition[1], full.ct(d.women))),
         d.women)
@@ -303,22 +294,22 @@ setdiff(ct2df(selectCases(asf(ana1)$condition[1], full.ct(d.women))),
 # --------------------------------------------------------------------------------
 # csCNA with ordering from Wollebaek (2010) [Beware: due to massive ambiguities, this analysis
 # will take about 20 seconds to compute.]
-\donttest{cna(d.volatile, ordering = list("VO2"), maxstep = c(6, 6, 16))}
+\donttest{cna(d.volatile, ordering = "VO2", maxstep = c(6, 6, 16))}
               
 # Using suff.only, CNA can be forced to abandon the analysis after minimization of sufficient 
 # conditions. [This analysis terminates quickly.]
-cna(d.volatile, ordering = list("VO2"), maxstep = c(6, 6, 16), suff.only = TRUE)
+cna(d.volatile, ordering = "VO2", maxstep = c(6, 6, 16), suff.only = TRUE)
 
 # Similarly, by using the default maxstep, CNA can be forced to only search for asf and csf
 # with reduced complexity.
-\donttest{cna(d.volatile, ordering = list("VO2"))}
+\donttest{cna(d.volatile, ordering = "VO2")}
 
 
 # Multi-value data from Hartmann & Kemmerzell (2010) on party bans in Africa
 # ---------------------------------------------------------------------------
 # mvCNA with an outcome specification taken from Hartmann & Kemmerzell 
 # (2010); coverage cutoff at 0.95 (consistency cutoff at 1), maxstep at c(6, 6, 10).
-cna.pban <- mvcna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(6, 6, 10), 
+cna.pban <- cna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(6, 6, 10), 
                   what = "all")
 cna.pban
 
@@ -329,9 +320,9 @@ csf(cna.pban)
 
 # [Note that all of these 14 causal models reach better consistency and 
 # coverage scores than the one model Hartmann & Kemmerzell (2010) present in their paper, 
-# which they generated using the TOSMANA software, version 1.3: 
+# which they generated using the TOSMANA software, version 1.3. 
 # T=0 + T=1 + C=2 + T=1*V=0 + T=2*V=0 <-> PB=1]
-condTbl("T=0 + T=1 + C=2 + T=1*V=0 + T=2*V=0 <-> PB = 1", mvct(d.pban))
+condTbl("T=0 + T=1 + C=2 + T=1*V=0 + T=2*V=0 <-> PB = 1", d.pban)
 
 # Extract all minimally sufficient conditions.
 msc(cna.pban)
@@ -344,22 +335,22 @@ print(cna.pban, nsolutions = "all")
 print(cna.pban, what = "t", show.cases = TRUE)
 
 # Build solution formulas with maximally 4 disjuncts.
-\donttest{mvcna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(4, 4, 10))
+\donttest{cna(d.pban, outcome = "PB=1", cov = .95, maxstep = c(4, 4, 10))
 
 # Only print 2 digits of consistency and coverage scores.
 print(cna.pban, digits = 2)
 
 # Build all but print only two msc for each factor and two asf and csf.
-print(mvcna(d.pban, outcome = "PB=1", cov = .95,
+print(cna(d.pban, outcome = "PB=1", cov = .95,
       maxstep = c(6, 6, 10), what = "all"), nsolutions = 2)
 
 # Lowering the consistency instead of the coverage threshold yields further models with
 # excellent fit scores; print only asf.
-mvcna(d.pban, outcome = "PB=1", con = .93, what = "a", maxstep = c(6, 6, 10))
+cna(d.pban, outcome = "PB=1", con = .93, what = "a", maxstep = c(6, 6, 10))
       
 # Specifying an outcome is unnecessary for d.pban. PB=1 is the only 
 # factor value in those data that could possibly be an outcome.
-mvcna(d.pban, cov = .95, maxstep = c(6, 6, 10))
+cna(d.pban, cov = .95, maxstep = c(6, 6, 10))
 }
 
 # Fuzzy-set data from Basurto (2013) on autonomy of biodiversity institutions in Costa Rica
@@ -371,34 +362,34 @@ mvcna(d.pban, cov = .95, maxstep = c(6, 6, 10))
 # we first apply fsCNA to replicate the analysis for the local conditions of the endurance of 
 # local autonomy.
 dat1 <- d.autonomy[15:30, c("AU","EM","SP","CO")]
-fscna(dat1, ordering = list("AU"), strict = TRUE, con = .9, cov = .9)
+cna(dat1, ordering = "AU", strict = TRUE, con = .9, cov = .9)
 
 # The fsCNA model has significantly better consistency (and equal coverage) scores than the 
 # model presented by Basurto (p. 580): SP*EM + CO <-> AU, which he generated using the 
 # fs/QCA software.
-fscond("SP*EM + CO <-> AU", dat1) # both EM and CO are redundant to account for AU
+condition("SP*EM + CO <-> AU", dat1) # both EM and CO are redundant to account for AU
 
 # If we allow for dependencies among the conditions by setting strict = FALSE, CNA reveals 
-# that SP is a common cause of both AU and EM:
-fscna(dat1, ordering = list("AU"), strict = FALSE, con = .9, cov = .9)
+# that SP is a common cause of both AU and EM.
+cna(dat1, ordering = "AU", strict = FALSE, con = .9, cov = .9)
 
 # Here is the analysis for the international conditions of autonomy endurance, which
-# yields the same model as the one presented by Basurto (plus one model Basurto does not mention):
+# yields the same model as the one presented by Basurto (plus one model Basurto does not mention).
 dat2 <- d.autonomy[15:30, c("AU","RE", "CN", "DE")]
-fscna(dat2, ordering = list("AU"), con = .9, con.msc = .85, cov = .85)
+cna(dat2, ordering = "AU", con = .9, con.msc = .85, cov = .85)
 
 # But there are other models (here printed with all solution attributes)
 # that fare equally well.
-fscna(dat2, ordering = list("AU"), con = .85, cov = .9, details = TRUE)
+cna(dat2, ordering = "AU", con = .85, cov = .9, details = TRUE)
 
 # Finally, here is an analysis of the whole dataset, showing that across the whole period 
 # 1986-2006, the best causal model of local autonomy (AU) renders that outcome dependent
-# only on local direct spending (SP):
-\donttest{fscna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
+# only on local direct spending (SP).
+\donttest{cna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
       maxstep = c(5, 5, 11), details = TRUE)}
 
 # Also build non-INUS solutions.
-\donttest{asf(fscna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
+\donttest{asf(cna(d.autonomy, outcome = "AU", con = .85, cov = .9, 
       maxstep = c(5, 5, 11), details = TRUE, inus.only = FALSE))}
       
       
@@ -422,17 +413,17 @@ mycond <- "(D + C*f <-> A)*(C*d + c*D <-> B)*(B*d + D*f <-> C)*(c*B + B*f <-> E)
 dat1 <- selectCases(mycond)
 \donttest{ana1 <- cna(dat1, details = c("e","cy"))
 # There exist almost 2M csf. This is how to build the first 1076 of them, with 
-# additional messages about the csf building process:
+# additional messages about the csf building process.
 first.csf <- csf(ana1, verbose = TRUE)
 # Most of these csf are compatible with more configurations than are contained in 
 # dat1. Only 193 csf in first.csf are perfectly exhaustive (i.e. all compatible 
-# configurations are contained in dat1):
+# configurations are contained in dat1).
 subset(first.csf, exhaustiveness == 1)
 
 # 1020 of the csf in first.csf contain cyclic substructures.
 subset(first.csf, cyclic == TRUE)
 
-# Here's how to only build acyclic csf:
+# Here's how to only build acyclic csf.
 ana2 <- cna(dat1, details = c("e","cy"), acyclic.only = TRUE)
 csf(ana2, verbose = TRUE)
 }
@@ -443,9 +434,9 @@ csf(ana2, verbose = TRUE)
 \donttest{# Define the target and generate data on the target.
 target <- "(A=1*B=2 + A=4*B=3 <-> C=1)*(C=4*D=1 + C=2*D=4 <-> E=4)"
 dat1 <- allCombs(c(4, 4, 4, 4, 4)) 
-dat2 <- selectCases(target, dat1, type = "mv")
+dat2 <- selectCases(target, dat1)
 # Analyze the simulated data with CNA.
-test1 <- mvcna(dat2, maxstep = c(3,2,9))
+test1 <- cna(dat2, maxstep = c(3,2,9))
 # Check whether a correctness-preserving submodel of the target is among the 
 # returned solutions. 
 is.submodel(csf(test1)$condition, target)
@@ -454,7 +445,7 @@ is.submodel(csf(test1)$condition, target)
 # only 100 of 472 observable configurations are actually
 # observed. [Repeated runs will generate different data.]
 dat3 <- some(dat2, n = 100, replace = TRUE)
-test2 <- mvcna(dat3, maxstep = c(3,2,9))
+test2 <- cna(dat3, maxstep = c(3,2,9))
 is.submodel(csf(test2)$condition, target)
 
 # 2. Fs data with imperfect consistencies (con = 0.8) and coverages (cov = 0.8); 
@@ -467,17 +458,17 @@ outcome <- cna:::rhs(target)
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- some(configTable(dat1), n = 200, replace = TRUE)
 dat3 <- makeFuzzy(ct2df(dat2), fuzzvalues = seq(0, 0.45, 0.01))
-dat4 <- selectCases1(target, con = .8, cov = .8, type = "fs", dat3)
+dat4 <- selectCases1(target, con = .8, cov = .8, dat3)
 # Analyze the simulated data with CNA.
-test3 <- fscna(dat4, outcome = outcome, con = .8, cov = .8)
+test3 <- cna(dat4, outcome = outcome, con = .8, cov = .8)
 # Check whether a correctness-preserving submodel of the target is among the 
 # returned solutions. 
 is.submodel(asf(test3)$condition, target)
 
-# Same test as above with data fragmentation: only 80 of about 150 possible
+# Same test as above with dat a fragmentation: only 80 of about 150 possible
 # cases are actually observed. [Repeated runs will generate different data.]
 dat5 <- some(dat4, n = 80, replace = TRUE)
-test4 <- fscna(dat5, ordering = list(outcome), strict = TRUE, con = .8, cov = .8)
+test4 <- cna(dat5, outcome = outcome, con = .8, cov = .8)
 is.submodel(asf(test4)$condition, target)
 }
 
@@ -489,26 +480,46 @@ mydata <- allCombs(rep(2, 5)) - 1
 dat1 <- makeFuzzy(mydata, fuzzvalues = seq(0, 0.5, 0.01))
 dat1 <- ct2df(selectCases1("a*B*d + A*c*D <-> E", con = .8, cov = .8, dat1))
 
-# In dat1, "a*B*d + A*c*D <-> E" has the following con and cov scores:
-as.condTbl(fscond("a*B*d + A*c*D <-> E", dat1))
+# In dat1, "a*B*d + A*c*D <-> E" has the following con and cov scores.
+as.condTbl(condition("a*B*d + A*c*D <-> E", dat1))
 
 # The standard algorithm of CNA will, however, not find this structure with
 # con = cov = 0.8 because one of the disjuncts (a*B*d) does not meet the con
-# threshold:
-as.condTbl(fscond(c("a*B*d <-> E", "A*c*D <-> E"), dat1))
-fscna(dat1, outcome = "E", con = .8, cov = .8)
+# threshold.
+as.condTbl(condition(c("a*B*d <-> E", "A*c*D <-> E"), dat1))
+cna(dat1, outcome = "E", con = .8, cov = .8)
 
 # With the argument con.msc we can lower the con threshold for msc, but this does not
-# recover "a*B*d + A*c*D <-> E" either:
-cna2 <- fscna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78)
+# recover "a*B*d + A*c*D <-> E" either.
+cna2 <- cna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78)
 cna2
 msc(cna2)
 
 # The reason is that "A*c -> E" and "c*D -> E" now also meet the con.msc threshold and,
 # therefore,  "A*c*D -> E" is not contained in the msc---because of violated minimality.
 # In a situation like this, lifting the minimality requirement via 
-# only.minimal.msc = FALSE allows CNA to find the intended target:
-fscna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78,
+# only.minimal.msc = FALSE allows CNA to find the intended target.
+cna(dat1, outcome = "E", con = .8, cov = .8, con.msc = .78,
       only.minimal.msc = FALSE)
+
+
+# Overriding automatic detection of the data type
+# ------------------------------------------------
+# The type argument allows for manually setting the data type.
+# If "cs" data are treated as "mv" data, cna() automatically builds models for all values
+# of outcome factors, i.e. both positive and negated outcomes.
+cna(d.educate, type = "mv")
+# Treating "cs" data as "fs".
+cna(d.women, type = "fs")
+
+# Not all manual settings are admissible.
+try(cna(d.autonomy, outcome = "AU", con = .8, cov = .8, type = "mv" ))
+
+# Shortcut functions from previous versions of the package continue to work 
+# (see ?shortcuts).
+fscna(d.autonomy, outcome = "AU", con = .8, cov = .8)
+mvcna(d.pban, outcome = "PB", con = .8)
+
+
 }
 

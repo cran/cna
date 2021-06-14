@@ -15,14 +15,14 @@ The function \code{full.ct} generates a \code{configTable} with all logically po
 \usage{
 full.ct(x, ...)
 
-\method{full.ct}{default}(x, type = c("cs", "mv", "fs"), cond = NULL, ...)
+\method{full.ct}{default}(x, type = "auto", cond = NULL, ...)
 \method{full.ct}{configTable}(x, cond = NULL, ...)
 \method{full.ct}{cti}(x, cond = NULL, ...)
 }
 
 \arguments{
   \item{x}{A \code{configTable}, a data frame, a matrix, an integer, a list specifying the factors' value ranges,  or a character vector featuring all admissible factor values (see the details and examples below).}
-  \item{type}{Character vector specifying the type of \code{x}: \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set); passed to \code{\link{configTable}}; only required if \code{x} is a data frame or matrix.}
+  \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). (Manual specification of the \code{type} only has an effect if \code{x} is a data frame or matrix.)}
   \item{cond}{Optional character vector containing conditions in the syntax of msc, asf or csf. If it is not \code{NULL}, only factors appearing in \code{cond} are used.}
   \item{\dots}{
   Further arguments passed to methods.
@@ -66,14 +66,12 @@ full.ct(c("A=1", "A=2", "B=1", "B=0", "C=13","C=45"))
 
 # x is a data frame.
 full.ct(d.educate)
-full.ct(d.jobsecurity, type = "fs")
-full.ct(d.pban, type = "mv")
+full.ct(d.jobsecurity)
+full.ct(d.pban)
 
 # x is a configTable.
-full.ct(csct(d.educate))
-full.ct(fsct(d.jobsecurity))
-full.ct(mvct(d.pban))
-full.ct(mvct(d.pban), cond = "C=1 + F=0 <-> V=1") 
+full.ct(configTable(d.jobsecurity))
+full.ct(configTable(d.pban), cond = "C=1 + F=0 <-> V=1") 
 
 # x is an integer.
 full.ct(6)

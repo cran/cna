@@ -33,7 +33,7 @@ Maximal number of iterations.
 
 \details{
 
-\code{rreduce} successively eliminates conjuncts and disjuncts from a DNF \code{cond} as long as the truth scores in data \code{x} do not change, that is, as long as the result of \code{condition(cond, x)} remains the same. The only required argument is \code{cond}. If \code{x} is not provided, redundancies are eliminated relative to \code{full.ct(cond)}. If \code{x} is provided and \code{full = TRUE}, redundancies are eliminated relative to \code{full.ct(x)}. If \code{x} is provided and \code{full = FALSE}, redundancies are eliminated relative to \code{x}.
+\code{rreduce} successively eliminates conjuncts and disjuncts from a DNF \code{cond} as long as the result of \code{condition(cond, x)} remains the same. The only required argument is \code{cond}. If \code{x} is not provided, redundancies are eliminated relative to \code{full.ct(cond)}. If \code{x} is provided and \code{full = TRUE}, redundancies are eliminated relative to \code{full.ct(x)}. If \code{x} is provided and \code{full = FALSE}, redundancies are eliminated relative to \code{x}.
 
 If there are more than one redundancy-free forms of \code{cond}, \code{rreduce} only returns a randomly chosen one. 
 }

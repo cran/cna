@@ -108,7 +108,7 @@ is.inus("(A + C <-> B)*(C + E <-> B)", csf.info = TRUE)
 # ----------------
 # In case of multi-value data, is.inus() needs to be given a dataset x determining
 # the value ranges of the factors in cond.
-mvdata <- mvct(setNames(allCombs(c(2, 3, 2, 3)) -1, c("C", "F", "V", "O")))
+mvdata <- configTable(setNames(allCombs(c(2, 3, 2, 3)) -1, c("C", "F", "V", "O")))
 is.inus("C=1 + F=2*V=0 <-> O=2", mvdata)
 # x can also be given to is.inus() as a list.
 is.inus("C=1 + F=2*V=0 <-> O=2", list(C=0:1, F=0:2, V=0:1, O=0:2))
@@ -117,8 +117,8 @@ is.inus("C=1 + F=2*V=0 <-> O=2", list(C=0:1, F=0:2, V=0:1, O=0:2))
 # in which case C=1 + F=2*V=0 is tautologous and, hence, non-INUS.
 is.inus("C=1 + F=2*V=0 <-> O=2") 
         
-is.inus("C=1 + C=0*C=2", mvct(d.pban))    # contradictory
-is.inus("C=0 + C=1 + C=2", mvct(d.pban))  # tautologous
+is.inus("C=1 + C=0*C=2", configTable(d.pban))    # contradictory
+is.inus("C=0 + C=1 + C=2", configTable(d.pban))  # tautologous
 
 # A redundancy in necessary or sufficient conditions, i.e. a 
 # non-INUS asf in a csf.
@@ -151,7 +151,7 @@ is.inus("(A=1 + B=2 + D=3 <-> C=1)*(A=2 + B=3 + D=2 <-> C=1)", fullDat, csf.info
 
 # Fuzzy-set case 
 # --------------
-fsdata <- fsct(d.jobsecurity)
+fsdata <- configTable(d.jobsecurity)
 conds <- csf(cna(fsdata, con = 0.85, cov = 0.85, inus.only = FALSE))$condition
 # Various examples of different types.
 is.inus(conds, fsdata, csf.info = TRUE)

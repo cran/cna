@@ -39,3 +39,4 @@ tt2df(...)
 
 \seealso{\code{\link{configTable}}, \code{\link{full.ct}}, \code{\link{ct2df}}}
 
+\keyword{internal}

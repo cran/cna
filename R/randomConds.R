@@ -4,7 +4,9 @@ randomAsf <- function(x, outcome = NULL, maxVarNum = if (type == "mv") 8 else 16
                       compl = NULL, how = c("inus", "minimal")){
   how <- match.arg(how)
   if (!is.data.frame(x) && !is.matrix(x)) x <- full.ct(x)
-  x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+  if (!inherits(x, "configTable")){
+    x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+  }
   type <- attr(x, "type")
   if (length(x) > maxVarNum){
     keep <- union(outcome, sample(names(x), maxVarNum - length(outcome)))
@@ -80,8 +82,10 @@ msamp <- function(i, v) vapply(sample(v, i), sample, 1, FUN.VALUE = character(1)
 # randCsf: Determine a random csf
 randomCsf <- function(x, outcome = NULL, n.asf = NULL, compl = NULL, maxVarNum = if (type == "mv") 8 else 16){
   if (!is.data.frame(x) && !is.matrix(x)) x <- full.ct(x)
+  if (!inherits(x, "configTable")){
+    x <- configTable(x, type = "auto", rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+  }
   type <- attr(x, "type")
-  if (is.null(type)) type <- "cs"
   stopifnot(length(x) >= 4, length(maxVarNum) == 1)
   maxVarNum <- min(maxVarNum, length(x))
 

@@ -1,3 +1,7 @@
+Changes in version 3.2.0 (2021-06-14)
+  * Automatic detection of data type in configTable().
+  * 'ordering' can be specified as a single character string in cna().
+
 Changes in version 3.1.0 (2021-05-28)
   * The computational efficiency of cna() and other functions has been improved, especially for applications to larger data sets.
   * The vignette has been reviewed.

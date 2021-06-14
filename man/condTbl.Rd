@@ -110,7 +110,7 @@ from an Irrigation Experiment in Nepal.}
 # ------------------------------------------------------------------------------------
 # CNA with causal ordering that corresponds to the ordering in Lam & Ostrom (2010); coverage 
 # cut-off at 0.9 (consistency cut-off at 1).
-cna.irrigate <- cna(d.irrigate, ordering = list(c("A","R","F","L","C"),"W"), cov = .9,
+cna.irrigate <- cna(d.irrigate, ordering = "A, R, F, L, C < W", cov = .9,
                     maxstep = c(4, 4, 12), details = TRUE)
 cna.irrigate
 
@@ -138,7 +138,7 @@ msc(cna.irrigate)$condition
 # ambiguous.
 cna2.irrigate <- cna(d.irrigate, cov = .9, maxstep = c(4,4,12), details = TRUE)
 
-# To speed up the construction of complex solution formulas, first extract atomic solutions
+# To speed up the construction of complex solution formulas, first extract asf
 # and then pass these asf to csf.
 cna2.irrigate.asf <- asf(cna2.irrigate)
 \donttest{csf(cna2.irrigate, asfx = cna2.irrigate.asf, details = FALSE)}
