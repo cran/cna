@@ -26,7 +26,7 @@ makeFuzzy(x, fuzzvalues = c(0, 0.05, 0.1), ...)
 A \code{configTable} of type "fs".
 }
 
-\seealso{\code{\link{selectCases}}, \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{configTable}}, \code{\link{cna}}, \code{\link{ct2df}}, \code{\link{condition}}
+\seealso{\code{\link{selectCases}}, \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{configTable}}, \code{\link{cna}}, \code{\link{ct2df}}, \code{\link[cna]{condition}}
 }
 
 \examples{

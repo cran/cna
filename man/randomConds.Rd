@@ -6,20 +6,23 @@
 \title{Generate random solution formulas}
 
 \description{
-Based on a set of factors and a corresponding data type---given as a data frame or \code{configTable}---, \code{randomAsf} generates a random atomic solution formula (asf) and \code{randomCsf} a random (acyclic) complex solution formula (csf).
+Based on a set of factors---given as a data frame or \code{configTable}---, \code{randomAsf} generates a random atomic solution formula (asf) and \code{randomCsf} a random (acyclic) complex solution formula (csf).
 }
 
 \usage{
-randomAsf(x, outcome = NULL, maxVarNum = if (type == "mv") 8 else 16,
-          compl = NULL, how = c("inus", "minimal"))
-randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL, 
-          maxVarNum = if (type == "mv") 8 else 16)
+randomAsf(x, outcome = NULL, positive = TRUE, 
+          maxVarNum = if (type == "mv") 8 else 16, compl = NULL, 
+          how = c("inus", "minimal"))
+randomCsf(x, outcome = NULL, positive = TRUE, 
+          n.asf = NULL, compl = NULL, maxVarNum = if (type == "mv") 8 else 16)
 }
 
 \arguments{
-  \item{x}{Data frame or \code{configTable}; determines the number of factors, their names and their possible values.}
-  \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor(s) in the solution formula; must be a subset of \code{names(x)}.}
-  \item{maxVarNum}{Maximal number of factors that can appear in a generated asf or csf.
+  \item{x}{Data frame or \code{configTable}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns, in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
+  \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor values in the solution formula. Must be factor values, e.g. \code{"A"} or \code{"b"} in case of binary data or \code{"A=1"} in case of multi-value data. With multi-value data, factor \emph{names} are also allowed; a value of that factor will then be chosen at random. \code{outcome} overrides \code{positive} and \code{n.asf}.
+}
+  \item{positive}{Logical; if TRUE (default), the outcomes all have positive values. If \code{FALSE}, a value (positive or negative in case of binary data) will be picked at random. \code{positive} has no effect if the \code{outcome} argument is not \code{NULL} or if \code{x} contains multi-value data.}
+  \item{maxVarNum}{Maximal number of factors in \code{x} that can appear in the generated asf or csf. The default depends on the type of the data contained in \code{x}.
 }
   \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf).}
   \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details).}
@@ -32,9 +35,13 @@ randomCsf(x, outcome = NULL, n.asf = NULL, compl = NULL,
 
 The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{configTable} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. %If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
 
-The optional argument \code{outcome} determines which factors in \code{x} shall be treated as outcomes. If \code{outcome} is at its default value \code{NULL}, \code{randomAsf} and \code{randomCsf} randomly draw factor(s) from \code{x} to be treated as outcome(s). If \code{type} is \code{"mv"}, then values of distinct factors are chosen as outcomes.
+The optional argument \code{outcome} determines which values of which factors in \code{x} shall be treated as outcomes. If \code{outcome = NULL} (default), \code{randomAsf} and \code{randomCsf} randomly draw factor values from \code{x} to be treated as outcome(s). If \code{positive = TRUE} (default), only positive outcome values are chosen in case of crisp-set data; if \code{positive = FALSE}, outcomes values are drawn from the set \{1,0\} at random. \code{positive} only has an effect if \code{x} contains crisp-set data and \code{outcome = NULL}.
 
-The maximal number of factors included in the generated asf and csf can be controlled via the argument \code{maxVarNum}. This is particularly relevant when \code{x} is of high dimension, as generating solution formulas with more than 20 factors is computationally demanding and, accordingly, may take a long time (or even exhaust computer memory).
+%\code{type} is \code{"mv"}, then values of distinct factors are chosen as outcomes.
+
+%The logical argument \code{positive} is only effective when \code{outcome = NULL}. At its non-default value \code{TRUE}, only positive outcome values are chosen; at its default value \code{FALSE}, outcome values are drawn at random. 
+
+The maximal number of factors included in the generated asf and csf can be controlled via the argument \code{maxVarNum}. This is relevant when \code{x} is of high dimension, as generating solution formulas with more than 20 factors is computationally demanding and, accordingly, may take a long time (or even exhaust computer memory).
 
 The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. Assigning unduly high values to \code{compl} results in an error.
 
@@ -58,6 +65,11 @@ randomAsf(full.ct("Johnny*Debby*Aurora*Mars*James*Sonja"))
 
 # Asf generated from a specified number of binary factors.
 randomAsf(full.ct(7))
+# In shorthand form.
+randomAsf(7)
+
+# Randomly choose positive or negative outcome values.
+replicate(10, randomAsf(7, positive = FALSE))
 
 # Asf generated from an existing data frame.
 randomAsf(d.educate)
@@ -74,13 +86,17 @@ randomAsf(d.educate, outcome = "G", how = "minimal")
 
 # Asf with multi-value factors.
 randomAsf(allCombs(c(3,4,3,5,3,4)))
+# Set the outcome value.
+randomAsf(allCombs(c(3,4,3,5,3,4)), outcome = "B=4")
+# Choose a random value of factor B.
+randomAsf(allCombs(c(3,4,3,5,3,4)), outcome = "B")
 
 # Asf from fuzzy-set data.
 randomAsf(d.jobsecurity)
 randomAsf(d.jobsecurity, outcome = "JSR")
 
-# Generate 20 asf.
-\donttest{replicate(20, randomAsf(full.ct(7), compl = 2:3))}
+# Generate 20 asf for outcome "e".
+replicate(20, randomAsf(7, compl = 2:3, outcome = "e"))
 
 
 # randomCsf
@@ -90,23 +106,30 @@ randomCsf(full.ct("H*I*T*R*K*Q*P"))
 
 # Csf generated from a specified number of binary factors.
 randomCsf(full.ct(7))
+# In shorthand form.
+randomCsf(7)
+
+# Randomly choose positive or negative outcome values.
+replicate(5, randomCsf(7, positive = FALSE))
 
 # Specify the outcomes.
-randomCsf(d.volatile, outcome = c("RB","SE"))
+randomCsf(d.volatile, outcome = c("RB","se"))
 
 # Specify the complexity.
-randomCsf(d.volatile, outcome = c("RB","SE"), compl = 2)
+randomCsf(d.volatile, outcome = c("RB","se"), compl = 2)
 randomCsf(full.ct(7), compl = 3:4)
 
 # Specify the maximal number of factors.
 randomCsf(d.highdim, maxVarNum = 10)
-\donttest{randomCsf(d.highdim, maxVarNum = 20) # takes a while to complete}
+\donttest{randomCsf(d.highdim, maxVarNum = 15) # takes a while to complete}
 
 # Specify the number of asf.
 randomCsf(full.ct(7), n.asf = 3)
 
 # Csf with multi-value factors.
 randomCsf(allCombs(c(3,4,3,5,3,4)))
+# Set the outcome values.
+randomCsf(allCombs(c(3,4,3,5,3,4)), outcome = c("A=1","B=4"))
 
 # Generate 20 csf.
 \donttest{replicate(20, randomCsf(full.ct(7), n.asf = 2, compl = 2:3))}

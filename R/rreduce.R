@@ -1,8 +1,9 @@
 
 # rreduce: reduce a cond wrt a data.fame/configTable:
-rreduce <- function(cond, x = full.ct(cond), full = !missing(x), 
+rreduce <- function(cond, x = full.ct(cond), niter = 1, full = !missing(x), 
                     verbose = FALSE, maxiter = 1000,
                     simplify2constant = TRUE){
+  stopifnot(niter>=1, niter%%1==0)
   if (!inherits(x, "cti")){
     if (!inherits(x, "configTable")){
       x <- configTable(x, rm.dup.factors=FALSE, rm.const.factors=FALSE)
@@ -19,50 +20,64 @@ rreduce <- function(cond, x = full.ct(cond), full = !missing(x),
   if (simplify2constant && all(evalCond0 == evalCond0[1L])) 
     return(as.character(evalCond0[1L]))
   
-  disjs <- strsplit(cond, "+", fixed = TRUE)[[1L]]
-  evalDisj <- qcond_bool(disjs, sc)
-  conjs <- strsplit(disjs, "*", fixed = TRUE)
+  initial <- list(disjs = strsplit(cond, "+", fixed = TRUE)[[1L]])
+  initial$evalDisj <- qcond_bool(initial$disjs, sc)
+  initial$conjs <- strsplit(initial$disjs, "*", fixed = TRUE)
 
-  counter <- 0L
-  
-  changed <- TRUE
-  while (changed) {
-    changed <- FALSE
-    # remove redundant disjuncts...
-    repeat{
-      if (length(conjs) > 1L && any(redundantDisj <- C_redund(!evalDisj))){
-        rmDisj <- which(redundantDisj)[sample(sum(redundantDisj), 1L)]
-        conjs <- conjs[-rmDisj]
-        disjs <- disjs[-rmDisj]
-        evalDisj <- evalDisj[, -rmDisj, drop = FALSE]
-        changed <- TRUE
-        if (verbose) cat(counter, ":", C_concat(disjs, sep = " + "), "\n")
-        counter <- counter + 1L
-      } else break
-    }
-    # remove redundant factors...
-    repeat {
-      if (length(wll <- which(lengths(conjs) > 1L))){
-        redundantFactors <- lapply(wll, 
-          function(j) C_redund(sc[evalCond0 == 0, conjs[[j]], drop = FALSE]))
-        if (any(haveRed <- vapply(redundantFactors, any, logical(1)))){
-          pickDisj <- which(haveRed)[sample(sum(haveRed), 1L)]
-          redFact <- redundantFactors[[pickDisj]]
-          rmFact <- which(redFact)[sample(sum(redFact), 1L)]
-          conjs[[wll[[pickDisj]]]] <- conjs[[wll[[pickDisj]]]][-rmFact]
+  out <- character(0)
+
+  repeat {  # 
+    disjs <- initial$disjs
+    evalDisj <- initial$evalDisj
+    conjs <- initial$conjs
+    counter <- 0L
+    changed <- TRUE
+    
+    while (changed) {
+      changed <- FALSE
+      # remove redundant disjuncts...
+      repeat{
+        if (length(conjs) > 1L && any(redundantDisj <- C_redund(!evalDisj))){
+          rmDisj <- which(redundantDisj)[sample(sum(redundantDisj), 1L)]
+          conjs <- conjs[-rmDisj]
+          disjs <- disjs[-rmDisj]
+          evalDisj <- evalDisj[, -rmDisj, drop = FALSE]
           changed <- TRUE
-          if (any(dupDisj <- duplicated(lapply(conjs, sort)))) conjs <- conjs[!dupDisj]
-          disjs <- C_mconcat(conjs, sep = "*")
-          evalDisj <- qcond_bool(disjs, sc)
+          if (verbose) cat(counter, ":", C_concat(disjs, sep = " + "), "\n")
           counter <- counter + 1L
-          if (verbose) cat(counter, ":", C_charList2string(conjs, disj = " + "), "\n")
         } else break
-      } else break
-      if (counter > maxiter) stop("Reached maximal number of reduction steps (maxiter)")
+      }
+      # remove redundant factors...
+      repeat {
+        if (length(wll <- which(lengths(conjs) > 1L))){
+          redundantFactors <- lapply(wll, 
+            function(j) C_redund(sc[evalCond0 == 0, conjs[[j]], drop = FALSE]))
+          if (any(haveRed <- vapply(redundantFactors, any, logical(1)))){
+            pickDisj <- which(haveRed)[sample(sum(haveRed), 1L)]
+            redFact <- redundantFactors[[pickDisj]]
+            rmFact <- which(redFact)[sample(sum(redFact), 1L)]
+            conjs[[wll[[pickDisj]]]] <- conjs[[wll[[pickDisj]]]][-rmFact]
+            changed <- TRUE
+            if (any(dupDisj <- duplicated(lapply(conjs, sort)))) conjs <- conjs[!dupDisj]
+            disjs <- C_mconcat(conjs, sep = "*")
+            evalDisj <- qcond_bool(disjs, sc)
+            counter <- counter + 1L
+            if (verbose) cat(counter, ":", C_charList2string(conjs, disj = " + "), "\n")
+          } else break
+        } else break
+        if (counter > maxiter) stop("Reached maximal number of reduction steps (maxiter)")
+      }
     }
+    reduced <- C_charList2string(conjs)
+    if (!(reduced %in% out)) out <- c(out, reduced)
+    
+    # escape
+    niter <- niter-1
+    if (niter<1) break
   }
-  out <- C_charList2string(conjs)
-  out
+  # Remove stdCond-duplicates
+  dups <- duplicated(stdCond(out))
+  out[!dups]
 }
 
 

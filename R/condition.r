@@ -144,9 +144,9 @@ cti2ct <- function(x, cases = TRUE){
 }
 
 # require(dplyr)
-# d.educate %>% configTable %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.educate)
-# d.pban %>% mvct %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.pban %>% mvct)
-# d.jobsecurity %>% fsct %>% (cna:::ctInfo) %>% cti2ct %>% setequal(d.jobsecurity)
+# d.educate %>% configTable %>% ctInfo %>% cti2ct %>% setequal(d.educate)
+# d.pban %>% mvct %>% ctInfo %>% cti2ct %>% setequal(d.pban %>% mvct)
+# d.jobsecurity %>% fsct %>% ctInfo %>% cti2ct %>% setequal(d.jobsecurity)
 
 # ------------------------------------------------------------------------------
 

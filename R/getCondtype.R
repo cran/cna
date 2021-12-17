@@ -12,7 +12,7 @@
 #' cond <- c("A+B", "a+b*C->E", "(a+b*C<->E)*(A+B<->D)",
 #'               "!a", "!(a+B)<->C", "(a+b*C<->E)*(A+!b<->D)",
 #'               "(a<->B)*(A+d)", "(a+*C", "x+y->Z", "a<-B->C")
-#' getCondType(cond, cna:::ctInfo(full.ct(5)))
+#' getCondType(cond, ctInfo(full.ct(5)))
 getCondType <- function(x, cti, force.bool = FALSE, rm.parentheses = FALSE){
   vnms <- colnames(cti$scores)
   inhStd <- as.logical(

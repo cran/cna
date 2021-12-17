@@ -50,7 +50,7 @@ Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making
 }
 
 \seealso{
-\code{\link{condition}}, \code{\link{full.ct}}, \code{\link{is.inus}}, \code{\link{csf}}, \code{\link{minimalizeCsf}}.
+\code{\link[cna]{condition}}, \code{\link{full.ct}}, \code{\link{is.inus}}, \code{\link{csf}}, \code{\link{minimalizeCsf}}.
 }
 
 \examples{

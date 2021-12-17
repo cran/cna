@@ -15,9 +15,9 @@ Extract conditions and solutions from an object of class \dQuote{cna}
 \description{
 Given a solution object \code{x} produced by \code{\link{cna}}, \code{msc(x)} extracts all minimally sufficient conditions, \code{asf(x)} all atomic solution formulas, and \code{csf(x, n.init)} builds approximately \code{n.init} complex solution formulas. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well. The three functions return a data frame with the additional class attribute \code{condTbl}.
 
-\code{as.condTbl} reshapes the output produced by \code{\link{condition}} in such a way as to make it identical to the output returned by \code{msc}, \code{asf}, and \code{csf}.
+\code{as.condTbl} reshapes the output produced by \code{\link[cna]{condition}} in such a way as to make it identical to the output returned by \code{msc}, \code{asf}, and \code{csf}.
 
-\code{condTbl} executes \code{\link{condition}} and returns a concise summary table featuring consistencies and coverages.
+\code{condTbl} executes \code{\link[cna]{condition}} and returns a concise summary table featuring consistencies and coverages.
 }
 
 \usage{
@@ -49,11 +49,11 @@ as.condTbl(x, ...)
   \item{n}{Maximal number of msc, asf, or csf to be printed.}
   \item{digits}{Number of digits to print in consistency, coverage, exhaustiveness, faithfulness, and coherence scores.}
   \item{quote, row.names}{As in \code{\link{print.data.frame}}.}
-  \item{\dots}{All arguments in \code{condTbl} are passed on to \code{\link{condition}}.}
+  \item{\dots}{All arguments in \code{condTbl} are passed on to \code{\link[cna]{condition}}.}
 }
 
 \details{Depending on the processed data, the solutions (models) output by \code{\link{cna}} are often ambiguous, to the effect that many atomic and complex solutions fit the data equally well. To facilitate the inspection of the \code{\link{cna}} output, however, the latter standardly returns only 5 minimally sufficient conditions (msc), 5 atomic solution formulas (asf), and 5 complex solution formulas (csf) for each outcome. \code{msc} can be used to extract \emph{all} msc from an object \code{x} of class \dQuote{cna}, \code{asf} to extract \emph{all} asf, and \code{csf} to build approximately \code{n.init} csf from the asf stored in \code{x}. All solution attributes (\code{details}) that are saved in \code{x} are recovered as well.
-The outputs of \code{msc}, \code{asf}, and \code{csf} can be further processed by the \code{\link{condition}} function.
+The outputs of \code{msc}, \code{asf}, and \code{csf} can be further processed by the \code{\link[cna]{condition}} function.
 
 While \code{msc} and \code{asf} merely extract information stored in \code{x}, \code{csf} builds csf from the inventory of asf recovered at the end of the third stage of the \code{\link{cna}} algorithm. That is, the \code{csf} function implements the fourth stage of that algorithm. It proceeds in a stepwise manner as follows.
 \enumerate{\item \code{n.init} possible conjunctions featuring one asf of every outcome are built. \item  If \code{inus.only = TRUE} or \code{minimalizeCsf = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019). 
@@ -65,7 +65,7 @@ While \code{msc} and \code{asf} merely extract information stored in \code{x}, \
 
 The argument \code{digits} applies to the \code{print} method. It determines how many digits of consistency, coverage, exhaustiveness, faithfulness, and coherence scores are printed. The default value is 3.
 
-The function \code{as.condTbl} takes a list of objects of class \dQuote{cond} that are returned by the \code{\link{condition}} function as input, and reshapes these objects in such a way as to make them identical to the output returned by \code{msc}, \code{asf}, and \code{csf}.
+The function \code{as.condTbl} takes a list of objects of class \dQuote{cond} that are returned by the \code{\link[cna]{condition}} function as input, and reshapes these objects in such a way as to make them identical to the output returned by \code{msc}, \code{asf}, and \code{csf}.
 
 \code{condTbl(...)} is identical with \code{as.condTbl(condition(...))}.
 }
@@ -103,7 +103,7 @@ from an Irrigation Experiment in Nepal.}
 }
 
 
-\seealso{\code{\link{cna}}, \code{\link{configTable}}, \code{\link{condition}}, \code{\link{minimalizeCsf}}, \code{\link{d.irrigate}}}
+\seealso{\code{\link{cna}}, \code{\link{configTable}}, \code{\link[cna]{condition}}, \code{\link{minimalizeCsf}}, \code{\link{d.irrigate}}}
 
 \examples{
 # Crisp-set data from Lam and Ostrom (2010) on the impact of development interventions

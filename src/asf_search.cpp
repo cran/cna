@@ -1,5 +1,6 @@
 
 #include <Rcpp.h>
+#include <R_ext/Utils.h>
 #include "typedefs.h"
 #include "headers.h"
 
@@ -183,7 +184,7 @@ mytest(sample(c(1L, 2L, 3L, 3L, 4L, 5L, 5L, 5L, 6L, 7L)))
 IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, 
                          const NumericVector y, const IntegerVector f,
                          const double con, const double cov, 
-                         const int maxSol){
+                         const long int maxSol){
   int n_conj = conjlen.size();
 
   // st = indicator, =true if conj hast same length as precedent conj
@@ -198,7 +199,7 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
 
   // intialize ii, count, out; define lim
   IntegerVector ii=C_init_ii(nn, st);
-  int count=0;
+  long int count=0L;
   IntegerMatrix out(maxSol, n_conj);
   IntegerVector lim=C_set_lim(nn, st);
   
@@ -232,6 +233,7 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
                   << std::endl;
       break;
     }
+    if (count % 1000000L == 0L)	R_CheckUserInterrupt();
   } while (as<bool>(any(ii>0)));
   
   // if (count > 0){
@@ -239,12 +241,12 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
   // }
   
   // Return matrix with 0 rows if count=0:
-  if (count == 0){ 
+  if (count == 0L){ 
     IntegerMatrix a(0, n_conj);
     return a;
   }
   
   // Return result matrix
-  return out(Range(0, count-1), _);
+  return out(Range(0, count-1L), _);
 }
 

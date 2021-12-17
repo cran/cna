@@ -365,7 +365,7 @@ This section explains most of these inputs and introduces some auxiliary functio
 
 
 
-Data $\delta$ processed by CNA have the form of $m\times k$ matrices, where $m$ is the number of units of observation (cases) and $k$ is the number of measured factors. $\delta$ can either be of type ``crisp-set'' ($cs$), ``multi-value'' ($mv$) or ``fuzzy-set'' ($fs$). Data that feature $cs$ factors only are $cs$. If the data contain at least one $mv$ factor, they count as $mv$. Data featuring at least one $fs$ factor are treated as $fs$.\footnote{Note, first, that factors calibrated at crisp-set thresholds may appear with unsuitably extreme values if the data as a whole are treated as $fs$ due to some $fs$ factor, and second, that mixing $mv$ and $fs$ factors in one analysis is (currently) not supported.} Examples of each data type are given in Table \ref{tab2}. Raw data collected in a study typically need to be suitably calibrated before they can be fed to \code{cna()}. We do not address the calibration problem here because it is the same for CNA as for QCA, in which context it has been extensively discussed, for example, by \cite{Thiem:2013} or \cite{Schneider:2012}. The \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}}, \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}, and \href{https://cran.r-project.org/package=SetMethods}{\pkg{SetMethods}} provide all tools necessary for automating data calibration.
+Data $\delta$ processed by CNA have the form of $m\times k$ matrices, where $m$ is the number of units of observation (cases) and $k$ is the number of measured factors. $\delta$ can either be of type ``crisp-set'' ($cs$), ``multi-value'' ($mv$) or ``fuzzy-set'' ($fs$). Data that feature $cs$ factors only are $cs$. If the data contain at least one $mv$ factor, they count as $mv$. Data featuring at least one $fs$ factor are treated as $fs$.\footnote{Note, first, that factors calibrated at crisp-set thresholds may appear with unsuitably extreme values if the data as a whole are treated as $fs$ due to some $fs$ factor, and second, that mixing $mv$ and $fs$ factors in one analysis is (currently) not supported.} Examples of each data type are given in Table \ref{tab2}. Raw data collected in a study typically need to be suitably calibrated before they can be fed to \code{cna()}. We do not address the calibration problem here because it is the same for CNA as for QCA, in which context it has been extensively discussed, for example, by \cite{Thiem:2013} or \cite{Schneider:2012}. The \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}}, \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}, and \href{https://cran.r-project.org/package=SetMethods}{\pkg{SetMethods}} provide all tools necessary for data calibration.
 \begin{table}[tb]\centering
 \subfloat[$cs$ data]{\begin{tabular}{r|cccc}
 & $A$ & $B$ & $C$ & $D$  \\\hline
@@ -517,7 +517,7 @@ i.e.\ perfect consistency and coverage. Contrary to QCA, which often returns sol
 
 If the data are noisy, the default thresholds will typically not yield any solution formulas. In such cases, \code{con} and \code{cov} may be suitably lowered. By lowering \code{con} to, say, $0.75$ in a $cs$ analysis, \code{cna()} is given permission to treat $X$ as sufficient for $Y$, even though in 25$\%$ of the cases $X$ is not associated with $Y$. Or by lowering \code{cov} to 0.75 in an $fs$ analysis, \code{cna()} is allowed to treat $X$ as necessary for $Y$, even though the sum of the membership scores in $Y$ over all cases in the data exceeds the sum of the membership scores in $\min(X,Y)$ by 25$\%$. 
 
-Determining to which value \code{con} and \code{cov} are best lowered in a concrete discovery context is a delicate task. On the one hand, CNA faces a severe overfitting risk when the data contain configurations incompatible with the data-generating structure, meaning that \code{con} and \code{cov} must not be set too high (i.e.\ too close to 1). On the other hand, the lower \code{con} and \code{cov} are set, the less complex and informative CNA's output will be, that is, the more CNA's purpose of uncovering causal complexity will be undermined. To find a suitable balance between over- and underfitting, \cite{robustness} systematically re-analyze the data at all \code{con} and \code{cov} settings in the interval $[0.7,1]$, collect all solutions resulting from such a re-analysis series in a set $\mathbf{M}$, and select the solution formula(s) with the most sub- and supermodels in $\mathbf{M}$. These are the solutions with the highest \emph{overlap in causal ascriptions} with the other solutions in $\mathbf{M}$. They are the most \emph{robust} solutions inferable from the data. This approach to robustness scoring has been implemented in the \proglang{R} package \pkg{frscore} \citep{frscore-pkg}, which is obtainable from \href{https://github.com/vpparkkinen/frscore/tree/frscore-pkg}{GitHub}.\footnote{In addition, the \proglang{R} package \href{https://cran.r-project.org/package=cnaOpt}{\textbf{cnaOpt}} \citep{cnaOptRef} provides functions for finding the maximal consistency and coverage scores obtainable from a given data set and for identifying models reaching those scores. For a discussion on possible applications of maximal scores see \cite{optimize}.}
+Determining to which value \code{con} and \code{cov} are best lowered in a concrete discovery context is a delicate task. On the one hand, CNA faces a severe overfitting risk when the data contain configurations incompatible with the data-generating structure, meaning that \code{con} and \code{cov} must not be set too high (i.e.\ too close to 1). On the other hand, the lower \code{con} and \code{cov} are set, the less complex and informative CNA's output will be, that is, the more CNA's purpose of uncovering causal complexity will be undermined. To find a suitable balance between over- and underfitting, \cite{robustness} systematically re-analyze the data at all \code{con} and \code{cov} settings in the interval $[0.7,1]$, collect all solutions resulting from such a re-analysis series in a set $\mathbf{M}$, and select the solution formula(s) with the most sub- and supermodels in $\mathbf{M}$. These are the solutions with the highest \emph{overlap in causal ascriptions} with the other solutions in $\mathbf{M}$. They are the most \emph{robust} solutions inferable from the data. This approach to robustness scoring has been implemented in the \proglang{R} package \pkg{frscore} \citep{frscore-pkg}, which is obtainable from \href{https://cran.r-project.org/package=frscore}{CRAN}.\footnote{In addition, the \proglang{R} package \href{https://cran.r-project.org/package=cnaOpt}{\textbf{cnaOpt}} \citep{cnaOptRef} provides functions for finding the maximal consistency and coverage scores obtainable from a given data set and for identifying models reaching those scores. For a discussion of possible applications of maximal scores see \cite{optimize}.}
 
 
 If the analyst does not want to conduct a whole robustness analysis, reasonable non-perfect consistency and coverage settings are \code{con} $=$ \code{cov} $=0.8$ or $0.75$. 
@@ -537,7 +537,7 @@ In the presence of noise, it is generally advisable to vary the \code{con} and \
 
 \subsection[Outcome and ordering]{Outcome and ordering}\label{order}
 \nopagebreak
-In principle, the \code{cna()} function does not need to be told which factors in the data \code{x} are endogenous (i.e.\ outcomes) and which ones are exogenous (i.e.\ causes). It attempts to infer that from \code{x}. But if it is known prior to the analysis what factors have values that can figure as outcomes, this information can be given to \code{cna()} via the argument \code{outcome}, which takes as input a character vector specifying one or several factor values that are to be considered as potential outcome(s). In case of $cs$ and $fs$ data, factor values are expressed by upper and lower cases (e.g.~\code{outcome = c("A", "b")}), in the $mv$ case, they are expressed by the ``factor=value'' notation (e.g.\ \code{outcome = c("A=1","B=3")}). Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are potential outcomes.
+In principle, the \code{cna()} function does not need to be told which factors in the data \code{x} are endogenous (i.e.\ outcomes) and which ones are exogenous (i.e.\ causes). It attempts to infer that from \code{x}. But if it is known prior to the analysis what factors have values that can figure as outcomes, this information can be given to \code{cna()} via the argument \code{outcome}, which takes as input a character vector specifying one or several factor values that are to be considered as potential outcome(s). In case of $cs$ and $fs$ data, factor values are expressed by upper and lower cases (e.g.~\code{outcome = c("A", "b")}), in the $mv$ case, they are expressed by the ``Factor=value'' notation (e.g.\ \code{outcome = c("A=1","B=3")}). Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are potential outcomes.
 
 When the data \code{x} contain multiple potential outcomes, it may moreover be known, prior to the analysis, that these outcomes are causally ordered in a certain way, to the effect that some of them are causally upstream of the others. 
  Such information can be given to CNA via a \emph{causal ordering}, which is a relation $A\prec C$ % (defined on the factors in \code{x}) 
@@ -1083,7 +1083,7 @@ We are grateful to Alrik Thiem, Martyna Swiatczak, and Jonathan Freitas for help
 
 \pagebreak
 
- % \bibliography{integra,bibliography,baumgartner-thiem}
+  % \bibliography{integra,bibliography,baumgartner-thiem}
 \begin{thebibliography}{49}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
@@ -1100,11 +1100,11 @@ Albert DZ (1992).
 \newblock \emph{Quantum Mechanics and Experience}.
 \newblock Harvard University Press, Cambridge.
 
-\bibitem[{Amb\"uhl and Baumgartner(2020)}]{cnaOptRef}
-Amb\"uhl M, Baumgartner M (2020).
+\bibitem[{Amb\"uhl and Baumgartner(2021)}]{cnaOptRef}
+Amb\"uhl M, Baumgartner M (2021).
 \newblock \emph{\pkg{cnaOpt}: Optimizing Consistency and Coverage in
   Configurational Causal Modeling.}
-\newblock \textsf{R} Package Version 0.2.0.
+\newblock \textsf{R} Package Version 0.5.0.
 \newblock \url{https://cran.r-project.org/package=cnaOpt}.
 
 \bibitem[{Baumgartner(2009{\natexlab{a}})}]{Baumgartner:2007a}
@@ -1155,10 +1155,11 @@ Baumgartner M, Amb\"uhl M (2021).
 \newblock \emph{The British Journal for the Philosophy of Science}.
 \newblock doi: 10.1093/bjps/axz047.
 
-\bibitem[{Baumgartner and Falk(manuscript)}]{CNA_LR}
-Baumgartner M, Falk C (manuscript).
+\bibitem[{Baumgartner and Falk(2021)}]{CNA_LR}
+Baumgartner M, Falk C (2021).
 \newblock \enquote{Configurational Causal Modeling and Logic Regression.}
-\newblock \url{https://people.uib.no/mba110/docs/CNA\_LR.pdf}.
+\newblock \emph{Multivariate Behavioral Research}.
+\newblock doi: 10.1080/00273171.2021.1971510.
 
 \bibitem[{Baumgartner and Thiem(2017)}]{BaumgartnerAmbigu}
 Baumgartner M, Thiem A (2017).
@@ -1317,7 +1318,7 @@ Moret W, Lorenzetti L (2020).
 \bibitem[{Oana \emph{et~al.}(2020)Oana, Medzihorsky, Quaranta, and
   Schneider}]{SetMethods}
 Oana IE, Medzihorsky J, Quaranta M, Schneider CQ (2020).
-\newblock \emph{SetMethods: Functions for Set-Theoretic Multi-Method Research
+\newblock \emph{\pkg{SetMethods}: Functions for Set-Theoretic Multi-Method Research
   and Advanced QCA}.
 \newblock R Package Version 2.5,
 \newblock \url{https://CRAN.R-project.org/package=SetMethods}.
@@ -1326,8 +1327,8 @@ Oana IE, Medzihorsky J, Quaranta M, Schneider CQ (2020).
 Parkkinen VP, Baumgartner M (2021{\natexlab{a}}).
 \newblock \emph{\pkg{frscore}: Functions for Calculating Fit-Robustness of
   {CNA}-solutions.}
-\newblock \textsf{R} Package Version 0.0.1.
-\newblock \url{https://github.com/vpparkkinen/frscore/tree/frscore-pkg}.
+\newblock \textsf{R} Package Version 0.1.0.
+\newblock \url{https://CRAN.R-project.org/package=frscore}.
 
 \bibitem[{Parkkinen and Baumgartner(2021{\natexlab{b}})}]{robustness}
 Parkkinen VP, Baumgartner M (2021{\natexlab{b}}).

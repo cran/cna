@@ -87,6 +87,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
   if (any(rm.rows <- (f == 0L))) {
     ct <- ct[!rm.rows, , drop = FALSE]
     f <- f[!rm.rows]
+    rownames(ct) <- NULL
   }
   # constant columns
   constcols <- vapply(ct, isConstant, logical(1))
@@ -117,7 +118,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
     } 
   }
   # Warn if names are not syntactically valid
-  nms <- names(ct) <- toupper(names(ct))
+  nms <- names(ct) <- make.unique(toupper(names(ct)))
   checkFactorNames(nms)
   # output
   class(ct) <- c("configTable", "data.frame", "truthTab")
@@ -134,7 +135,7 @@ checkFactorNames <- function(nms, warn = TRUE){
   nms <- gsub("[\\._]+", "", as.character(nms))
   ok <- nms == make.names(nms, unique = TRUE) & !grepl("[[:punct:][:space:]]", nms)
   if (any(!ok) && warn){
-    warning("configTable has invalid names (", paste0(nms[!ok], collapse = ""), 
+    warning("configTable has invalid names (", paste0(nms[!ok], collapse = ", "), 
             "). condition(), cna() and other functions may not work.",
             call. = FALSE)
   }

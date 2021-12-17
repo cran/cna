@@ -7,8 +7,7 @@ cna <- function (x, type,
     only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6, 
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
     cutoff = 0.5, border = c("down", "up", "drop"),
-    details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value"))
-{
+    details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value")){
   # call and type
   cl <- match.call()
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
@@ -71,9 +70,7 @@ cna <- function (x, type,
   if (isTRUE(outcome)){ 
     outcome <- cti$resp_nms
   } else {
-    if (!all(outcome %in% c(names(x), colnames(cti$scores))))
-      stop("Invalid 'outcome' value specified: ", 
-           setdiff(outcome, c(names(x), cti$resp_nms)))
+    outcome <- checkOutcome(outcome, colnames(cti$scores))
   }
   if (any(neg.outcome <- outcome == tolower(outcome))){
     outcome <- toupper(outcome)
@@ -300,6 +297,21 @@ make.asf <- function(cti, zname, .sol, inus.only, details){
   if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
   rownames(asf) <- NULL
   asf
+}
+
+checkOutcome <- function(x, values){
+  if (is.null(x)) return(x)
+  ok <- x %in% values
+  if (all(ok)) return(x)
+  ok_up <- toupper(x) %in% values
+  x[!ok & ok_up] <- toupper(x)[!ok & ok_up]
+  ok <- x %in% values
+  if (!all(ok)){
+    stop("Invalid 'outcome' value", if (sum(!ok)>1) "s", 
+         " specified: ", paste0(x[!ok], collapse = ", "), 
+         call. = FALSE)
+  }
+  x  
 }
 
 ################################################################################

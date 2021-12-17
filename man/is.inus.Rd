@@ -33,7 +33,7 @@ Or the first asf in \dQuote{(a + C <-> D)*(D + G <-> A)} entails that whenever "
 
 If an expression passes the \code{is.inus}-check it can be interpreted as a causal structure according to Mackie's (1974) INUS-theory of causation or modern variants thereof (e.g. Grasshoff and May 2001; Baumgartner and Falk 2019). In other words, such an expression has the form of an INUS structure, i.e. it has \emph{INUS form}, for short.
 
-In the function's default call with \code{x = NULL}, the INUS checks are performed relative to \code{full.ct(cond)}; if \code{x} is not \code{NULL}, the checks are performed relative to \code{full.ct(x)}. As \code{full.ct(cond)} and \code{full.ct(x)} coincide in case of binary factors, the argument \code{x} has no effect in the crisp-set and fuzzy-set cases and, hence, does not have to be specified. In case of multi-value factors, however, the argument \code{x} should be specified in order to define the factors' value ranges (see examples below).
+In the function's default call with \code{x = NULL}, the INUS checks are performed relative to \code{full.ct(cond)}; if \code{x} is not \code{NULL}, the checks are performed relative to \code{full.ct(x)}. As \code{full.ct(cond)} and \code{full.ct(x)} coincide in case of binary factors, the argument \code{x} has no effect in the crisp-set and fuzzy-set cases. In case of multi-value factors, however, the argument \code{x} should be specified in order to define the factors' value ranges (see examples below).
 
 If the argument \code{csf.info} is set to its non-default value \code{TRUE} and \code{cond} has the syntax of a csf, the results of the individual checks of conditions (1) to (6) are printed (in that order) to the console.
 
@@ -59,7 +59,7 @@ Mackie, John L. 1974. \emph{The Cement of the Universe: A Study of Causation}. O
 }
 
 \seealso{
-\code{\link{condition}}, \code{\link{full.ct}}, \code{\link{redundant}}, \code{\link{minimalize}}, \code{\link{cna}}, \code{\link{minimalizeCsf}}
+\code{\link[cna]{condition}}, \code{\link{full.ct}}, \code{\link{redundant}}, \code{\link{minimalize}}, \code{\link{cna}}, \code{\link{minimalizeCsf}}
 }
 
 

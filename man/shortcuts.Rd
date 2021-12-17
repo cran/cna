@@ -28,7 +28,7 @@ fscond(...)
 
 \description{
 In previous versions of the \pkg{cna} package (<3.2), these functions were designed to abbreviate the specification of the data type using the type argument in calls to
-\code{\link{configTable}}, \code{\link{cna}} and \code{\link{condition}}, respectively.
+\code{\link{configTable}}, \code{\link{cna}} and \code{\link[cna]{condition}}, respectively.
 
 They have become obsolete since the introduction of the default setting \code{type = "auto"} in package version 3.2.0.
 }
@@ -47,7 +47,7 @@ They have become obsolete since the introduction of the default setting \code{ty
 \code{cscond(x, ct, ...)}, \code{mvcond(x, ct, ...)}, and \code{fscond(x, ct, ...)} are shorthands for \code{condition(x, ct, type = "cs", ...)}, \cr\code{condition(x, ct, type = "mv", ...)} and \code{condition(x, ct, type = "fs", ...)}, respectively.
 }
 
-\seealso{\code{\link{configTable}}, \code{\link{cna}}, \code{\link{condition}}}
+\seealso{\code{\link{configTable}}, \code{\link{cna}}, \code{\link[cna]{condition}}}
 
 \keyword{internal}
 

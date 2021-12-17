@@ -100,7 +100,9 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, ...){
       x <- lapply(split(val, var), sort)
     }
   }
-  if (!is.data.frame(x) && is.list(x) && !is.null(names(x))){
+  if (!is.data.frame(x) && is.list(x)){
+    if (is.null(names(x))) names(x) <- rep(LETTERS, length.out = length(x))
+    names(x) <- make.unique(names(x))
     x <- .expandUniqvals(x)
     if (!all(unlist(x, use.names = FALSE) %in% 0:1))
       type <- "mv"

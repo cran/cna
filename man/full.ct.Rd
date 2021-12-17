@@ -9,7 +9,7 @@ Generate all logically possible value configurations of a given set of factors
 }
 \description{
 The function \code{full.ct} generates a \code{configTable} with all logically possible value configurations of the factors defined in the input \code{x}. It is more flexible than \code{\link{allCombs}}. 
-\code{x} can be a \code{configTable}, a data frame, an integer, a list specifying the factors' value ranges, or a character vector featuring all admissible factor values.
+\code{x} can be a \code{configTable}, a data frame, an integer, a list specifying the factors' value ranges, or a character string expressing a condition featuring all admissible factor values.
 }
 
 \usage{
@@ -31,7 +31,7 @@ full.ct(x, ...)
 
 \details{
 \code{full.ct} generates all logically possible value configurations of the factors defined in \code{x}, which can either be a character vector or an integer or a list or a data frame or a matrix. \itemize{
-\item{If \code{x} is a character vector, it can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link{condition}}). \code{x} must contain at least one factor. Factor names and admissible values are guessed from the Boolean formulas. If \code{x} contains multi-value factors, only those values are considered admissible that are explicitly contained in \code{x}. Accordingly, in case of multi-value factors, \code{full.ct} should be given the relevant factor definitions by means of a list (see below).
+\item{If \code{x} is a character vector, it can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}). \code{x} must contain at least one factor. Factor names and admissible values are guessed from the Boolean formulas. If \code{x} contains multi-value factors, only those values are considered admissible that are explicitly contained in \code{x}. Accordingly, in case of multi-value factors, \code{full.ct} should be given the relevant factor definitions by means of a list (see below).
 }
 \item{If \code{x} is an integer and \code{<=26}, the output will be a logically complete configuration table of type \code{"cs"} with \code{x} factors. The first \code{x} capital letters of the alphabet will be used as the names of the factors.
 }

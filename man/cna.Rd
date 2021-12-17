@@ -35,7 +35,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
         the factors in \code{x}.}
   \item{strict}{Logical; if \code{TRUE}, factors on the same level of the causal
         ordering are \emph{not} potential causes of each other; if \code{FALSE}, factors on the same level \emph{are} potential causes of each other.}
-  \item{outcome}{Character vector specifying one or several factors values that are to be considered as potential outcome(s). For crisp- and fuzzy-set data, factor values are expressed by upper and lower cases, for multi-value data, they are expressed by the "factor=value" notation.  
+  \item{outcome}{Character vector specifying one or several factor values that are to be considered as potential outcome(s). For crisp- and fuzzy-set data, factor values are expressed by upper and lower cases, for multi-value data, they are expressed by the "factor=value" notation.  
   Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are considered as potential outcomes.}
   \item{con}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every minimally sufficient condition (msc), atomic solution formula (asf), and complex solution formula (csf) must satisfy. (See also the argument \code{con.msc} below).}
   \item{cov}{Numeric scalar between 0 and 1 to set the minimum coverage threshold every asf and csf must satisfy.}
@@ -51,7 +51,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{rm.const.factors, rm.dup.factors}{Logical; if \code{TRUE} (default), factors with constant values are removed and all but the first of a set of duplicated factors are removed. These parameters are passed to \code{\link{configTable}}.}
   \item{what}{Character string specifying what to print; \code{"t"} for the configuration table, \code{"m"} for msc, \code{"a"} for asf, \code{"c"} for csf, and \code{"all"} for all. Defaults to \code{"ac"} if \code{suff.only = FALSE}, and to \code{"m"} otherwise.}
   \item{cutoff}{Minimum membership score required for a factor to count as instantiated in the data and to be integrated in the analysis. Value in the unit interval [0,1]. The default cutoff is 0.5. Only meaningful if \code{type = "fs"}.}
-  \item{border}{Character vector specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}), rounded down (\code{"down"}) or dropped from the analysis (\code{"drop"}). Only meaningful if \code{type="fs"}. }
+  \item{border}{Character vector specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}), rounded down (\code{"down"}) or dropped from the analysis (\code{"drop"}). Only meaningful if \code{type = "fs"}. }
   \item{details}{Either \code{TRUE}/\code{FALSE}, or a character vector with possible elements \code{"exhaustiveness"}, \code{"faithfulness"}, \code{"coherence"}, \code{"redundant"}, \code{"cyclic"}. The strings can also be abbreviated, e.g.  \code{"e"} or \code{"exh"} for \code{"exhaustiveness"}, etc.}
   \item{acyclic.only}{Logical; if \code{TRUE}, csf featuring a cyclic substructure are not returned. \code{FALSE} by default.}
   \item{cycle.type}{Character string specifying what type of cycles to be detected: \code{"factor"} (the default) or \code{"value"} (cf. \code{\link{cyclic}}).}
@@ -95,7 +95,7 @@ checks whether single factor values, e.g. A, b, C, (where "A" stands for "A=1" a
 
 As the combinatorial search space for asf is potentially too large to be exhaustively scanned in reasonable time, the argument \bold{\code{maxstep}} allows for setting an upper bound for the complexity of the generated asf. \code{maxstep} takes a vector of three integers \code{c(i, j, k)} as input, entailing that the generated asf have maximally \code{j} disjuncts with maximally \code{i} conjuncts each and a total of maximally \code{k} factor values (\code{k} is the maximal complexity). The default is \code{maxstep = c(3, 4, 10)}.
 
-Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to suitable values in the interval [0.7, 1]. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. }
+Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to suitable values in the interval [0.7, 1]. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. See also the R package \CRANpkg{frscore}. }
 
 \item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)}
 }
@@ -219,7 +219,7 @@ Wollebaek, Dag. 2010.
 \emph{Rural Sociology} 75:144-166.
 }
 
-\seealso{\code{\link{configTable}}, \code{\link{condition}}, \code{\link{cyclic}}, \code{\link{condTbl}}, \code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link{some}},  \code{\link{coherence}},\cr
+\seealso{\code{\link{configTable}}, \code{\link[cna]{condition}}, \code{\link{cyclic}}, \code{\link{condTbl}}, \code{\link{selectCases}}, \code{\link{makeFuzzy}}, \code{\link[cna]{some}},  \code{\link{coherence}},\cr
 \code{\link{minimalizeCsf}}, \code{\link{randomConds}}, \code{\link{is.submodel}},  \code{\link{is.inus}},  \code{\link{redundant}}, \code{\link{full.ct}}, \code{\link{shortcuts}}, \code{\link{d.educate}},\cr
 \code{\link{d.women}}, \code{\link{d.pban}}, \code{\link{d.autonomy}}, \code{\link{d.highdim}}}
 
@@ -453,7 +453,7 @@ is.submodel(csf(test2)$condition, target)
 # [Repeated runs will generate different targets and data. In some runs, no solutions
 # are found.]
 target <- randomAsf(full.ct(5), compl = c(2,3))
-outcome <- cna:::rhs(target)
+outcome <- rhs(target)
 # Simulate the data with con =  cov = 0.8.
 dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
 dat2 <- some(configTable(dat1), n = 200, replace = TRUE)
@@ -465,7 +465,7 @@ test3 <- cna(dat4, outcome = outcome, con = .8, cov = .8)
 # returned solutions. 
 is.submodel(asf(test3)$condition, target)
 
-# Same test as above with dat a fragmentation: only 80 of about 150 possible
+# Same test as above with data fragmentation: only 80 of about 150 possible
 # cases are actually observed. [Repeated runs will generate different data.]
 dat5 <- some(dat4, n = 80, replace = TRUE)
 test4 <- cna(dat5, outcome = outcome, con = .8, cov = .8)
@@ -518,8 +518,7 @@ try(cna(d.autonomy, outcome = "AU", con = .8, cov = .8, type = "mv" ))
 # Shortcut functions from previous versions of the package continue to work 
 # (see ?shortcuts).
 fscna(d.autonomy, outcome = "AU", con = .8, cov = .8)
-mvcna(d.pban, outcome = "PB", con = .8)
-
+mvcna(d.pban, outcome = "PB=1", con = .8)
 
 }
 

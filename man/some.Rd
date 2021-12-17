@@ -33,7 +33,7 @@ A data frame or configTable.
 }
 
 \note{
-The generic function \code{some} is read from the package \pkg{car}.
+The generic function \code{some} is read from the package \CRANpkg{car}.
 The method for \code{data.frame}s in the \pkg{cna} package has an additional parameter \code{replace}, which is \code{TRUE} by default. It will thus not apply the same sampling scheme as the method in \pkg{car} by default.
 }
 

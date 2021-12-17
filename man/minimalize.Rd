@@ -15,7 +15,7 @@ minimalize(cond, x = NULL, maxstep = c(4, 4, 12))
 
 \arguments{
   \item{cond}{
-Character vector specifying Boolean expressions; the acceptable syntax is the same as that of \code{\link{condition}}.
+Character vector specifying Boolean expressions; the acceptable syntax is the same as that of \code{\link[cna]{condition}}.
 }
   \item{x}{A data frame, a \code{configTable}, or a list determining the possible values for each factor in \code{cond}; \code{x} has no effect for a \code{cond} with only binary factors but is mandatory for a \code{cond} with multi-value factors (see details).
 }
@@ -43,7 +43,7 @@ A list of character vectors of the same length as \code{cond}. Each list element
 }
 
 \seealso{
-\code{\link{condition}}, \code{\link{is.inus}}, \code{\link{cna}}, \code{\link{full.ct}}.
+\code{\link[cna]{condition}}, \code{\link{is.inus}}, \code{\link{cna}}, \code{\link{full.ct}}.
 }
 
 \examples{
@@ -75,7 +75,7 @@ minimalize(c("C=1 + C=0 * C=2", "C=0 + C=1 + C=2"), configTable(d.pban))
 # --------------------------------------------------------------------------
 \donttest{fsdata <- configTable(d.jobsecurity)
 conds <- asf(cna(fsdata, con = 0.8, cov = 0.8, inus.only = FALSE))$condition
-conds <- cna:::lhs(conds)
+conds <- lhs(conds)
 noninus.conds <- conds[-which(is.inus(conds, fsdata))]
 minimalize(noninus.conds)}
 }

@@ -7,6 +7,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // C_concat
 std::string C_concat(const CharacterVector x, const std::string sep);
 RcppExport SEXP _cna_C_concat(SEXP xSEXP, SEXP sepSEXP) {
@@ -241,7 +246,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_find_asf
-IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const int maxSol);
+IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const long int maxSol);
 RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -252,7 +257,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
     Rcpp::traits::input_parameter< const double >::type con(conSEXP);
     Rcpp::traits::input_parameter< const double >::type cov(covSEXP);
-    Rcpp::traits::input_parameter< const int >::type maxSol(maxSolSEXP);
+    Rcpp::traits::input_parameter< const long int >::type maxSol(maxSolSEXP);
     rcpp_result_gen = Rcpp::wrap(C_find_asf(conjlen, x, y, f, con, cov, maxSol));
     return rcpp_result_gen;
 END_RCPP
