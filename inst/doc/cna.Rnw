@@ -30,7 +30,7 @@ captionskip=.3cm}
 \def\att{\text{\raisebox{2pt}{$\scriptstyle \ast$}}}
 \newcommand{\id}{\text{\raisebox{1pt}{$\scriptstyle =$}}}
 \newcommand{\idn}{\text{\raisebox{1pt}{$\scriptstyle \neq$}}}
-
+\definecolor{Blue}{rgb}{0,0,0.5}
 
 \fnbelowfloat
 %% For Sweave-based articles about R packages:
@@ -74,7 +74,7 @@ Postboks 7805\\
 5020 Bergen\\
 Norway\\
   E-mail: \email{michael.baumgartner@uib.no}\\
-  URL: \url{http://people.uib.no/mba110/}
+  URL: \url{https://m-baum.github.io}
 \bigskip
 
   Mathias Amb\"uhl\\
@@ -94,8 +94,7 @@ Tramstrasse 10\\
 
 
 \emph{Coincidence Analysis} (CNA) is a configurational comparative method of causal data analysis that was introduced for crisp-set (i.e.\ binary) data in (Baumgartner \citeyear{Baumgartner:2007a,Baumgartner:2008,Baumgartner:pars}) and substantively extended, reworked, and generalized for multi-value and fuzzy-set data in \citep{BaumgartnerfsCNA}. In recent years, CNA was applied in numerous studies in public health as well as in the social and political sciences. For example, \cite{Dy:2020} used the method to investigate how different implementation strategies %and social network factors
- affect patient safety culture in medical homes. \cite{Yakovchenko:2020} applied CNA to data on factors affecting the uptake of innovation in the treatment of hepatitis C virus infection, or \cite{Haesebrouck:2019} used it to search for factors influencing EU member states' participation in military operations.\footnote{Further recent CNA applications include \cite{Hickman:2020}, \cite{Moret:2020}, and \cite{Petrik2020}. %, or \citeN{Epple:2016}. 
-Moreover, CNA has been showcased in the flagship journal of implementation science \cite{Birken:CNA}.}
+ affect patient safety culture in medical homes. \cite{Yakovchenko:2020} applied CNA to data on factors affecting the uptake of innovation in the treatment of hepatitis C virus infection, or \cite{Haesebrouck:2019} used it to search for factors influencing EU member states' participation in military operations.\footnote{The \href{https://www.zotero.org/groups/4567107/coincidence.analysis/library}{Zotero CNA library} provides detailed references to many more applications of CNA. Among other things, CNA has been showcased in the flagship journal of implementation science \citep{Birken:CNA}.}
 In contrast to more standard methods of data analysis, which primarily quantify effect sizes, CNA belongs to a family of methods designed to group causal influence factors conjunctively (i.e.\ in complex bundles) and disjunctively (i.e.\ on alternative pathways). It is firmly rooted in a so-called regularity theory of causation and it is the only method of its kind that can recover causal structures with multiple outcomes (effects), for example, common-cause structures or 
 causal chains.  
 
@@ -105,14 +104,14 @@ that only become operative when all of their components are properly co-instanti
 For example, of a given set of implementation strategies available to medical facilities some strategies yield a desired outcome (e.g.\ high uptake of treatment innovation) in combination with certain other strategies, whereas in different combinations the same strategies may have opposite effects (e.g.\ \citealp{Yakovchenko:2020}). Or, a variation in a phenotype only occurs if many single-nucleotide polymorphisms  
 interact, and various such 
 interactions can independently induce the same phenotype (e.g.\ \citealp{Culverhouse2002}). 
-Different labels are used for features (i) and (ii) in different disciplines: 
-``component causation'', ``conjunctural causation'', ``alternative causation'', ``equifinality'', etc. For uniformity's sake, we will subsequently refer to (i) as \emph{conjunctivity} and to (ii) as \emph{disjunctivity} of causation, reflecting the fact that  causes form conjunctions and disjunctions, that is, Boolean \textsc{and}- and \textsc{or}-connections. 
+Different labels are used for features (i) and (ii) in different disciplines: ``interactions'', 
+``component causation'', ``conjunctural causation'', ``alternative causation'', ``equifinality'', etc. For uniformity's sake, we will subsequently refer to (i) as \emph{conjunctivity} and to (ii) as \emph{disjunctivity} of causation, reflecting the fact that causes form conjunctions and disjunctions, that is, Boolean \textsc{and}- and \textsc{or}-connections. 
 
 
 Causal structures featuring conjunctivity and disjunctivity pose severe challenges for %both for theories of causation and 
 methods of causal data analysis. As many theories of causation entail that it is necessary (though not sufficient) for $X$ to be a cause of $Y$ that there be some kind of dependence (e.g.\ probabilistic or counterfactual) between $X$ and $Y$, standard methods---most notably Bayesian network methods \citep{Spirtes:2000}---infer that $X$ is \emph{not} a cause of $Y$ if $X$ and $Y$ are \emph{not} pairwise dependent (i.e.\ correlated). %\footnote{Methods of causal inference must be distinguished from methods of causal reasoning (e.g.\ \citealp[5-6]{Peters:2017}). The former are methods discovering or learning causal model from data, and the latter are methods testing given models by, for example, inferring predictions from them. This paper is only concerned with the forme r type of methods.} 
 However, structures displaying conjunctivity and disjunctivity often do not exhibit pairwise dependencies. As a very simple illustration, consider the interplay between a person's skills to perform an activity, the challenges posed by that activity, and the actor's autotelic experience of complete involvement with the activity called \emph{flow} \citep{boredom1975}. A binary model of this interplay involves the factors $S$, with values 0/1 representing low/high skills, $C$, with 0/1 standing for low/high challenges, and $F$, with 0/1 representing the absence/presence of flow.  Csikszentmihalyi's (\citeyear[ch.\ 4]{boredom1975}) flow theory entails that flow is triggered if, and only if, skills and challenges are either both high or both low, meaning that $F\id 1$ has the two alternative causes $S\id 1\;\&\;C\id 1$ and $S\id 0 \; \&\; C\id 0$.
-If the flow theory is true, ideal (i.e.\ unbiased, non-confounded, noise-free) data on this structure feature the four configurations $c_1$ to $c_4$ in Table \ref{tab_ex}a, and no others.
+If the flow theory is true, ideal (i.e.\ unbiased, unconfounded, noise-free) data on this structure feature the four configurations $c_1$ to $c_4$ in Table \ref{tab_ex}a, and no others.
 \begin{table}[tb]
   {  \centering
 \includegraphics[width=8cm]{tab1.pdf}
@@ -174,10 +173,10 @@ Standard methods of causal data analysis cannot infer the causal structure behin
 
 A switch position as $A\id 0$ can only be identified as cause of $L\id 1$ by finding the whole conjunction of switch positions in which $A\id 0$ is indispensable for closing the circuit. More generally, discovering causal structures exhibiting conjunctivity and disjunctivity calls for a method that tracks causation as defined by a theory 
 not treating a dependence between individual causes and effects as necessary for causation
- and that embeds values of exogenous factors in complex Boolean \textsc{and}- and \textsc{or}-functions over many other causes, fitting those functions as a whole to the data. But the space of Boolean functions over even a handful of factors is vast. For $n$ binary factors there exist $2^{2^n}$ Boolean functions. For the switch positions in our circuit there exist 65536 Boolean functions; if we add only one additional binary switch that number jumps to 4.3 billion and if we also consider factors with more than two values that number explodes beyond controllability. That means a method capable of correctly discovering causal structures with conjunctivity and disjunctivity must find ways to efficiently  navigate in that vast space of possibilities.
+ and that embeds values of exogenous factors in complex Boolean \textsc{and}- and \textsc{or}-functions over many other causes, fitting those functions as a whole to the data. But the space of Boolean functions over even a handful of factors is vast. For $n$ binary factors there exist $2^{2^n}$ Boolean functions. For the switch positions in our circuit there exist 65536 Boolean functions; if we add only one additional binary switch that number jumps to 4.3 billion and if we also consider factors with more than two values that number explodes beyond controllability. That means a method capable of correctly discovering causal structures with conjunctivity and disjunctivity must find ways to efficiently  navigate in that vast space of possibilities. This is the purpose of CNA.
 
-This is the purpose of CNA. CNA takes data on binary, multi-value or continuous (fuzzy-set) factors as input and infers causal structures as defined by the so-called \emph{INUS theory} from it. %, which may comprise binary, multi-value or  
-The INUS theory was first developed by \citet{Mackie:1974} and later refined to the \emph{MINUS theory} by \cite{grasshoff2001} (see also \citealp{Beirlaen2018}; \citealp{BaumFalk}). It defines %causally relevant factor values 
+CNA takes data on binary, multi-value or fuzzy-set factors as input and infers causal structures as defined by the so-called \emph{INUS theory} from it. %, which may comprise binary, multi-value or  
+The INUS theory was first developed by \citet{Mackie:1974} and later refined to the \emph{MINUS theory} by \cite{grasshoff2001} (see also \citealp{BaumFalk}; \citealp{Beirlaen2018}). It defines %causally relevant factor values 
 causation in terms of redundancy-free Boolean dependency structures and, importantly, does not require causes and their outcomes to be pairwise dependent. As such, it is custom-built to account for structures featuring conjunctivity and disjunctivity. 
 
 CNA is not the only method for the discovery of (M)INUS structures. Other methods that can be used for that purpose are Logic Regression (\citealp{Ruczinski2003,Kooperberg2005}), which is implemented in the \proglang{R} package \href{https://cran.r-project.org/package=LogicReg}{\pkg{LogicReg}} \citep{LogicReg},\footnote{Another package implementing a variation of Logic Regression is \href{https://cran.r-project.org/package=logicFS}{\pkg{logicFS}}  \citep{logicFS}.} 
@@ -1045,7 +1044,7 @@ The \pkg{cna} package provides all the functionalities necessary to conduct inve
 
 
 
-Against that background, the following might be a core of a error-freeness benchmark test that simulates multi-value data with 20\% missing observations and 10\% random noise (i.e.\ cases incompatible with the ground truth), and that runs \code{cna()} and \code{csf()} at \code{con} $=$ \code{cov} $=$ $0.7$ without giving the algorithm any prior causal information in an ordering or and outcome specification.
+Against that background, the following might be a core of a error-freeness benchmark test that simulates multi-value data with 20\% missing observations and 5\% random noise (i.e.\ cases incompatible with the ground truth), and that runs \code{cna()} and \code{csf()} at \code{con} $=$ \code{cov} $=$ $0.7$ without giving the algorithm any prior causal information in an ordering or and outcome specification.
 <<details, eval=F>>=
 # Draw a ground truth.
 fullData <- allCombs(c(4,4,4,4,4))
@@ -1054,10 +1053,10 @@ groundTruth <- randomCsf(fullData, n.asf = 2, compl = 2)
 idealData <- ct2df(selectCases(groundTruth, fullData))
 # Introduce 20% fragmentation.
 fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
-# Introduce 10% random noise (cases incompatible with ground truth).
+# Add 5% random noise (cases incompatible with ground truth).
 incompCases <- dplyr::setdiff(fullData, idealData)
-x <- rbind(fullData[sample(1:nrow(fullData), 
-   nrow(incompCases) * 0.1), ], fragData)  
+x <- rbind(incompCases[sample(1:nrow(incompCases), 
+   nrow(fragData) * 0.05), ], fragData)  
 # Run CNA without an ordering.
 csfs <- csf(cna(x, con = .7, cov = .7, maxstep = c(3, 3, 12)))
 # Check whether no causal error (no false positive) is returned.
@@ -1079,7 +1078,7 @@ CNA is currently the only method searching for (M)INUS causation in data that bu
 Moreover, it builds causal models on the basis of a bottom-up algorithm that is unique among configurational comparative methods and gives CNA an edge over other methods in guaranteeing the redundancy-freeness of its models, which, in turn, is crucial for their causal interpretability. Overall, CNA constitutes a powerful methodological alternative for researchers interested in causal structures affected by conjunctivity and disjunctivity. The \pkg{cna} package makes that inferential power available to end-users.
 
 \section*{Acknowledgments}
-We are grateful to Alrik Thiem, Martyna Swiatczak, and Jonathan Freitas for helpful comments on earlier drafts of this vignette, and we thank the Toppforsk-program of the Bergen Research Foundation and the University of Bergen (grant nr.\ 811886) and the Swiss National Science Foundation (grant nr.\ PP00P1\_144736/1) for generous support of this research.
+We are grateful to Alrik Thiem, Martyna Swiatczak, Jonathan Freitas, and Luna De Souter for helpful comments on earlier drafts of this vignette, and we thank the Toppforsk-program of the Trond Mohn Foundation and the University of Bergen (grant nr.\ 811886), the Research Council of Norway (grant nr.\ 326215), and the Swiss National Science Foundation (grant nr.\ PP00P1\_144736/1) for generous support of the research behind the \pkg{cna} package over the years.
 
 \pagebreak
 
@@ -1101,10 +1100,10 @@ Albert DZ (1992).
 \newblock Harvard University Press, Cambridge.
 
 \bibitem[{Amb\"uhl and Baumgartner(2021)}]{cnaOptRef}
-Amb\"uhl M, Baumgartner M (2021).
+Amb\"uhl M, Baumgartner M (2022).
 \newblock \emph{\pkg{cnaOpt}: Optimizing Consistency and Coverage in
   Configurational Causal Modeling.}
-\newblock \textsf{R} Package Version 0.5.0.
+\newblock \textsf{R} Package Version 0.5.2.
 \newblock \url{https://cran.r-project.org/package=cnaOpt}.
 
 \bibitem[{Baumgartner(2009{\natexlab{a}})}]{Baumgartner:2007a}
@@ -1224,11 +1223,11 @@ Culverhouse R, Suarez BK, Lin J, Reich T (2002).
 % \newblock
 % \url{http://www.sciencedirect.com/science/article/pii/S0002929707639597}.
 
-\bibitem[{Dusa(2021)}]{QCARef}
+\bibitem[{Dusa(2022)}]{QCARef}
 Dusa A (2021).
 \newblock \emph{\pkg{QCA}: A Package for {Q}ualitative {C}omparative
   {A}nalysis}.
-\newblock \textsf{R} Package Version 3.11.
+\newblock \textsf{R} Package Version 3.16.
 \newblock \url{https://cran.r-project.org/package=QCA}.
 
 \bibitem[{Dy \emph{et~al.}(2020)Dy, Acton, Yuan, Hsu, Lai, Marsteller, Ye,
@@ -1327,7 +1326,7 @@ Oana IE, Medzihorsky J, Quaranta M, Schneider CQ (2020).
 Parkkinen VP, Baumgartner M (2021{\natexlab{a}}).
 \newblock \emph{\pkg{frscore}: Functions for Calculating Fit-Robustness of
   {CNA}-solutions.}
-\newblock \textsf{R} Package Version 0.1.0.
+\newblock \textsf{R} Package Version 0.2.0.
 \newblock \url{https://CRAN.R-project.org/package=frscore}.
 
 \bibitem[{Parkkinen and Baumgartner(2021{\natexlab{b}})}]{robustness}

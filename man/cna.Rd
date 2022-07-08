@@ -20,7 +20,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
     maxSol = 1e6, suff.only = FALSE, 
     what = if (suff.only) "m" else "ac", cutoff = 0.5, 
     border = c("down", "up", "drop"), details = FALSE, 
-    acyclic.only = FALSE, cycle.type = c("factor", "value"))
+    acyclic.only = FALSE, cycle.type = c("factor", "value"), verbose = FALSE)
 
 \method{print}{cna}(x, what = x$what, digits = 3, nsolutions = 5, 
       details = x$details, show.cases = NULL, inus.only = x$inus.only, 
@@ -55,7 +55,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{details}{Either \code{TRUE}/\code{FALSE}, or a character vector with possible elements \code{"exhaustiveness"}, \code{"faithfulness"}, \code{"coherence"}, \code{"redundant"}, \code{"cyclic"}. The strings can also be abbreviated, e.g.  \code{"e"} or \code{"exh"} for \code{"exhaustiveness"}, etc.}
   \item{acyclic.only}{Logical; if \code{TRUE}, csf featuring a cyclic substructure are not returned. \code{FALSE} by default.}
   \item{cycle.type}{Character string specifying what type of cycles to be detected: \code{"factor"} (the default) or \code{"value"} (cf. \code{\link{cyclic}}).}
-  \item{verbose}{Logical; if \code{TRUE}, some details on the csf building process are printed. \code{FALSE} by default.}
+  \item{verbose}{Logical; if \code{TRUE}, some details on the csf building process are printed during the execution of the \code{cna} function. \code{FALSE} by default.}
   \item{digits}{Number of digits to print in consistency, coverage, exhaustiveness, faithfulness, and coherence scores.}
   \item{nsolutions}{Maximum number of msc, asf, and csf to print. Alternatively, \code{nsolutions = "all"} will print all solutions.}
   \item{show.cases}{Logical; if \code{TRUE}, the \code{configTable}'s attribute \dQuote{cases}
@@ -95,11 +95,12 @@ checks whether single factor values, e.g. A, b, C, (where "A" stands for "A=1" a
 
 As the combinatorial search space for asf is potentially too large to be exhaustively scanned in reasonable time, the argument \bold{\code{maxstep}} allows for setting an upper bound for the complexity of the generated asf. \code{maxstep} takes a vector of three integers \code{c(i, j, k)} as input, entailing that the generated asf have maximally \code{j} disjuncts with maximally \code{i} conjuncts each and a total of maximally \code{k} factor values (\code{k} is the maximal complexity). The default is \code{maxstep = c(3, 4, 10)}.
 
-Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to suitable values in the interval [0.7, 1]. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. See also the R package \CRANpkg{frscore}. }
+Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to values different from 1. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. See also the R package \CRANpkg{frscore}. }
 
-\item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)}
+\item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)} 
 }
 
+If \code{verbose} is set to its non-default value \code{TRUE}, some information about the progression of the algorithm is returned to the console during the execution of the \code{cna} function. The execution can easily be interrupted by ESC at all stages.
 
 The \bold{default output} of \code{cna} lists asf and csf, ordered by complexity and the product of consistency and coverage. It provides the consistency and coverage scores of each solution, a complexity score, which corresponds to the number of exogenous factor values in a solution, and a column \dQuote{\code{inus}} indicating whether a solution has INUS form, meaning whether it is redundancy-free as required by the \emph{INUS-theory} of causation (Mackie 1974, ch. 3; Baumgartner and Falk 2019). If \code{inus.only = TRUE}, all solutions automatically have INUS form, but if \code{only.minimal.msc} or 
 \code{only.minimal.asf} are set to \code{FALSE}, non-INUS solutions may also be returned. 
@@ -174,12 +175,6 @@ The option \dQuote{spaces} controls how the conditions are rendered. The current
 
 \if{html}{\figure{structures3.png}{Causal Structures}}
 \if{latex}{\figure{structures3.png}{options: width=13.5cm}}
-}
-
-
-\section{Contributors}{
-Epple, Ruedi: development, testing\cr
-Thiem, Alrik: testing
 }
 
 
@@ -304,6 +299,9 @@ cna(d.volatile, ordering = "VO2", maxstep = c(6, 6, 16), suff.only = TRUE)
 # with reduced complexity.
 \donttest{cna(d.volatile, ordering = "VO2")}
 
+# The verbose argument returns information during the execution of cna().
+\donttest{cna(d.volatile, ordering = "VO2", verbose = TRUE)}
+
 
 # Multi-value data from Hartmann & Kemmerzell (2010) on party bans in Africa
 # ---------------------------------------------------------------------------
@@ -358,7 +356,7 @@ cna(d.pban, cov = .95, maxstep = c(6, 6, 10))
 # Basurto investigates two outcomes: emergence of local autonomy and endurance thereof. The 
 # data for the first outcome are contained in rows 1-14 of d.autonomy, the data for the second
 # outcome in rows 15-30. For each outcome, the author distinguishes between local ("EM",  
-# "SP", "CO"),  national ("CI", "PO") and international ("RE", "CN", "DE") conditions. Here,   
+# "SP", "CO"), national ("CI", "PO") and international ("RE", "CN", "DE") conditions. Here,   
 # we first apply fsCNA to replicate the analysis for the local conditions of the endurance of 
 # local autonomy.
 dat1 <- d.autonomy[15:30, c("AU","EM","SP","CO")]

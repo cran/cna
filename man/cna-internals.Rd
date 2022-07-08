@@ -37,7 +37,7 @@ These functions are mainly for internal purposes and will not normally be called
       Alternative internal represenation of a \code{\link{configTable}}.
     }
     \item{\code{qcond_bool}, \code{qcond_asf}, \code{qcond_csf}:}{
-      Fast evaluation of the certain aspects of the well-formedness of conditions.
+      Fast evaluation of certain aspects of the well-formedness of conditions.
     }
     \item{\code{getCondType}, \code{getComplexity}:}{
       Extract condition type and complexity values from a character vector containing conditions.

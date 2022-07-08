@@ -3,22 +3,73 @@
 # Generic function
 full.ct <- function(x, ...) UseMethod("full.ct")
 
-.expandUniqvals <- function(valueList){
-  do.call(expand.grid, 
-          c(valueList, list(KEEP.OUT.ATTRS = FALSE)))
+
+.expandUniqvals <- function(valueList, nmax = NULL){
+  if (is.null(nmax) || 
+      (n <- prod(lengths(valueList))) <= nmax){
+    out <- do.call(expand.grid, 
+                   c(valueList, list(KEEP.OUT.ATTRS = FALSE)))
+    return(out)
+  }
+  nval <- lengths(valueList)
+  log_ntot <- sum(log(nval))
+  nmax <- round(exp(min(log(nmax), log_ntot)))
+  complete <- log(nmax) == log_ntot
+  if (log_ntot > log(.Machine$integer.max)){
+    out <- matrix(unlist(lapply(valueList, sample, size = nmax, replace = TRUE), 
+                         recursive = FALSE, use.names = FALSE), 
+                  nrow = nmax, ncol = length(valueList))
+    repeat {
+      out <- unique(out)
+      if (nrow(out) == nmax) break
+      out <- rbind(
+        out, 
+        sapply(valueList, sample, size = nmax-nrow(out), replace = TRUE))
+    }
+  } else {
+    ntot <- prod(lengths(valueList))
+    moduli <- c(1, cumprod(nval[-length(nval)]))
+    samp <- if (complete) seq_len(ntot) else sort(sample(ntot, nmax))
+    ind <- .expandRowIDs(samp-1, moduli)
+    ind[] <- lapply(ind, "+", 1)
+    out <- mapply("[", valueList, ind, 
+                  SIMPLIFY = FALSE, USE.NAMES = TRUE)
+  }
+  out <- data.frame(out)
+  names(out) <- names(valueList)
+  out
 }
+.expandRowIDs <- function(x, mod){
+  if (length(mod) == 1) return(list(x))
+  c(.expandRowIDs(x %% mod[[length(mod)]], mod[-length(mod)]), 
+    list(x %/% mod[[length(mod)]]))
+}
+
+
+# Aux function rowID
+# generates a unique integer identifier of the rows in the ct
+rowID <- function(cti){
+  # if (cti$type == "fs") warning("Be careful when using rowID() with 'fs' data.")
+  v <- matrix(unlist(cti$uniqueValues, use.names = FALSE)[cti$valueId],
+              nrow = nrow(cti$valueId),
+              dimnames = list(NULL, names(cti$nVal)))
+  maxVal <- vapply(cti$uniqueValues, max, 1L) + 1L
+  m <- c(1L, cumprod(maxVal[-length(maxVal)]))
+  drop(v %*% m)
+}
+
 
 # ==== Method for class 'cti' ====
 # builds 
 #   x       output of ctInfo configTable
 #   cond    used for selection of factors
 # value:    cti of configTable, mv if original is mv, cs else
-full.ct.cti <- function(x, cond = NULL, ...){
+full.ct.cti <- function(x, cond = NULL, nmax = NULL, ...){
   if (!is.null(cond)){
     varsInCond <- extractFactors(unlist(extract_asf(cond)), x$type)
     x <- selectFactors(x, varsInCond)
   }
-  expanded <- .expandUniqvals(x$uniqueValues)
+  expanded <- .expandUniqvals(x$uniqueValues, nmax = nmax)
   if (x$type == "fs") x$type <- "cs"
   scoresColnms <- colnames(x$score)
   x$scores <- do.call(cbind, 
@@ -49,7 +100,7 @@ full.ct.cti <- function(x, cond = NULL, ...){
 # builds full configTable
 #   x       configTable
 #   value:  configTable, mv if original is mv, cs else
-full.ct.configTable <- function(x, cond = NULL, ...){
+full.ct.configTable <- function(x, cond = NULL, nmax = NULL, ...){
   if (!is.null(cond)){
     cond <- noblanks(cond)
     varsInCond <- extractFactors(unlist(extract_asf(cond)), attr(x, "type"), 
@@ -58,10 +109,10 @@ full.ct.configTable <- function(x, cond = NULL, ...){
     if (length(varsInCond) == 0) 
       stop("Invalid input to full.ct:\n", paste0("  ", cond, collapse = "\n"),
            call. = FALSE)
-    x <- full.ct(x[varsInCond])
+    x <- full.ct(x[varsInCond], nmax = nmax)
   }
   cti <- ctInfo(x)
-  expanded <- .expandUniqvals(cti$uniqueValues)
+  expanded <- .expandUniqvals(cti$uniqueValues, nmax = nmax)
   configTable(expanded, type = if (cti$type == "mv") "mv" else "cs",
               rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
@@ -69,9 +120,13 @@ full.ct.configTable <- function(x, cond = NULL, ...){
 # ==== Default Method (for matrix or data.frame) ====
 # builds full.ct
 # cases: character, list, matrix/data.frame
-full.ct.default  <- function(x, type = "auto", cond = NULL, ...){
-  if (is.numeric(x) && length(x) == 1 && x %in% 1:length(LETTERS)){
-    x <- LETTERS[seq_len(x)]
+full.ct.default  <- function(x, type = "auto", cond = NULL, nmax = NULL, ...){
+  if (is.numeric(x) && length(x) == 1 && x %% 1 == 0 && x >= 1L){
+    if (x<=26){
+      x <- rep(LETTERS, length.out = x)
+    } else {
+      x <- paste0("X", seq_len(x))
+    }
   }
   if (is.character(x)){
     type <- if (any(grepl("=", x))) "mv" else "cs"
@@ -101,9 +156,15 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, ...){
     }
   }
   if (!is.data.frame(x) && is.list(x)){
-    if (is.null(names(x))) names(x) <- rep(LETTERS, length.out = length(x))
+    if (is.null(names(x))){
+      if (length(x)<=26){
+        names(x) <- rep(LETTERS, length.out = length(x))
+      } else {
+        names(x) <- paste0("X", seq_along(x))
+      }
+    }
     names(x) <- make.unique(names(x))
-    x <- .expandUniqvals(x)
+    x <- .expandUniqvals(x, nmax = nmax)
     if (!all(unlist(x, use.names = FALSE) %in% 0:1))
       type <- "mv"
   }
@@ -113,20 +174,8 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, ...){
                   rm.dup.factors = FALSE, 
                   rm.const.factors = FALSE, 
                   verbose = FALSE, ...), 
-      cond = cond))
+      cond = cond, nmax = nmax))
   }
   stop("Don't know how to apply 'full.ct' to this input.")
 }
   
-
-# Aux function rowID
-# generates a unique integer identifier of the rows in the ct
-rowID <- function(cti){
-  # if (cti$type == "fs") warning("Be careful when using rowID() with 'fs' data.")
-  v <- matrix(unlist(cti$uniqueValues, use.names = FALSE)[cti$valueId], 
-              nrow = nrow(cti$valueId), 
-              dimnames = list(NULL, names(cti$nVal)))
-  maxVal <- vapply(cti$uniqueValues, max, 1L) + 1L
-  m <- c(1L, cumprod(maxVal[-length(maxVal)]))
-  drop(v %*% m)
-}

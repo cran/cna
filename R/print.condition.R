@@ -69,7 +69,7 @@ print.cond <- function (x, digits = 3, print.table = TRUE,
       }
       stopifnot(attr(x, "type") == attr(add.data, "type"), 
                 isTRUE(all.equal(attr(add.data, "cases"), attr(x, "cases"))))
-      dfr <- cbind(dfr, as.data.frame(add.data))
+      dfr <- cbind(dfr, as.data.frame(add.data, warn = FALSE))
       bar.after <- 1:2 + (condType == "atomic")
     } else {
       bar.after <- 1 + (condType == "atomic")
@@ -122,7 +122,7 @@ print.complexCond <- function (x, digits = 3, print.table = TRUE,
       }
       stopifnot(attr(x, "type") == attr(add.data, "type"), 
                 isTRUE(all.equal(attr(add.data, "cases"), attr(x, "cases"))))
-      dfr <- cbind(dfr, as.data.frame(add.data))
+      dfr <- cbind(dfr, as.data.frame(add.data, warn = FALSE))
       bar.after <- c(seq_along(x) * 2, length(x)*2 + 1)
     } else {
       bar.after <- seq_along(x) * 2

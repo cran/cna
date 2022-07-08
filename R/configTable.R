@@ -19,7 +19,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
     frequency <- attr(x, "n", exact = TRUE)
     .cases <- attr(x, "cases")
     type <- attr(x, "type")
-    x <- as.data.frame(x)
+    x <- as.data.frame(x, warn = FALSE)
   }
   type <- tolower(type)
   type <- match.arg(type)
@@ -180,7 +180,8 @@ print.configTable <- function(x, show.cases = NULL, ...){
     cases.ok <- FALSE
   }
   # create data frame for printing
-  df.args <- list(as.data.frame(x), n.obs = attr(x, "n", exact = TRUE), check.names = FALSE)
+  df.args <- list(as.data.frame(x, warn = FALSE), 
+                  n.obs = attr(x, "n", exact = TRUE), check.names = FALSE)
   ncols <- length(df.args[[1]])
   prntx <- do.call(data.frame, df.args)
   if (cases.ok){
@@ -214,7 +215,7 @@ print.configTable <- function(x, show.cases = NULL, ...){
   }
   noRowPos <- len == 3
   cl1 <- quote(`[.data.frame`(x, , , drop = FALSE))
-  cl1[[2]] <- call("as.data.frame", cl[[2]])
+  cl1[[2]] <- call("as.data.frame", cl[[2]], warn = FALSE)
   cl1[[3]] <- if (noRowPos || identical(cl[[3]], quote(expr = ))) TRUE else cl[[3]]
   cl1[[3]] <- i <- eval.parent(cl1[[3]])
   cl1[[4]] <- if (noRowPos) cl[[3]] else cl[[4]]
@@ -229,13 +230,15 @@ print.configTable <- function(x, show.cases = NULL, ...){
 
 # More methods for class "configTable"
 # ====================================
-as.data.frame.configTable <- function(x, ...){
+as.data.frame.configTable <- function(x, ..., warn = TRUE){
   class(x) <- "data.frame"
+  if (warn && any(attr(x, "n") != 1))
+    message("Application of as.data.frame() to a configTable removed the case frequencies.")
   attributes(x)[c("type", "cases", "n")] <- NULL
   x
 }
 `[<-.configTable` <- function(x, i, j, value){
-  out <- as.data.frame(NextMethod("[<-", x))
+  out <- as.data.frame(NextMethod("[<-", x), warn = FALSE)
   row.sel <- nargs() == 5 && !missing(i)
   rows <- if (row.sel) i else if (nrow(x)) TRUE else logical(0)
   out <- configTable(out,
@@ -246,7 +249,7 @@ as.data.frame.configTable <- function(x, ...){
 }
 
 `$<-.configTable` <- function(x, name, value){
-  out <- as.data.frame(NextMethod("$<-", x))
+  out <- as.data.frame(NextMethod("$<-", x), warn = FALSE)
   out <- configTable(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),
@@ -255,7 +258,7 @@ as.data.frame.configTable <- function(x, ...){
 }
 
 `[[<-.configTable` <- function(x, i, j, value){
-  out <- as.data.frame(NextMethod("[[<-", x))
+  out <- as.data.frame(NextMethod("[[<-", x), warn = FALSE)
   out <- configTable(out,
            type = attr(x, "type"),
            frequency = attr(x, "n", exact = TRUE),

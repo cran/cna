@@ -18,7 +18,7 @@ A character string specifying a disjunctive normal form; can be either crisp-set
 \code{configTable} or \code{data.frame}; can be either crisp-set or multi-value.
 }
   \item{niter}{
-An integer value \code{>=1} specifying the number iterated minimization attempts. The minimal DNFs produced in each iteration are collected and returned.
+An integer value \code{>=1} specifying the number of iterated minimization attempts. The minimal DNFs produced in each iteration are collected and returned.
 }
   \item{full}{
 Logical; if \code{TRUE} (the default), redundancies are eliminated relative to \code{full.ct(x)}, otherwise relative to \code{x}.

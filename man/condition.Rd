@@ -3,10 +3,7 @@
 \alias{condition.default}
 \alias{condition.condTbl}
 \alias{print.condList}
-\alias{summary.condList}
 \alias{print.cond}
-\alias{group.by.outcome}
-
 
 \title{
 Uncover relevant properties of msc, asf, and csf in a data frame or \code{configTable}
@@ -24,12 +21,8 @@ condition(x, ...)
 \method{condition}{condTbl}(x, ct, ...)
 
 \method{print}{condList}(x, ...)
-\method{summary}{condList}(object, ...)
-
 \method{print}{cond}(x, digits = 3, print.table = TRUE, 
       show.cases = NULL, add.data = NULL, ...)
-
-group.by.outcome(condlst, cases = TRUE)
 }
 
 \arguments{
@@ -41,11 +34,7 @@ group.by.outcome(condlst, cases = TRUE)
   \item{rm.parentheses}{Logical; if \code{TRUE}, parentheses around \code{x} are removed prior to evaluation.}
   \item{digits}{Number of digits to print in consistency and coverage scores.}
   \item{print.table}{Logical; if \code{TRUE}, the table assigning configurations and cases to conditions is printed.}
-  \item{show.cases}{In \code{print.cond}: logical; if \code{TRUE}, the attribute \dQuote{cases} of the \code{configTable} is printed. Same default behavior as in \code{\link{print.configTable}}.}
-  \item{object}{Object of class \dQuote{condList}, as returned by \code{condition}.}
-  \item{condlst}{List of objects, each of them of class \dQuote{cond}, as returned by \code{condition}.}
-  \item{cases}{Logical; if \code{TRUE}, the returned data frame has a
-        column named \dQuote{cases}.}
+  \item{show.cases}{Logical; if \code{TRUE}, the attribute \dQuote{cases} of the \code{configTable} is printed; same default behavior as in \code{\link{print.configTable}}.}
   \item{\dots}{Arguments passed to methods.}
   \item{tt}{Argument \code{tt} is deprecated in \code{condition()}; use \code{ct} instead.}
 }
@@ -73,28 +62,25 @@ Three types of conditions are distinguished:
     \item The type \emph{atomic} comprises expressions that have the syntactic form of atomic causal models, i.e. asf, meaning the corresponding character strings in the argument \code{x} have an \dQuote{\code{->}} or \dQuote{\code{<->}} as main operator. Examples: \code{"A*B + C -> D"} or \code{"A*B + C <-> D"}. The expressions on both sides of \dQuote{\code{->}} and \dQuote{\code{<->}} are evaluated and written into a data frame with two columns. Consistency and coverage are attached to these data frames as attributes.
     \item The type \emph{complex} represents complex causal models, i.e. csf. Example:\cr \code{"(A*B + a*b <-> C)*(C*d + c*D <-> E)"}. Each component must be a causal model of type \emph{atomic}. These components are evaluated separately and the results stored in a list. Consistency and coverage of the complex expression are then attached to this list.
   }
-The types of the character strings in the input \code{x} are automatically discerned and thus do not need be specified by the user.
+The types of the character strings in the input \code{x} are automatically discerned and thus do not need to be specified by the user.
 
 If \code{force.bool = TRUE}, expressions with \dQuote{\code{->}} or \dQuote{\code{<->}} are treated as type \emph{boolean}, i.e. only their frequencies are calculated. Enclosing a character string representing a causal model in parentheses has the same effect as specifying \code{force.bool = TRUE}. \code{rm.parentheses = TRUE} removes parentheses around the expression prior to evaluation, and thus has the reverse effect of setting \code{force.bool = TRUE}.
 
 If \code{add.data = TRUE}, \code{ct} is appended to the output such as to facilitate the analysis and evaluation of a model on the case level.
 
-The \code{digits} argument of the \code{print} function determines how many digits of consistency and coverage scores are printed. If \code{print.table = FALSE}, the table assigning conditions to configurations and cases is omitted, i.e. only frequencies or consistency and coverage scores are returned. \code{row.names = TRUE} also lists the row names in \code{ct}. If rows in a \code{ct} are instantiated by many cases, those cases are not printed by default. They can be recovered by \code{show.cases = TRUE}.
+The \code{digits} argument of the \code{print} method determines how many digits of consistency and coverage scores are printed. If \code{print.table = FALSE}, the table assigning conditions to configurations and cases is omitted, i.e. only frequencies or consistency and coverage scores are returned. \code{row.names = TRUE} also lists the row names in \code{ct}. If rows in a \code{ct} are instantiated by many cases, those cases are not printed by default. They can be recovered by \code{show.cases = TRUE}.
 
-\code{group.by.outcome} takes a \code{condlist} as input, i.e. a list of \dQuote{cond} objects, as it is returned by \code{condition}, and combines the entries in that lists into a data frame with a larger number of columns. The additional attributes (consistencies etc.) are thereby removed.
+}
+
+\section{\code{print} method}{
+\code{print.condList} essentially executes \code{print.cond} (the method printing a single condition)
+successively for each list element/condition. All arguments in \code{print.condList} are thereby passed to \code{print.cond}, i.e. \code{digits}, \code{print.table}, \code{show.cases}, \code{add.data} can also be specified when printing the complete list of conditions.
+
+The option \dQuote{spaces} controls how the conditions are rendered in certain contexts. The current setting is queried by typing \code{getOption("spaces")}. The option specifies characters that will be printed with a space before and after them. The default is \code{c("<->","->","+")}. A more compact output is obtained with \code{option(spaces = NULL)}. 
 }
 
 \value{
-\code{condition} returns a list of objects, each of them corresponding to one element of the input vector \code{x}. The list has a class attribute \dQuote{condList}, the list elements (i.e., the individual conditions) are of class \dQuote{cond} and have a more specific class label \dQuote{booleanCond}, \dQuote{atomicCond} or \dQuote{complexCond}, according to the condition type. The components of class \dQuote{booleanCond} or \dQuote{atomicCond} are amended data frames, those of class \dQuote{complexCond} are lists of amended data frames.
-
-\code{group.by.outcome} returns a list of data frames, one data frame for each factor appearing as an outcome in \code{condlst}.
-}
-
-\section{\code{print} and \code{summary} methods}{\code{print.condList} essentially executes \code{print.cond} successively for each list element/condition. All arguments in \code{print.condList} are thereby passed to \code{print.cond}, i.e. \code{digits}, \code{print.table}, \code{show.cases}, \code{add.data} can also be specified when printing the complete list of conditions.
-
-The \code{summary} method for class \dQuote{condList} is identical to \code{print}ing with \code{print.table = FALSE}.
-
-The option \dQuote{spaces} controls how the conditions are rendered in certain contexts. The current setting is queried by typing \code{getOption("spaces")}. The option specifies characters that will be printed with a space before and after them. The default is \code{c("<->","->","+")}. A more compact output is obtained with \code{option(spaces = NULL)}. 
+\code{condition} returns a nested list of objects, each of them corresponding to one element of the input vector \code{x}. The list has a class attribute \dQuote{condList}, the list elements (i.e., the individual conditions) are of class \dQuote{cond} and have a more specific class label \dQuote{booleanCond}, \dQuote{atomicCond} or \dQuote{complexCond}, relfecting the type of condition. The components of class \dQuote{booleanCond} or \dQuote{atomicCond} are amended data frames, those of class \dQuote{complexCond} are lists of amended data frames.
 }
 
 
@@ -113,8 +99,10 @@ University of Chicago Press.
 
 }
 
+\seealso{
+\code{\link{condList-methods}} describes methods and functions processing the output of \code{condition}; see, in particular, the related \code{summary} and \code{as.data.frame} methods.
 
-\seealso{\code{\link{cna}}, \code{\link{configTable}}, \code{\link{condTbl}}, \code{\link{d.irrigate}}, \code{\link{shortcuts}}}
+\code{\link{cna}}, \code{\link{configTable}}, \code{\link{condTbl}}, \code{\link{as.data.frame.condList}}, \code{\link{d.irrigate}}, \code{\link{shortcuts}}}
 
 
 \examples{
@@ -150,6 +138,9 @@ group.by.outcome(irrigate.cna1.msc)
 irrigate.cna2 <- cna(d.irrigate, con = .9)
 irrigate.cna2a.asf <- condition(asf(irrigate.cna2)$condition, irrigate.ct)
 group.by.outcome(irrigate.cna2a.asf)
+
+# Return as regular data frame.
+as.data.frame(irrigate.cna2a.asf)
 
 # Add data.
 (irrigate.cna2b.asf <- condition(asf(irrigate.cna2)$condition, irrigate.ct, 

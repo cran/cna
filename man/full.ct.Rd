@@ -5,35 +5,36 @@
 \alias{full.ct.cti}
 
 \title{
-Generate all logically possible value configurations of a given set of factors
+Generate the logically possible value configurations of a given set of factors
 }
 \description{
-The function \code{full.ct} generates a \code{configTable} with all logically possible value configurations of the factors defined in the input \code{x}. It is more flexible than \code{\link{allCombs}}. 
+The function \code{full.ct} generates a \code{configTable} with all (or a specified number of) logically possible value configurations of the factors defined in the input \code{x}. It is more flexible than \code{\link{allCombs}}. 
 \code{x} can be a \code{configTable}, a data frame, an integer, a list specifying the factors' value ranges, or a character string expressing a condition featuring all admissible factor values.
 }
 
 \usage{
 full.ct(x, ...)
 
-\method{full.ct}{default}(x, type = "auto", cond = NULL, ...)
-\method{full.ct}{configTable}(x, cond = NULL, ...)
-\method{full.ct}{cti}(x, cond = NULL, ...)
+\method{full.ct}{default}(x, type = "auto", cond = NULL, nmax = NULL, ...)
+\method{full.ct}{configTable}(x, cond = NULL, nmax = NULL, ...)
+\method{full.ct}{cti}(x, cond = NULL, nmax = NULL, ...)
 }
 
 \arguments{
   \item{x}{A \code{configTable}, a data frame, a matrix, an integer, a list specifying the factors' value ranges,  or a character vector featuring all admissible factor values (see the details and examples below).}
   \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set). (Manual specification of the \code{type} only has an effect if \code{x} is a data frame or matrix.)}
   \item{cond}{Optional character vector containing conditions in the syntax of msc, asf or csf. If it is not \code{NULL}, only factors appearing in \code{cond} are used.}
+  \item{nmax}{Maximal number of rows in the output \code{configTable}. If \code{nmax} is smaller than the total number of logically possible configurations, a random sample of configurations is drawn. The default \code{nmax = NULL} selects all logically possible configurations.}
   \item{\dots}{
   Further arguments passed to methods.
 }
 }
 
 \details{
-\code{full.ct} generates all logically possible value configurations of the factors defined in \code{x}, which can either be a character vector or an integer or a list or a data frame or a matrix. \itemize{
+\code{full.ct} generates all or \code{nmax} logically possible value configurations of the factors defined in \code{x}, which can either be a character vector or an integer or a list or a data frame or a matrix. \itemize{
 \item{If \code{x} is a character vector, it can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}). \code{x} must contain at least one factor. Factor names and admissible values are guessed from the Boolean formulas. If \code{x} contains multi-value factors, only those values are considered admissible that are explicitly contained in \code{x}. Accordingly, in case of multi-value factors, \code{full.ct} should be given the relevant factor definitions by means of a list (see below).
 }
-\item{If \code{x} is an integer and \code{<=26}, the output will be a logically complete configuration table of type \code{"cs"} with \code{x} factors. The first \code{x} capital letters of the alphabet will be used as the names of the factors.
+\item{If \code{x} is an integer, the output is a configuration table of type \code{"cs"} with \code{x} factors. If \code{x <= 26}, the first \code{x} capital letters of the alphabet are used as the names of the factors. If \code{x > 26}, factors are named "X1" to "Xx". 
 }
 \item{If \code{x} is a list, \code{x} is expected to have named elements each of which provides the factor names with corresponding vectors enumerating their admissible values (i.e. their value ranges). These values must be non-negative integers.
 }
@@ -41,9 +42,11 @@ full.ct(x, ...)
 }
 }
 
-If not all factors specified in \code{x} are of interest but only those in a given msc, asf, or csf, \code{full.ct} can be correspondingly restricted via the argument \code{cond}. For instance, \code{full.ct(d.educate, cond = "D + L <-> E")} generates all logically possible value configurations of the factors in the set \{D, L, E\}, even though \code{d.educate} contains further factors. The argument \code{cond} is primarily used internally to speed up the execution of various functions in case of high-dimensional data. 
+The computational demand of generating all logically possible configurations increases exponentially with the number of factors in \code{x}. In order to get an output in reasonable time, even when \code{x} features more than about 15 factors, the argument \code{nmax} allows for specifying a maximal number of configurations to be returned (by random sampling).
 
-The main area of application of \code{full.ct} is data simulation in the context of inverse search trials benchmarking the output of \code{cna} (see examples below). While \code{full.ct} generates the space of all logically possible configurations of the factors in an analyzed factor set, \code{\link{selectCases}} selects those configurations from this space that are compatible with a given data generating causal structure (i.e. the ground truth), that is, it selects the empirically possible configurations.
+If not all factors specified in \code{x} are of interest but only those in a given msc, asf, or csf, \code{full.ct} can be correspondingly restricted via the argument \code{cond}. For instance, \code{full.ct(d.educate, cond = "D + L <-> E")} generates the logically possible value configurations of the factors in the set \{D, L, E\}, even though \code{d.educate} contains further factors. The argument \code{cond} is primarily used internally to speed up the execution of various functions in case of high-dimensional data. 
+
+The main area of application of \code{full.ct} is data simulation in the context of inverse search trials benchmarking the output of \code{cna} (see examples below). While \code{full.ct} generates the relevant space of logically possible configurations of the factors in an analyzed factor set, \code{\link{selectCases}} selects those configurations from this space that are compatible with a given data generating causal structure (i.e. the ground truth), that is, it selects the empirically possible configurations.
 
 The method for class "cti" is for internal use only.
 }
@@ -75,6 +78,8 @@ full.ct(configTable(d.pban), cond = "C=1 + F=0 <-> V=1")
 
 # x is an integer.
 full.ct(6)
+# Constrain the number of configurations to 1000.
+full.ct(30, nmax = 1000) 
 
 # x is a list.
 full.ct(list(A = 0:1, B = 0:1, C = 0:1))  # cs
@@ -82,22 +87,24 @@ full.ct(list(A = 1:2, B = 0:1, C = 23:25))  # mv
 
 # Simulating crisp-set data.
 groundTruth.1 <- "(A*b + C*d <-> E)*(E*H + I*k <-> F)"
-fullData <- full.ct(groundTruth.1)
-idealData <- selectCases(groundTruth.1, fullData) 
+fullData <- ct2df(full.ct(groundTruth.1))
+idealData <- ct2df(selectCases(groundTruth.1, fullData))
 # Introduce 20% data fragmentation.
 fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
-# Introduce 10% random noise.
-(realData <- rbind(ct2df(fullData[sample(1:nrow(fullData), nrow(fragData)*0.1), ]), 
+# Add 10% random noise.
+incompData <- dplyr::setdiff(fullData, idealData)
+(realData <- rbind(incompData[sample(1:nrow(incompData), nrow(fragData)*0.1), ], 
   fragData))
 
 # Simulating multi-value data.
 \donttest{groundTruth.2 <- "(JO=3 + TS=1*PE=3 <-> ES=1)*(ES=1*HI=4 + IQ=2*KT=5 <-> FA=1)"
-fullData <- full.ct(list(JO=1:3, TS=1:2, PE=1:3, ES=1:2, HI=1:4, IQ=1:5, KT=1:5, FA=1:2))
-idealData <- selectCases(groundTruth.2, fullData) 
+fullData <- ct2df(full.ct(list(JO=1:3, TS=1:2, PE=1:3, ES=1:2, HI=1:4, IQ=1:5, KT=1:5, FA=1:2)))
+idealData <- ct2df(selectCases(groundTruth.2, fullData))
 # Introduce 20% data fragmentation.
 fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
-# Introduce 10% random noise.
-(realData <- rbind(ct2df(fullData[sample(1:nrow(fullData), nrow(fragData)*0.1), ]), 
+# Add 10% random noise.
+incompData <- dplyr::setdiff(fullData, idealData)
+(realData <- rbind(incompData[sample(1:nrow(incompData), nrow(fragData)*0.1), ], 
   fragData))
 }
 }

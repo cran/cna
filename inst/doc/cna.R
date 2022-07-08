@@ -382,10 +382,10 @@ group.by.outcome(condition(asf(ana.aut.3)$condition, dat.aut.2))$AU
 ## idealData <- ct2df(selectCases(groundTruth, fullData))
 ## # Introduce 20% fragmentation.
 ## fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
-## # Introduce 10% random noise (cases incompatible with ground truth).
+## # Add 5% random noise (cases incompatible with ground truth).
 ## incompCases <- dplyr::setdiff(fullData, idealData)
-## x <- rbind(fullData[sample(1:nrow(fullData), 
-##    nrow(incompCases) * 0.1), ], fragData)  
+## x <- rbind(incompCases[sample(1:nrow(incompCases), 
+##    nrow(fragData) * 0.05), ], fragData)  
 ## # Run CNA without an ordering.
 ## csfs <- csf(cna(x, con = .7, cov = .7, maxstep = c(3, 3, 12)))
 ## # Check whether no causal error (no false positive) is returned.

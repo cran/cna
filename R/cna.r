@@ -7,7 +7,8 @@ cna <- function (x, type,
     only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6, 
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
     cutoff = 0.5, border = c("down", "up", "drop"),
-    details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value")){
+    details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value"), 
+    verbose = FALSE){
   # call and type
   cl <- match.call()
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
@@ -100,7 +101,7 @@ cna <- function (x, type,
     ct.out <- ct
     notcols.nrs <- names(ct) %in% notcols
     names(ct.out)[notcols.nrs] <- tolower(names(ct.out)[notcols.nrs])
-    ct.out.df <- as.data.frame(ct.out)
+    ct.out.df <- as.data.frame(ct.out, warn = FALSE)
     ct.out.df[notcols.nrs] <- lapply(ct.out.df[notcols.nrs], function(x) 1-x)
     attributes(ct.out.df)[c("names", "row.names", "class", "n", "cases", "type")] <- 
       attributes(ct.out)[c("names", "row.names", "class", "n", "cases", "type")]
@@ -132,6 +133,10 @@ cna <- function (x, type,
     msc <- lapply(minSuff, make.msc, outcome = zname, cti = cti, 
                   details = details1, suff.only = suff.only)
     msc <- do.call(rbind, msc)
+    if (verbose){
+      cat("Outcome ", zname, " (", match(zname, outcome), "/", length(outcome), "):\n  ", 
+          nrow(msc), " msc found\n", sep = "")
+    }
     nstars <- gregexpr("*", msc$condition, fixed = TRUE)
     msc$complexity <- lengths(nstars) + 1L - (vapply(nstars, "[[", integer(1), 1L) == -1L)
     msc <- msc[order(msc$complexity, -msc$consistency * msc$coverage, msc$condition), , drop = FALSE]
@@ -146,13 +151,17 @@ cna <- function (x, type,
     noMsc <- m_is.null(.conjList)
     .conjList[noMsc] <- lapply(which(noMsc), function(i) matrix(integer(0), 0, i))
 
-    .sol <- findAsf(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf)
+    .sol <- findAsf(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf, 
+                    verbose = verbose)
     stopifnot(length(.sol) == 0 || any(vapply(.sol, is.intList, logical(1))))
       
     if (length(.sol)){
-      asf <- make.asf(cti, zname, .sol, inus.only, details1)
+      asf <- make.asf(cti, zname, .sol, inus.only, details1, 
+                      verbose = verbose)
       sol[[c(zname, "asf")]] <- asf
     }
+    if (verbose)
+      cat("  ", if (length(.sol)) nrow(asf) else 0, " asf found\n\n", sep = "")
   }
 
   out <- structure(list(), class = "cna")
@@ -245,7 +254,8 @@ make.msc <- function(x, outcome, cti, details, suff.only){
   out
 }
 
-findAsf <- function(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf){
+findAsf <- function(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.minimal.asf, 
+                    verbose = FALSE){
   .conSc <- lapply(seq_along(.conjList), function(i) C_conjScore(cti$scores, .conjList[[i]]))
   maxstep1 <- maxstep
   maxstep1[[1]] <- min(maxstep1[[1]], length(.conSc))
@@ -256,28 +266,49 @@ findAsf <- function(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.mi
   i <- 0L
   # search for asf's
   nn <- vapply(.conSc, ncol, integer(1))
+  if (verbose){
+    .complexity <- 0L # .complexity is never defined if !verbose
+    .count_newsol <- 0L  # counts number of solutions of current complexity in loop below
+  }
   for (i in seq_along(.combs)){
     .c <- .combs[[i]]
-    if (prod(nn[.c]) == 0 || any(tabulate(.c, nbins = length(.conSc)) > nn)) next
-    .s <- C_find_asf(.c, .conSc[.c], y, freqs, con, cov, maxSol)
-    
-    if (nrow(.s) > 0){
-      .cands <- lapply(seq_along(.c), function(i){
-        .part <- .conjList[[.c[i]]][.s[, i] + 1L, , drop = FALSE]
-        unname(split.default(.part, row(.part)))
-      })
-      .newsol <- do.call(mapply, c(list(list), .cands, list(SIMPLIFY = FALSE)))
-      stopifnot(is.recIntList(.newsol))
-      if (only.minimal.asf && length(.sol)){ 
-        .newsol <- .newsol[C_minimal_old(.newsol, .sol, ignore_equals = FALSE)]
+    if (verbose && sum(.c)>.complexity){
+      .complexity <- sum(.c)
+      cat("\r  ...searching for asf of complexity ", .complexity, "...", sep = "")
+      flush.console()
+    }
+    .newsol <- list()
+    if (prod(nn[.c]) > 0 && all(tabulate(.c, nbins = length(.conSc)) <= nn)){
+      
+      .s <- C_find_asf(.c, .conSc[.c], y, freqs, con, cov, maxSol)
+      if (nrow(.s) > 0){
+        .cands <- lapply(seq_along(.c), function(i){
+          .part <- .conjList[[.c[i]]][.s[, i] + 1L, , drop = FALSE]
+          unname(split.default(.part, row(.part)))
+        })
+        .newsol <- do.call(mapply, c(list(list), .cands, list(SIMPLIFY = FALSE)))
+        stopifnot(is.recIntList(.newsol))
+        if (only.minimal.asf && length(.sol)){ 
+          .newsol <- .newsol[C_minimal_old(.newsol, .sol, ignore_equals = FALSE)]
+        }
+        .sol <- c(.sol, .newsol)
       }
-
-      .sol <- c(.sol, .newsol)
+    }
+    if (verbose){
+      .count_newsol <- .count_newsol + length(.newsol)
+      .last.compl <- (i == length(.combs)) || (sum(.combs[[i+1L]]) > .complexity) 
+      if (.last.compl){ ## && .count_newsol>0L){
+        cat("\r    complexity ", .complexity, ": ", .count_newsol, " potential asf",
+            "                 \n", sep = "")
+        .count_newsol <- 0L
+      }
     }
   }
+  if (verbose) cat("\r                                              \r")
   .sol
 }
-make.asf <- function(cti, zname, .sol, inus.only, details){
+make.asf <- function(cti, zname, .sol, inus.only, details, 
+                     verbose = FALSE){
   vnms <- colnames(cti$scores)
   .lhs <- hconcat(.sol, c("+", "*"), f = function(i) vnms[i])
   asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), 
@@ -294,7 +325,15 @@ make.asf <- function(cti, zname, .sol, inus.only, details){
                  .det(cti, paste0(asf$condition, "<->", asf$outcome), 
                       what = details, cycle.type = NULL))
   }
-  if (inus.only) asf <- asf[asf$inus, , drop = FALSE]
+  n0 <- nrow(asf)
+  if (inus.only){
+    asf <- asf[asf$inus, , drop = FALSE]
+    if (verbose)
+      cat("    ", n0 - nrow(asf), " non-INUS asf (of ", n0 ,") are removed, as inus.only=TRUE\n", 
+          sep = "")
+  } else if (verbose){
+    cat("    Keeping all asf, as inus.only=TRUE\n")
+  }
   rownames(asf) <- NULL
   asf
 }

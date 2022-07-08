@@ -1,3 +1,9 @@
+Changes in version 3.4.0 (2022-07-08)
+  * New argument verbose in cna()
+  * New argument nmax in full.ct()
+  * New method of as.data.frame() for class "condList"
+  * The help files of condition() and related functions have been reorganized
+
 Changes in version 3.3.0 (2021-12-03)
   * randomAsf() and randomCsf() generate conditions with positive or negative outcome in case of binary data (only positive before)
   * New argument positive in randomAsf() and randomCsf()

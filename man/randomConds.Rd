@@ -19,13 +19,13 @@ randomCsf(x, outcome = NULL, positive = TRUE,
 
 \arguments{
   \item{x}{Data frame or \code{configTable}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns, in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
-  \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor values in the solution formula. Must be factor values, e.g. \code{"A"} or \code{"b"} in case of binary data or \code{"A=1"} in case of multi-value data. With multi-value data, factor \emph{names} are also allowed; a value of that factor will then be chosen at random. \code{outcome} overrides \code{positive} and \code{n.asf}.
+  \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor value(s) in the solution formula. Must be factor values, e.g. \code{"A"} or \code{"b"} in case of binary data or \code{"A=1"} in case of multi-value data. With multi-value data, factor \emph{names} are also allowed; a value of that factor will then be chosen at random. \code{outcome} overrides \code{positive} and \code{n.asf}.
 }
   \item{positive}{Logical; if TRUE (default), the outcomes all have positive values. If \code{FALSE}, a value (positive or negative in case of binary data) will be picked at random. \code{positive} has no effect if the \code{outcome} argument is not \code{NULL} or if \code{x} contains multi-value data.}
   \item{maxVarNum}{Maximal number of factors in \code{x} that can appear in the generated asf or csf. The default depends on the type of the data contained in \code{x}.
 }
   \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf).}
-  \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details).}
+  \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details below).}
   \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by\cr \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \cr \code{ncol(x)-2}.}
 }
 
@@ -175,16 +175,18 @@ fullData <- allCombs(c(4,4,4,4,4))
 target <- randomCsf(fullData, n.asf=2, compl = 2:3)
 target
 # Generate the ideal data.
-x <- ct2df(selectCases(target, fullData))
+idealData <- ct2df(selectCases(target, fullData))
 # Introduce fragmentation.
-x <- x[-sample(1:nrow(x), nrow(x)*0.2), ] 
-# Introduce random noise.
-x <- rbind(ct2df(fullData[sample(1:nrow(fullData), nrow(x)*0.05), ]), x)  
+x <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 
+# Add random noise.
+incompData <- dplyr::setdiff(ct2df(fullData), idealData)
+x <- rbind(ct2df(incompData[sample(1:nrow(incompData), nrow(x)*0.05), ]), x)  
 # Run CNA without an ordering.
-mycna <- cna(x, con = .75, cov = .75, maxstep = c(3, 3, 12), rm.dup.factors = F)
+mycna <- cna(x, con = .7, cov = .7, maxstep = c(3, 3, 12), rm.dup.factors = F)
+mycna
 # Extract the csf. 
 csfs <- csf(mycna)
-# Check whether no causal fallacy (no false positive) is returned.
+# Check whether no error (no false positive) is returned.
 if(nrow(csfs)==0) {
       TRUE } else {any(is.submodel(csfs$condition, target))}
 }

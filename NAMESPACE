@@ -21,7 +21,7 @@ export(allCombs, makeFuzzy, selectCases, selectCases1,
 
 useDynLib(cna, .registration = TRUE)
 importFrom(Rcpp, sourceCpp)
-importFrom(utils, head, tail, combn, packageVersion, getFromNamespace)
+importFrom(utils, head, tail, combn, packageVersion, getFromNamespace, flush.console)
 importFrom(stats, as.dist, cutree, hclust, setNames)
 importFrom(Matrix, Matrix)
 importFrom(matrixStats, rowMins, rowMaxs, rowAnys, rowAlls, 
@@ -46,6 +46,7 @@ S3method(condition, default)
 
 S3method(as.condTbl, condList)
 S3method(as.condTbl, data.frame)
+S3method(as.data.frame, condList)
 
 S3method(print, condTbl)
 S3method(condition, condTbl)

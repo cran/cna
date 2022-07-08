@@ -134,7 +134,7 @@ cti2ct <- function(x, cases = TRUE){
   } else {
     out[] <- unlist(x$uniqueValues, use.names = FALSE)[as.vector(out)]
   }
-  out <- as.data.frame(out)
+  out <- as.data.frame(out, warn = FALSE)
   class(out) <- c("configTable", "data.frame")
   attr(out, "type") <- x$type
   attr(out, "n") <- x$freq

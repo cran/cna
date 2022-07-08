@@ -1,15 +1,15 @@
 
 # function group.by.outcome
 #   group a list of atomicCond's by their outcome
-group.by.outcome <- function(condlst, cases = TRUE){
-  stopifnot(is.list(condlst))
-  if (!all(isAtomic <- vapply(condlst, inherits, logical(1), "atomicCond"))){
-    condlst <- condlst[isAtomic]
+group.by.outcome <- function(object, cases = TRUE){
+  stopifnot(is.list(object))
+  if (!all(isAtomic <- vapply(object, inherits, logical(1), "atomicCond"))){
+    object <- object[isAtomic]
     message("group.by.outcomes only considers conditions of type 'atomic' - other are ignored.")
   }
-  outc <- rhs(names(condlst))
+  outc <- rhs(names(object))
   outc[!nzchar(outc)] <- "(No outcome)"
-  out <- lapply(split(condlst, outc), grbyout1, cases = cases)
+  out <- lapply(split(object, outc), grbyout1, cases = cases)
   structure(out, class = c("groupedConds", "listof"), cases = cases)
 }
 grbyout1 <- function(x, cases){
@@ -27,7 +27,9 @@ grbyout1 <- function(x, cases){
       stop("Cases are not identical in all condition tables.")
     Cases <- C_mconcat(Cases[[1]], sep = ",")
   }
-  out <- do.call(data.frame, c(lapply(x, function(a) as.data.frame(a)[1]), list(check.names = FALSE)))
+  out <- do.call(data.frame, 
+    c(lapply(x, function(a) as.data.frame(a, , warn = FALSE)[1]), 
+      list(check.names = FALSE)))
   out[[outName]] <- x[[1]][[outName]]
   out$n.obs <- ncases
   if (cases) rownames(out) <- Cases
