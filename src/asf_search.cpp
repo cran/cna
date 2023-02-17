@@ -218,7 +218,7 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
     //Rcpp::Rcout << "coco: " << coco << std::endl;
     
     // Conditionally insert in next row of the matrix
-    if (coco(0) >= con && coco(1) >= cov){
+    if (coco(0) >= con && coco(1) >= cov){      // con and cov values >= thresholds
       for (int j=0; j<n_conj; j++){
         out(count, j) = ii[j];
       }

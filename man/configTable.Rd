@@ -65,9 +65,6 @@ An object of type \dQuote{configTable}, i.e. a data.frame with additional attrib
 
 
 \references{
-Aleman, Jose. 2009.
-\dQuote{The Politics of Tripartite Cooperation in New Democracies: A Multi-level Analysis.}
-\emph{International Political Science Review} 30 (2):141-162.
 
 Greckhamer, Thomas, Vilmos F. Misangyi, Heather Elms, and Rodney Lacey. 2008.
 \dQuote{Using Qualitative Comparative Analysis in Strategic Management Research: An Examination of Combinations of Industry, Corporate, and Business-Unit Effects.}
@@ -119,6 +116,7 @@ dat1.ct <- configTable(dat1, frequency = c(4,3,1,3,4,1,4,1,3,3,3), case.cutoff =
 cna(dat1.ct, details = TRUE)
 
 
+
 # Simulating multi-value data with biased samples (exponential distribution)
 # --------------------------------------------------------------------------
 dat1 <- allCombs(c(3,3,3,3,3))
@@ -137,16 +135,6 @@ configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE)
 # The same without messages about constant and duplicated factors.
 configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 
-
-# configTable with fuzzy-set data from Aleman (2009)
-# --------------------------------------------------
-# Include all cases.
-ct.pacts <- configTable(d.pacts) 
-cna(ct.pacts, con = .93, cov = .86, details = TRUE)
-
-# Only include configurations with at least 3 cases.
-ct.pacts2 <- configTable(d.pacts, case.cutoff = 3) 
-cna(ct.pacts2, con = .93, cov = .86, details = TRUE)
 
 
 # Large-N data with crisp sets from Greckhamer et al. (2008)

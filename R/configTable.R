@@ -25,8 +25,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
   type <- match.arg(type)
   if (type == "auto") type <- type_from_data(x)
   if (is.null(.cases)){
-    .cases <- try(as.character(rownames(x)))
-    #if (inherits(.cases, "try-error")){
+    .cases <- as.character(rownames(x))
     if (anyNA(iconv(.cases, "", "ASCII"))){
       warning("The row names contain special (non-ASCII) characters and are therefore not used.")
       .cases <- as.character(seq_len(nrow(x)))
@@ -67,6 +66,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
                      recursive = FALSE, use.names = FALSE)
   }
   ll <- lengths(.cases)
+  if (any(ll == 0)) .cases[ll == 0] <- list(character(0))
   if (length(ll) > 0 && !isTRUE(all.equal(f, ll, check.attributes = FALSE))){
     .cases <- mapply(rep_len, .cases, f, SIMPLIFY = FALSE, USE.NAMES = FALSE)
     .cases <- unname(

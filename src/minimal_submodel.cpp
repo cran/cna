@@ -23,9 +23,9 @@ LogicalMatrix C_disj_contained(const intList x, const intList y, const bool shor
     for (int j=0; j<leny; ++j){
       out(i,j) = C_isSubsetOf(as<IntegerVector>(x[i]), as<IntegerVector>(y[j]));
       // Rcout << i << " " << j << ": " << out(i,j) << std::endl;
-      if (shortcut & !anyTrueInRow & out(i,j)) anyTrueInRow = true;
+      if (shortcut && !anyTrueInRow && out(i,j)) anyTrueInRow = true;
     }
-    if (shortcut & !anyTrueInRow) break;  // if complete row without TRUE -> break
+    if (shortcut && !anyTrueInRow) break;  // if complete row without TRUE -> break
   }
   return(out);
 }
@@ -37,7 +37,7 @@ LogicalVector C_is_submodel(const recIntList x, const intList ref, const bool st
   LogicalVector out(lenx);
   for (int i=0; i<lenx; ++i){
     out[i] = C_checkHallsCondition(C_disj_contained(as<intList>(x[i]), ref, true));
-    if (out[i] & strict & intList_equal(as<intList>(x[i]), ref)){
+    if (out[i] && strict && intList_equal(as<intList>(x[i]), ref)){
       out[i]=false;
     }
   }
@@ -57,7 +57,7 @@ LogicalVector C_minimal(const recIntList x, const recIntList ref,
     for (int j=0; j<lenr; ++j){
       found = C_checkHallsCondition(
                 C_disj_contained(as<intList>(ref[j]), as<intList>(x[i]), true));
-      if (found & strict & 
+      if (found && strict && 
           intList_equal(as<intList>(x[i]), as<intList>(ref[j]))){
         found=false;
       }
@@ -100,7 +100,7 @@ LogicalVector C_rowSubsetColAnys(const LogicalMatrix x, const IntegerVector rows
   for (int i=0; i<k; ++i){
     int r=rows[i];
     for (int j=0; j<nc; ++j){
-      out[j] |= static_cast<bool>(x(r,j));
+      out[j] = out[j] || static_cast<bool>(x(r,j));
     }
   }
   return out;

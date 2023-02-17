@@ -1,3 +1,6 @@
+Changes in version 3.5.0 (2023-02-17)
+  * New argument asf.selection in cna()
+
 Changes in version 3.4.0 (2022-07-08)
   * New argument verbose in cna()
   * New argument nmax in full.ct()

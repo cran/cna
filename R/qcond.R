@@ -16,7 +16,7 @@ qcond_bool <- function(condstr, sc){
   factors <- unique(toupper(usplc))
   factor_ok <- !is.na(match(factors, nms))
   if (any(!factor_ok)) stop("Invalid condition specified.", call. = FALSE)
-  n <- nrow(sc)
+  n <- NROW(sc)
   ms_conjs <- matrix(vapply(splc, function(x) rowMins(sc[, x, drop = FALSE]),
                             numeric(n)),
                      nrow = n, ncol = length(splc))
@@ -60,8 +60,17 @@ qcond_asf <- function(condstr, sc, force.bool = FALSE){
 # quick version of condTbl for 'atomic condition'
 # parametes: as above
 # Value: condTbl with columns outcome, condition, consistency, coverage
-qcondTbl_asf <- function(condstr, sc, freqs){
+qcondTbl_asf <- function(condstr, sc, freqs, asf.selection = "none"){
+  stopifnot(asf.selection %in% c("none", "cs", "fs"))
   cond <- qcond_asf(condstr, sc)
+  if (asf.selection != "none"){
+    # select condition where outcome varies within concordant cases:
+    varying <- apply(cond, 3, function(tbl) C_varies(tbl[, 1], tbl[, 2], asfSelection = asf.selection), 
+                     simplify = TRUE)
+    cond <- structure(cond[, , varying, drop = FALSE], 
+                      condition = attr(cond, "condition")[varying],
+                      response = attr(cond, "response")[varying])
+  }
   cond2condTbl(cond, freqs)
 }
 

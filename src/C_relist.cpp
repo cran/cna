@@ -13,19 +13,22 @@ List C_relist(const T& x, const IntegerVector l){
   if (x.size() != sum(l)){
     stop("length(x) and sum(l) must be equal.");
   }
-  int start=0L, n=l.size(), end=l(0)-1L;
+  int n=l.size();
   List out(n);
-  for (int i=0L; i<n; i++){
-    // Rcpp::Rcout << start << " " << end << std::endl;
-    if (start<=end){
-      out[i] = x[Range(start, end)];
-    } else {
-      out[i]=T(0);
-    }
-    if (i==n-1L) break;
-    start += l(i);
-    end += l(i+1L);
-  }  
+  if (n > 0){
+    int start=0L, end=l(0)-1L;
+    for (int i=0L; i<n; i++){
+      // Rcpp::Rcout << start << " " << end << std::endl;
+      if (start<=end){
+        out[i] = x[Range(start, end)];
+      } else {
+        out[i]=T(0);
+      }
+      if (i==n-1L) break;
+      start += l(i);
+      end += l(i+1L);
+    }  
+  }
   return out;
 }
 

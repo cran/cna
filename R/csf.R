@@ -26,7 +26,7 @@ csf <- function (x, n.init = 1000, details = x$details,
 
   # Output if no cond
   if (nrow(asfx) == 0 || n.init <= 0) {
-    out <- emptyCondTbl("stdComplex", details = x$details)
+    out <- emptyCondTbl("stdComplex", details = details)
     # if (coh) out$coherence <- numeric(0)
     return(out)
   }

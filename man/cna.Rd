@@ -8,7 +8,7 @@
 The \code{cna} function performs Coincidence Analysis to identify atomic solution formulas (asf) consisting of minimally necessary
 disjunctions of minimally sufficient conditions of all outcomes in the data
 and combines the recovered asf to complex solution formulas (csf) representing multi-outcome structures, e.g. common-cause and/or
-causal chain structures.
+causal chain structures. 
 }
 
 \usage{
@@ -20,7 +20,8 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
     maxSol = 1e6, suff.only = FALSE, 
     what = if (suff.only) "m" else "ac", cutoff = 0.5, 
     border = c("down", "up", "drop"), details = FALSE, 
-    acyclic.only = FALSE, cycle.type = c("factor", "value"), verbose = FALSE)
+    acyclic.only = FALSE, cycle.type = c("factor", "value"), 
+    asf.selection = c("cs", "fs", "none"), verbose = FALSE)
 
 \method{print}{cna}(x, what = x$what, digits = 3, nsolutions = 5, 
       details = x$details, show.cases = NULL, inus.only = x$inus.only, 
@@ -51,10 +52,11 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{rm.const.factors, rm.dup.factors}{Logical; if \code{TRUE} (default), factors with constant values are removed and all but the first of a set of duplicated factors are removed. These parameters are passed to \code{\link{configTable}}.}
   \item{what}{Character string specifying what to print; \code{"t"} for the configuration table, \code{"m"} for msc, \code{"a"} for asf, \code{"c"} for csf, and \code{"all"} for all. Defaults to \code{"ac"} if \code{suff.only = FALSE}, and to \code{"m"} otherwise.}
   \item{cutoff}{Minimum membership score required for a factor to count as instantiated in the data and to be integrated in the analysis. Value in the unit interval [0,1]. The default cutoff is 0.5. Only meaningful if \code{type = "fs"}.}
-  \item{border}{Character vector specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}), rounded down (\code{"down"}) or dropped from the analysis (\code{"drop"}). Only meaningful if \code{type = "fs"}. }
+  \item{border}{Character string specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}), rounded down (\code{"down"}) or dropped from the analysis (\code{"drop"}). Only meaningful if \code{type = "fs"}. }
   \item{details}{Either \code{TRUE}/\code{FALSE}, or a character vector with possible elements \code{"exhaustiveness"}, \code{"faithfulness"}, \code{"coherence"}, \code{"redundant"}, \code{"cyclic"}. The strings can also be abbreviated, e.g.  \code{"e"} or \code{"exh"} for \code{"exhaustiveness"}, etc.}
   \item{acyclic.only}{Logical; if \code{TRUE}, csf featuring a cyclic substructure are not returned. \code{FALSE} by default.}
   \item{cycle.type}{Character string specifying what type of cycles to be detected: \code{"factor"} (the default) or \code{"value"} (cf. \code{\link{cyclic}}).}
+  \item{asf.selection}{Character string specifying how to select asfs based on outcome variation in configurations incompatible with a model. \code{asf.selection = "cs"} (default): selection based on variation at the 0.5 anchor; \code{asf.selection = "fs"}: selection based on variation in the fuzzy-set value; \code{asf.selection = "none"}: no selection based on outcome variation in incompatible configurations.}
   \item{verbose}{Logical; if \code{TRUE}, some details on the csf building process are printed during the execution of the \code{cna} function. \code{FALSE} by default.}
   \item{digits}{Number of digits to print in consistency, coverage, exhaustiveness, faithfulness, and coherence scores.}
   \item{nsolutions}{Maximum number of msc, asf, and csf to print. Alternatively, \code{nsolutions = "all"} will print all solutions.}
@@ -135,6 +137,8 @@ determines that only factors A and B are negated. The default is no negations, i
 
 \code{rm.const.factors} and \code{rm.dup.factors} are used to determine the handling of \bold{constant factors}, i.e. factors with constant values in all cases (rows) in \code{x}, and of \bold{duplicated factors}, i.e. factors that take identical value distributions in all cases in \code{x}. If \code{rm.const.factors = TRUE}, which is the default value, constant factors are removed from the data prior to the analysis, and if \code{rm.dup.factors = TRUE} (the default) all but the first of a set of duplicated factors are removed. From the perspective of configurational causal modeling, factors with constant values in all cases can neither be modeled as causes nor as outcomes; therefore, they can be removed prior to the analysis. Factors that take identical values in all cases cannot be distinguished configurationally, meaning they are one and the same factor as far as configurational causal modeling is concerned. Therefore, only one factor of a set of duplicated factors is standardly retained by \code{cna}.
 
+If the data \code{x} feature noise, it can happen that all variation of an outcome occurs in noisy configurations in \code{x}. In such cases, there may be asfs that meet chosen consistency and coverage thresholds (lower than 1) such that the corresponding outcome only varies in configurations that are incompatible with the strict crisp-set or fuzzy-set necessity and sufficiency relations expressed by those very asfs. In the default setting \code{"cs"} of the argument \code{asf.selection} (introduced in version 3.5.0 of the \pkg{cna} package), an asf is only returned if the outcome takes a value above and below the 0.5 anchor in the configurations compatible with the strict crisp-set necessity and sufficiency relations expressed by that asf. At \code{asf.selection = "fs"}, an asf is only returned if the outcome takes different values in the configurations compatible with the strict fuzzy-set necessity and sufficiency relations expressed by that asf. At \code{asf.selection = "none"}, asfs are returned even if outcome variation only occurs in noisy configurations, which was the default behavior of \code{cna} prior to version 3.5.0. (For more details, see examples below.)
+
 The argument \code{what} can be specified both for the \code{cna} and the \code{print()}
 function. It regulates what items of the output of \code{cna} are printed. If
 \code{what} is given the value \dQuote{\code{t}}, the configuration table is printed; if
@@ -180,6 +184,8 @@ The option \dQuote{spaces} controls how the conditions are rendered. The current
 
 
 \references{
+Aleman, Jose. 2009. \dQuote{The Politics of Tripartite Cooperation in New Democracies: A Multi-level Analysis.} \emph{International Political Science Review} 30 (2):141-162.
+
 Basurto, Xavier. 2013. \dQuote{Linking Multi-Level Governance to Local Common-Pool 
 Resource Theory using Fuzzy-Set Qualitative Comparative Analysis: Insights from 
 Twenty Years of Biodiversity Conservation in Costa Rica.} \emph{Global Environmental Change} 23(3):573-87.
@@ -265,6 +271,7 @@ cna(d.educate, details = c("e", "f"))
 
 # Restore the default of the option "spaces".
 options(spaces = c("<->", "->", "+"))
+
 
 
 # Crisp-set data from Krook (2010) on representation of women in western-democratic parliaments
@@ -423,52 +430,8 @@ subset(first.csf, cyclic == TRUE)
 
 # Here's how to only build acyclic csf.
 ana2 <- cna(dat1, details = c("e","cy"), acyclic.only = TRUE)
-csf(ana2, verbose = TRUE)
-}
+csf(ana2, verbose = TRUE)}
 
-# Inverse search trials to assess the correctness of CNA
-# ------------------------------------------------------
-# 1. Ideal mv data, i.e. perfect consistencies and coverages, without data fragmentation.
-\donttest{# Define the target and generate data on the target.
-target <- "(A=1*B=2 + A=4*B=3 <-> C=1)*(C=4*D=1 + C=2*D=4 <-> E=4)"
-dat1 <- allCombs(c(4, 4, 4, 4, 4)) 
-dat2 <- selectCases(target, dat1)
-# Analyze the simulated data with CNA.
-test1 <- cna(dat2, maxstep = c(3,2,9))
-# Check whether a correctness-preserving submodel of the target is among the 
-# returned solutions. 
-is.submodel(csf(test1)$condition, target)
-
-# Same test as above with data fragmentation, i.e. with non-ideal data:
-# only 100 of 472 observable configurations are actually
-# observed. [Repeated runs will generate different data.]
-dat3 <- some(dat2, n = 100, replace = TRUE)
-test2 <- cna(dat3, maxstep = c(3,2,9))
-is.submodel(csf(test2)$condition, target)
-
-# 2. Fs data with imperfect consistencies (con = 0.8) and coverages (cov = 0.8); 
-# about 150 cases (depending on the seed). Randomly generated target asf. 
-# [Repeated runs will generate different targets and data. In some runs, no solutions
-# are found.]
-target <- randomAsf(full.ct(5), compl = c(2,3))
-outcome <- rhs(target)
-# Simulate the data with con =  cov = 0.8.
-dat1 <- allCombs(c(2, 2, 2, 2, 2)) - 1
-dat2 <- some(configTable(dat1), n = 200, replace = TRUE)
-dat3 <- makeFuzzy(ct2df(dat2), fuzzvalues = seq(0, 0.45, 0.01))
-dat4 <- selectCases1(target, con = .8, cov = .8, dat3)
-# Analyze the simulated data with CNA.
-test3 <- cna(dat4, outcome = outcome, con = .8, cov = .8)
-# Check whether a correctness-preserving submodel of the target is among the 
-# returned solutions. 
-is.submodel(asf(test3)$condition, target)
-
-# Same test as above with data fragmentation: only 80 of about 150 possible
-# cases are actually observed. [Repeated runs will generate different data.]
-dat5 <- some(dat4, n = 80, replace = TRUE)
-test4 <- cna(dat5, outcome = outcome, con = .8, cov = .8)
-is.submodel(asf(test4)$condition, target)
-}
 
 # Illustration of only.minimal.msc = FALSE
 # ----------------------------------------
@@ -510,13 +473,54 @@ cna(d.educate, type = "mv")
 # Treating "cs" data as "fs".
 cna(d.women, type = "fs")
 
-# Not all manual settings are admissible.
+# Not all manual settings are admissible. 
 try(cna(d.autonomy, outcome = "AU", con = .8, cov = .8, type = "mv" ))
 
 # Shortcut functions from previous versions of the package continue to work 
 # (see ?shortcuts).
 fscna(d.autonomy, outcome = "AU", con = .8, cov = .8)
 mvcna(d.pban, outcome = "PB=1", con = .8)
+
+
+# Illustration of asf.selection
+# -----------------------------
+# Consider the following data set:
+d1 <- data.frame(X1 = c(1, 0, 1),
+                 X2 = c(0, 1, 0), 
+                 Y = c(1, 1, 0))
+ct1 <- configTable(d1, frequency = c(10, 10, 1))
+
+# Both of the following are asfs reaching con=0.95 and cov=1.
+condition(c("X1+X2<->Y", "x1+x2<->Y"), ct1)
+
+# Up to version 3.4.0 of the cna package, these two asfs were inferred from 
+# ct1 by cna(). But the outcome Y is constant in ct1, except for a variation in 
+# the third row, which is incompatible with X1+X2<->Y and x1+x2<->Y. Subject to  
+# both of these models, the third row of ct1 is a noisy configuration. Inferring
+# difference-making models that are incapable of accounting for the only difference
+# in the outcome in the data is inadequate. (Thanks to Luna De Souter for 
+# pointing out this problem.) Hence, as of version 3.5.0, asfs whose outcome only
+# varies in configurations incompatible with the strict crisp-set necessity 
+# or sufficiency relations expressed by those asfs are not returned anymore.
+
+cna(ct1, outcome = "Y", con = 0.9)
+
+# The old behavior of cna() can be obtained by setting the argument asf.selection
+# to its non-default value "none".
+
+cna(ct1, outcome = "Y", con = 0.9, asf.selection = "none")
+
+# Analysis of fuzzy-set data from Aleman (2009).
+cna(d.pacts, con = .9, cov = .85)
+cna(d.pacts, con = .9, cov = .85, asf.selection = "none")
+# In the default setting, cna() does not return any model for d.pacts because
+# the outcome takes a value >0.5 in every single case, meaning it does not change
+# between presence and absence. No difference-making model should be inferred from
+# such data. 
+# The implications of asf.selection can also be traced by
+# the verbose argument:
+
+cna(d.pacts, con = .9, cov = .85, verbose = TRUE)
 
 }
 

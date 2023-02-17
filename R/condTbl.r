@@ -117,7 +117,11 @@ emptyCondTbl <- function(condClass = "condString", details = FALSE, msc = FALSE)
     out$minimal <- logical(0)
   }
   for (d in clarify_details(details)){
-    out[[d]] <- if (d %in% c("inus", "redundant")) logical(0) else numeric(0)
+    out[[d]] <- if (d %in% c("inus", "redundant", "cyclic")){
+      logical(0)
+    } else {
+      numeric(0)
+    }
   }
   as.condTbl(out)
 }

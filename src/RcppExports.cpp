@@ -159,6 +159,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_varies
+bool C_varies(NumericVector x, NumericVector y, std::string asfSelection);
+RcppExport SEXP _cna_C_varies(SEXP xSEXP, SEXP ySEXP, SEXP asfSelectionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< std::string >::type asfSelection(asfSelectionSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_varies(x, y, asfSelection));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_conCov
 NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f);
 RcppExport SEXP _cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {

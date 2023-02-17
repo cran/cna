@@ -48,6 +48,7 @@ extern SEXP _cna_C_set_lim(SEXP, SEXP);
 extern SEXP _cna_C_subsetMin(SEXP, SEXP);
 extern SEXP _cna_C_uniqueCombs(SEXP, SEXP);
 extern SEXP _cna_C_uniqueMat(SEXP);
+extern SEXP _cna_C_varies(SEXP, SEXP, SEXP);
 extern SEXP _cna_intList_equal(SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
@@ -91,6 +92,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_cna_C_subsetMin",           (DL_FUNC) &_cna_C_subsetMin,           2},
     {"_cna_C_uniqueCombs",         (DL_FUNC) &_cna_C_uniqueCombs,         2},
     {"_cna_C_uniqueMat",           (DL_FUNC) &_cna_C_uniqueMat,           1},
+    {"_cna_C_varies",              (DL_FUNC) &_cna_C_varies,              3},
     {"_cna_intList_equal",         (DL_FUNC) &_cna_intList_equal,         2},
     {NULL, NULL, 0}
 };

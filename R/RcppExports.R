@@ -49,6 +49,10 @@ C_relist_List <- function(x, l) {
     .Call(`_cna_C_relist_List`, x, l)
 }
 
+C_varies <- function(x, y, asfSelection = "none") {
+    .Call(`_cna_C_varies`, x, y, asfSelection)
+}
+
 C_conCov <- function(x, y, f) {
     .Call(`_cna_C_conCov`, x, y, f)
 }

@@ -8,7 +8,7 @@ cna <- function (x, type,
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
     cutoff = 0.5, border = c("down", "up", "drop"),
     details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value"), 
-    verbose = FALSE){
+    asf.selection = c("cs", "fs", "none"), verbose = FALSE){
   # call and type
   cl <- match.call()
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
@@ -21,6 +21,9 @@ cna <- function (x, type,
     if (!only.minimal.asf) 
       stop("Calling cna() with inus.only=TRUE and only.minimal.asf=FALSE is not meaningful.")
   }
+  
+  # Select asf.selection (choices: "none", "cs", "fs")
+  asf.selection <- match.arg(asf.selection)
     
   # variable names  
   ct <- configTable(x, type = type, rm.const.factors = rm.const.factors, 
@@ -157,11 +160,11 @@ cna <- function (x, type,
       
     if (length(.sol)){
       asf <- make.asf(cti, zname, .sol, inus.only, details1, 
-                      verbose = verbose)
+                      asf.selection = asf.selection, verbose = verbose)
       sol[[c(zname, "asf")]] <- asf
     }
     if (verbose)
-      cat("  ", if (length(.sol)) nrow(asf) else 0, " asf found\n\n", sep = "")
+      cat("  ", if (length(.sol)) NROW(asf) else 0, " asf found\n\n", sep = "")
   }
 
   out <- structure(list(), class = "cna")
@@ -308,24 +311,29 @@ findAsf <- function(cti, y, freqs, con, cov, .conjList, maxSol, maxstep, only.mi
   .sol
 }
 make.asf <- function(cti, zname, .sol, inus.only, details, 
-                     verbose = FALSE){
+                     asf.selection, verbose = FALSE){
   vnms <- colnames(cti$scores)
   .lhs <- hconcat(.sol, c("+", "*"), f = function(i) vnms[i])
-  asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), 
-                      cti$scores, cti$freq)  
-  asf$condition[] <- .lhs
+  asf <- qcondTbl_asf(paste0(.lhs, "<->", zname), cti$scores, cti$freq, 
+                      asf.selection = asf.selection)
+  if (verbose && nrow(asf)<length(.lhs)){
+    cat("    ", length(.lhs)-nrow(asf), " asf (of ", length(.lhs) ,
+        ") are removed based on criterion asf.selection=\"", asf.selection, "\"\n", 
+        sep = "")
+  }
+  if (nrow(asf) == 0) return(NULL)
+  asf$condition[] <- as.character(lhs(asf$condition))
   n_plus_stars <- gregexpr("[\\*\\+]", asf$condition)
   asf$complexity <- 
     lengths(n_plus_stars) + 1L - (vapply(n_plus_stars, "[[", integer(1), 1L) == -1L)
   asf <- asf[order(asf$complexity, -asf$consistency * asf$coverage), , drop = FALSE]
-  if (length(details)){
-    if (useCtiList(cti)) 
-      cti <- ctiList(cti, paste0(asf$condition, "<->", asf$outcome))
-    asf <- cbind(asf, 
-                 .det(cti, paste0(asf$condition, "<->", asf$outcome), 
-                      what = details, cycle.type = NULL))
-  }
   n0 <- nrow(asf)
+  if (length(details)){
+    .cond <- if (n0 == 0) character(0) else paste0(asf$condition, "<->", asf$outcome)
+    if (useCtiList(cti)) 
+      cti <- ctiList(cti, .cond)
+    asf <- cbind(asf, .det(cti, .cond, what = details, cycle.type = NULL))
+  }
   if (inus.only){
     asf <- asf[asf$inus, , drop = FALSE]
     if (verbose)
