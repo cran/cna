@@ -65,7 +65,8 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE){
 .inus.cti <- function(x, cond, 
                       qtypes = .qcondType(cond, colnames(x$scores), x$type,  
                                           stdComplex.multiple.only = FALSE), 
-                      full = FALSE, const.ok = FALSE, csf.info = FALSE){
+                      full = FALSE, const.ok = FALSE, csf.info = FALSE, 
+                      ...){
   out <- rep(NA, length(cond))
 
   # condition type "constant"

@@ -96,7 +96,7 @@ full.ct.ctiList <- function(x, ...){
 
 .det.ctiList <- function(x, cond = x$conds, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"), 
-    available = what, cycle.type = "factor", in.csf = FALSE){
+    available = what, cycle.type = "factor", in.csf = FALSE, ...){
   out <- mapply(.det.cti, 
     x = x$tbls, cond = split(x$conds, x$indices), 
     MoreArgs = list(what = what, available = available, cycle.type = cycle.type, 
@@ -107,8 +107,8 @@ full.ct.ctiList <- function(x, ...){
 }
 
 
-.inus.ctiList <- function(x, cond, qtypes, 
-                          full = FALSE, const.ok = FALSE, csf.info = FALSE){
+.inus.ctiList <- function(x, cond, qtypes, full = FALSE, 
+                          const.ok = FALSE, csf.info = FALSE, ...){
   out0 <- mapply(.inus.cti, 
     x = x$tbls, cond = split(x$conds, x$indices), 
     qtypes = split(qtypes, x$indices), 
@@ -124,7 +124,8 @@ full.ct.ctiList <- function(x, ...){
   out
 }
 
-.redund.ctiList <- function(x, cond, simplify = TRUE, full = FALSE, names = TRUE){
+.redund.ctiList <- function(x, cond, simplify = TRUE, full = FALSE, names = TRUE, 
+                            ...){
   out <- mapply(.redund.cti, x = x$tbls, cond = split(x$conds, x$indices), 
     MoreArgs = list(simplify = FALSE, full = full, names = names),
     SIMPLIFY = FALSE, USE.NAMES = FALSE)

@@ -340,7 +340,7 @@ make.asf <- function(cti, zname, .sol, inus.only, details,
       cat("    ", n0 - nrow(asf), " non-INUS asf (of ", n0 ,") are removed, as inus.only=TRUE\n", 
           sep = "")
   } else if (verbose){
-    cat("    Keeping all asf, as inus.only=TRUE\n")
+    cat("    Keeping all asf, as inus.only=FALSE\n")
   }
   rownames(asf) <- NULL
   asf

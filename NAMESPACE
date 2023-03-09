@@ -16,7 +16,8 @@ export(allCombs, makeFuzzy, selectCases, selectCases1,
        stdCond, matchCond, 
        fs2cs, C_recCharList2char, C_relist_Int, 
        relist1, C_mconcat, hstrsplit, 
-       C_redund, getComplexity, getCondType
+       C_redund, getComplexity, getCondType, 
+       C_is_submodel
 )
 
 useDynLib(cna, .registration = TRUE)

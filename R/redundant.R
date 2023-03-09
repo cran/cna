@@ -26,7 +26,7 @@ redundant <- function(cond, x = NULL, simplify = TRUE){
 
 # ==== Method for class 'configTable' ====
 # Function suited for interactive use
-.redund.configTable <- function(x, cond, simplify = TRUE, full = FALSE){
+.redund.configTable <- function(x, cond, simplify = TRUE, full = FALSE, ...){
   if (!length(cond)) return(logical(0))
   cti <- ctInfo(x)
   qtypes <- .qcondType(cond, colnames(cti$scores), cti$type, 
@@ -50,7 +50,7 @@ redundant <- function(cond, x = NULL, simplify = TRUE){
 # value: A list of logical vectors (lengths corresponding to the number of asf), 
 #        or a matrix if simplify=TRUE and all csf have the same number of asf
 .redund.cti <- function(x, cond, simplify = TRUE, full = FALSE, names = TRUE,
-                        qc_full = qcond_csf(cond, sc, flat = TRUE)){
+                        qc_full = qcond_csf(cond, sc, flat = TRUE), ...){
   if (!full) x <- full.ct(x, cond = cond)
   sc <- x$scores
   asfs <- extract_asf(cond)

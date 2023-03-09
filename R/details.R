@@ -16,7 +16,7 @@ details <- function(cond, x,
 #  Converts x to a configTable and then calls the .det.cti
 .det.default <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-    type, cycle.type = "factor"){
+    type, cycle.type = "factor", ...){
   if (!inherits(x, "configTable")){
     if (missing(type)) type <- "auto"
     x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
@@ -46,7 +46,8 @@ details <- function(cond, x,
 # value: A data.frame with columns according to what
 .det.cti <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-    available = what, cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE){
+    available = what, cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE, 
+    ...){
 
   what <- clarify_details(what, available = available)
   if (any(c("redundant", "inus", "exhaustiveness", "faithfulness") %in% what)){

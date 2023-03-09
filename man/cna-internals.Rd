@@ -21,6 +21,7 @@
 \alias{C_redund}
 \alias{getComplexity}
 \alias{getCondType}
+\alias{C_is_submodel}
 
 \title{Internal functions in the cna package}
 
@@ -56,6 +57,9 @@ These functions are mainly for internal purposes and will not normally be called
     }
     \item{\code{getCond}:}{
       Derive a condition from a data set. 
+    }
+    \item{\code{C_is_submodel}:}{
+      Internal core of the function \code{\link{is.submodel}}. 
     }
   }
 }
