@@ -50,19 +50,24 @@ randomAsf <- function(x, outcome = NULL, positive = TRUE,
   if (is.null(compl)){
     compl <- pmin(ncol(x)-1, 4)
     if (compl>2) compl <- 2:compl
-  } else {
-    compl <- compl[compl <= length(x)-1]
-    compl <- compl[compl >= 1]
   }
-  if(length(compl) < 1) stop("Invalid specification of compl")
+  if (!is.list(compl)) compl <- list(compl)
+  if (length(compl) == 1) compl <- rep(compl, 2)
+  compl[[1]] <- intersect(compl[[1]], seq_len(length(x)-1))
+  compl_ok <- is.list(compl) &&
+                (length(compl) == 2) &&
+                all(sapply(compl, is.numeric)) &&
+                all(sapply(compl, function(.c) all(.c %in% 1:length(x))))
+  if(!compl_ok) stop("Invalid specification of compl")
 
-  # number and lengths of msc's
-  if (length(compl)>1){  
-    n.msc <- sample(compl, 1)
-    len.msc <- sample(compl, n.msc, replace = TRUE)
+  # number of msc's
+  n.msc <- sample(compl[[2]], 1)
+  # lengths of msc's (number of factors)
+  compl1 <- compl[[1]]
+  if (length(compl1) > 1){  
+    len.msc <- sample(compl1, n.msc, replace = TRUE)
   } else {
-    n.msc <- compl
-    len.msc <- rep(compl, n.msc)
+    len.msc <- rep(compl1, n.msc)
   }
   vals <- vals[-match(outcomeFactor, names(vals))]
   repeat {
@@ -129,7 +134,7 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
 
   # outcome, number and complexity of asf's
   if (is.null(outcome)){
-    if (is.null(n.asf)) n.asf <- 2:pmin(ncol(x)-2, 4)
+    if (is.null(n.asf)) n.asf <- 2:pmin(ncol(x) - 2, 4)
     if (length(n.asf) > 1) n.asf <- sample(n.asf, 1)
   } else {
     if (length(outcome) > ncol(x)-2) 
@@ -155,7 +160,12 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
   if (anyDuplicated(outcomeFactors)){
     stop("Invalid ", sQuote("outcome"), ": factors are not allowed to appear repeatedly.")
   }
-  if (is.null(compl)) compl <- 2:pmin(ncol(x)-1, 4)
+  if (is.null(compl)) compl <- 2:pmin(ncol(x) - n.asf, 4)
+  if (!is.list(compl)) compl <- list(compl)
+  if (length(compl) == 1) compl <- rep(compl, 2)
+  if (min(compl[[1]]) + n.asf > length(x)){
+    stop("Cann not generate a csf of specified complexity.")
+  }
 
   lhs_factors <- setdiff(names(x), outcomeFactors)
   outCsf <- ""

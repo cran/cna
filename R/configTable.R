@@ -5,7 +5,7 @@
 #   - types "cs", "mv", und "fs"
 #   - Behaviour if x already is a configTable
 configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
-                        case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
+                        case.cutoff = 0, rm.dup.factors = FALSE, rm.const.factors = FALSE,
                         .cases = NULL, verbose = TRUE){
   nm.x <- deparse(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x), length(case.cutoff) == 1)

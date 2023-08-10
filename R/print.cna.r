@@ -22,7 +22,7 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
   
   if (whatl["t"]){
     cat("\nConfiguration table:\n")
-    print(x$configTable_out, show.cases = show.cases)
+    printPseudoConfigTable(x, show.cases = show.cases)
   }
   if (!is.null(x$ordering))
     cat("\nCausal ordering",
@@ -87,4 +87,22 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
   }
 
   invisible(x)
+}
+
+
+# Note: The 'configTable'  that is printed if 'what' contains an "t" is not a proper cna object
+# if there are some 'notcols'.
+printPseudoConfigTable <- function(x, show.cases = TRUE){
+  if (length(x$notcols)){
+    ct0 <- x$configTable
+    notcols.nrs <- names(ct0) %in% x$notcols
+    names(ct0)[notcols.nrs] <- tolower(names(ct0)[notcols.nrs])
+    ctout <- as.data.frame(ct0, warn = FALSE)
+    ctout[notcols.nrs] <- lapply(ctout[notcols.nrs], function(x) 1-x)
+    attributes(ctout)[c("names", "row.names", "class", "n", "cases", "type")] <-
+      attributes(ct0)[c("names", "row.names", "class", "n", "cases", "type")]
+  } else {
+    ctout <- x$configTable
+  }
+  print(ctout, show.cases = show.cases)
 }

@@ -10,7 +10,7 @@ The \code{configTable} function assembles cases with identical configurations fr
 
 \usage{
 configTable(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
-            case.cutoff = 0, rm.dup.factors = TRUE, rm.const.factors = TRUE,
+            case.cutoff = 0, rm.dup.factors = FALSE, rm.const.factors = FALSE,
            .cases = NULL, verbose = TRUE)
 
 \method{print}{configTable}(x, show.cases = NULL, ...)
@@ -24,8 +24,8 @@ configTable(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
   \item{case.cutoff}{Minimum number of occurrences (cases) of a configuration
         in \code{x}. Configurations with fewer than \code{case.cutoff} occurrences (cases)
         are not included in the configuration table.}
-  \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical values in \code{x} are removed.}
-  \item{rm.const.factors}{Logical; if \code{TRUE}, factors with constant values in \code{x} are removed.}
+  \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical values in \code{x} are removed. \bold{Note:} The default value has changed from \code{TRUE} to \code{FALSE} in the package's version 3.5.4.}
+  \item{rm.const.factors}{Logical; if \code{TRUE}, factors with constant values in \code{x} are removed. \bold{Note:} The default value has changed from \code{TRUE} to \code{FALSE} in the package's version 3.5.4.}
   \item{.cases}{Optional character vector of length \code{nrow(x)} to set case labels (row names).}
   \item{verbose}{Logical; if \code{TRUE}, some messages on the configuration table are printed.}
   \item{show.cases}{Logical; if \code{TRUE}, the attribute \dQuote{cases}
@@ -48,7 +48,8 @@ be used to indicate the frequency of each configuration in the data frame. \code
 
 The \code{case.cutoff} argument is used to determine that configurations are only included in the configuration table if they are instantiated at least as many times in \code{x} as the number assigned to \code{case.cutoff}. Or differently, configurations that are instantiated less than  \code{case.cutoff} are excluded from the configuration table. For instance, \code{configTable(x, case.cutoff = 3)} entails that configurations with less than 3 cases are excluded.
 
-\code{rm.dup.factors} and \code{rm.const.factors} allow for determining whether all but the first of a set of duplicated factors (i.e. factors with identical value distributions in \code{x}) are eliminated and whether constant factors (i.e. factors with constant values in all cases (rows) in \code{x}) are eliminated. From the perspective of configurational causal modeling, factors with constant values in all cases can neither be modeled as causes nor as outcomes; therefore, they can be removed prior to the analysis. Factors with identical value distributions cannot be distinguished configurationally, meaning they are one and the same factor as far as configurational causal modeling is concerned. Therefore, only one factor of a set of duplicated factors is standardly retained by \code{configTable}. 
+\code{rm.dup.factors} and \code{rm.const.factors} allow for determining whether all but the first of a set of duplicated factors (i.e. factors with identical value distributions in \code{x}) are eliminated and whether constant factors (i.e. factors with constant values in all cases (rows) in \code{x}) are eliminated. From the perspective of configurational causal modeling, factors with constant values in all cases can neither be modeled as causes nor as outcomes; therefore, they can be removed prior to the analysis. Factors with identical value distributions cannot be distinguished configurationally, meaning they are one and the same factor as far as configurational causal modeling is concerned. When duplicate or constant factors are contained in \code{x}, a warning message is issued by default. By setting \code{rm.dup.factors} and \code{rm.const.factors} to the non-default value \code{TRUE}, \code{configTable} is given permission to automatically eliminate duplicate or constant factors.
+
 
 \code{.cases} can be used to set case labels (row names). It is a character vector of length \code{nrow(x)}. 
 
@@ -127,13 +128,17 @@ dat2 <- dat1[sample(nrow(dat1), 100, replace = TRUE, prob = wei),]
 configTable(dat2) # 100 cases with 51 configurations instantiated only once.
 configTable(dat2, case.cutoff = 2) # removing the single instances.
 
-# Duplicated factors are not eliminated, constant factors are not eliminated.
+# Duplicated factors are not eliminated by default.
 dat3 <- selectCases("(A=1+A=2+A=3 <-> C=2)*(B=3<->D=3)*(B=2<->D=2)*(A=2 + B=1 <-> E=2)",
                     dat1)
-configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+configTable(dat3)
+
+# By setting rm.dup.factors and rm.const.factors to their non-default values,
+# duplicates and constant factors can be eliminated automatically.
+configTable(dat3, rm.dup.factors = TRUE, rm.const.factors = TRUE)
 
 # The same without messages about constant and duplicated factors.
-configTable(dat3, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
+configTable(dat3, rm.dup.factors = TRUE, rm.const.factors = TRUE, verbose = FALSE)
 
 
 

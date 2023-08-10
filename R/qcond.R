@@ -171,7 +171,7 @@ qcondTbl_csf <- function(condstr, sc, freqs){
     stringsAsFactors = FALSE
   )
 }
-# Grouped version of condTbl for csf-strings
+# Grouped version of condTbl for csf-strings [apparently not used anywhere...]
 groupedCondTbl_csf <- function(condstr, sc, freqs){
   qc <- qcond_csf(condstr, sc, flat = TRUE)
   ctbl <- cond2condTbl(qc, freqs)

@@ -24,7 +24,7 @@ randomCsf(x, outcome = NULL, positive = TRUE,
   \item{positive}{Logical; if TRUE (default), the outcomes all have positive values. If \code{FALSE}, a value (positive or negative in case of binary data) will be picked at random. \code{positive} has no effect if the \code{outcome} argument is not \code{NULL} or if \code{x} contains multi-value data.}
   \item{maxVarNum}{Maximal number of factors in \code{x} that can appear in the generated asf or csf. The default depends on the type of the data contained in \code{x}.
 }
-  \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf).}
+  \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf). Alternatively, \code{compl} can be a list of two integer vectors; then the first vector is used for the initial complexity of the msc and the second for that of the asf.}
   \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details below).}
   \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by\cr \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \cr \code{ncol(x)-2}.}
 }
@@ -43,7 +43,7 @@ The optional argument \code{outcome} determines which values of which factors in
 
 The maximal number of factors included in the generated asf and csf can be controlled via the argument \code{maxVarNum}. This is relevant when \code{x} is of high dimension, as generating solution formulas with more than 20 factors is computationally demanding and, accordingly, may take a long time (or even exhaust computer memory).
 
-The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. Assigning unduly high values to \code{compl} results in an error.
+The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector or list of vectors \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. Assigning unduly high values to \code{compl} results in an error.
 
 
 \code{randomAsf} has the additional argument \code{how} with the two possible values \code{"inus"} and \code{"minimal"}. \code{how = "inus"} determines that the generated asf is redundancy-free relative to all logically possible configurations of the factors in \code{x}, i.e. relative to \code{full.ct(x)}, whereas in case of \code{how = "minimal"} redundancy-freeness is imposed only relative to all configurations actually contained in \code{x}, i.e. relative to \code{x} itself. Typically \code{"inus"} should be used; the value \code{"minimal"} is relevant mainly in repeated \code{randomAsf} calls from within \code{randomCsf}. Moreover, setting \code{how = "minimal"} will return an error if \code{x} is a \code{\link{configTable}} of type \code{"fs"}.
@@ -78,8 +78,12 @@ randomAsf(d.educate)
 randomAsf(d.educate, outcome = "G")
 
 # Specify the complexity.
+# Initial complexity of 2 conjunctions and 2 disjunctions.
 randomAsf(full.ct(7), compl = 2)
+# Initial complexity of 3:4 conjunctions and 3:4 disjunctions.
 randomAsf(full.ct(7), compl = 3:4)
+# Initial complexity of 2 conjunctions and 3:4 disjunctions.
+randomAsf(full.ct(7), compl = list(2,3:4))
 
 # Redundancy-freeness relative to x instead of full.ct(x).
 randomAsf(d.educate, outcome = "G", how = "minimal")
@@ -118,6 +122,7 @@ randomCsf(d.volatile, outcome = c("RB","se"))
 # Specify the complexity.
 randomCsf(d.volatile, outcome = c("RB","se"), compl = 2)
 randomCsf(full.ct(7), compl = 3:4)
+randomCsf(full.ct(7), compl = list(2,4))
 
 # Specify the maximal number of factors.
 randomCsf(d.highdim, maxVarNum = 10)
@@ -145,7 +150,7 @@ target
 # Select the cases compatible with the target.
 x <- selectCases(target)
 # Run CNA without an ordering.
-mycna <- cna(x, rm.dup.factors = FALSE)
+mycna <- cna(x)
 # Extract the csf. 
 csfs <- csf(mycna)
 # Check whether the target is completely returned.
@@ -161,7 +166,7 @@ x <- ct2df(selectCases(target))
 # Introduce fragmentation.
 x <- x[-sample(1:nrow(x), nrow(x)*0.2), ] 
 # Run CNA without an ordering.
-mycna <- cna(x, rm.dup.factors = FALSE)
+mycna <- cna(x)
 # Extract the csf. 
 csfs <- csf(mycna)
 # Check whether (a submodel of) the target is returned.
@@ -182,7 +187,7 @@ x <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ]
 incompData <- dplyr::setdiff(ct2df(fullData), idealData)
 x <- rbind(ct2df(incompData[sample(1:nrow(incompData), nrow(x)*0.05), ]), x)  
 # Run CNA without an ordering.
-mycna <- cna(x, con = .7, cov = .7, maxstep = c(3, 3, 12), rm.dup.factors = F)
+mycna <- cna(x, con = .7, cov = .7, maxstep = c(3, 3, 12))
 mycna
 # Extract the csf. 
 csfs <- csf(mycna)

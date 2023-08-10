@@ -2,7 +2,7 @@
 cna <- function (x, type,
     ordering = NULL, strict = FALSE, outcome = TRUE, 
     con = 1, cov = 1, con.msc = con, 
-    notcols = NULL, rm.const.factors = TRUE, rm.dup.factors = TRUE,  
+    notcols = NULL, rm.const.factors = FALSE, rm.dup.factors = FALSE,  
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf,
     only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6, 
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
@@ -89,7 +89,7 @@ cna <- function (x, type,
   }
   outcome <- intersect(cti$resp_nms, outcome) # order!
 
-  # notcols and ct.out
+  # notcols
   if (!is.null(notcols)){
     if (type == "mv") stop("\"notcols\" not applicable if type==\"mv\"")
     if (length(notcols) == 1L && notcols == "all"){
@@ -101,16 +101,6 @@ cna <- function (x, type,
     if (!is.character(notcols)) notcols <- names(ct)[notcols]
     notcols <- toupper(notcols)
     if (!all(notcols %in% names(ct))) stop("Wrong specification of 'notcols'")
-    ct.out <- ct
-    notcols.nrs <- names(ct) %in% notcols
-    names(ct.out)[notcols.nrs] <- tolower(names(ct.out)[notcols.nrs])
-    ct.out.df <- as.data.frame(ct.out, warn = FALSE)
-    ct.out.df[notcols.nrs] <- lapply(ct.out.df[notcols.nrs], function(x) 1-x)
-    attributes(ct.out.df)[c("names", "row.names", "class", "n", "cases", "type")] <- 
-      attributes(ct.out)[c("names", "row.names", "class", "n", "cases", "type")]
-    ct.out <- ct.out.df
-  } else {
-    ct.out <- ct
   }
 
   # main loop over outcomes  
@@ -119,7 +109,6 @@ cna <- function (x, type,
     # Identify minimal sufficient conditions
     # --------------------------------------
     # Initialize minSuff, list of minimal sufficient combinations
-    # .znm <- sub("(.+)=.+", "\\1", zname)
     poteff <- potential.effects(cti, zname, ordering, strict)
     if (length(poteff) == 0L) next
     
@@ -174,8 +163,8 @@ cna <- function (x, type,
   }
   out$x <- x
   out$ordering <- ordering
+  out$notcols <- notcols
   out$configTable <- ct
-  out$configTable_out <- ct.out
   out$solution <- sol
   out$what <- what
   out$details <- details

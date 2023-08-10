@@ -107,7 +107,7 @@ relist1 <- function(x, g){
                 logical =   C_relist_Log(x, g),
                 character = C_relist_Char(x, g),
                 list =      C_relist_List(x, g),
-                stop("relist1 is unnable to handle data of type \"", typeof(x), "\"")
+                stop("relist1 is unable to handle data of type \"", typeof(x), "\"")
                 )
   out
 }
