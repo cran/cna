@@ -145,15 +145,17 @@ print.complexCond <- function (x, digits = 3, print.table = TRUE,
 
 # ------------------------------------------------------------------------------
 
-
 print.invalidCond <- function (x, ...){
-  cat(x, " (", reason(x), ")\n", sep = "")
+  cat(x, " [", invalidCondReason(x), "]\n", sep = "")
   invisible(x)
 }
 
-reason <- function(x){
-  stopifnot(inherits(x, "invalidCond"))
-  switch(attr(x, "info")$condTypes, 
-         invalidValues = "non-existing values", 
-         invalidSyntax = "invalid syntax")
+invalidCondReason <- function(condType){
+  stopifnot(inherits(condType, "invalidCond"))
+  switch(attr(condType, "info")$condTypes, 
+         invalidSyntax = "invalid syntax",
+         invalidFactor = "non-existing factor name",
+         invalidValue = "non-existing factor value", 
+         factorInsteadOfValue = "factor name instead of factor value in multi-value condition"
+         )
 }

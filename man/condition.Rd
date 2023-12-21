@@ -26,7 +26,7 @@ condition(x, ...)
 }
 
 \arguments{
-  \item{x}{Character vector specifying a Boolean expression as \code{"A + B*C -> D"}, where \code{"A"}, \code{"B"}, \code{"C"}, \code{"D"} are column names in \code{ct}.}
+  \item{x}{Character vector specifying a Boolean expression as \code{"A + B*C -> D"}, where \code{"A"}, \code{"B"}, \code{"C"}, \code{"D"} are factor values appearing in \code{ct}.}
   \item{ct}{Data frame or \code{configTable} (see \code{\link{configTable}}).}
   \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
 \item{add.data}{Logical; if \code{TRUE}, \code{ct} is attached to the output. Alternatively, \code{ct} can be requested by the \code{add.data} argument in \code{print.cond}.}
@@ -46,7 +46,7 @@ Most importantly, the output of the \code{condition} function highlights in whic
 
 The \code{condition} function is independent of \code{\link{cna}}. That is, any msc, asf, or csf---irrespective of whether they are output by \code{\link{cna}}---can be given as input to \code{condition}. Even Boolean expressions that do not have the syntax of CNA solution formulas can be passed to \code{condition}. %This makes it possible to also assess the properties of Boolean functions that are interesting or of relevance independently of \code{\link{cna}}.
 
-The first required input \code{x} of \code{condition} is a character vector consisting of Boolean formulas composed of factor names that are column names of \code{ct}, which is the second required input. \code{ct} can be a \code{configTable} or a data frame. If \code{ct} is a data frame and the \code{type} argument has its default value \code{"auto"}, \code{condition} first determines the data type and then converts the data frame to a \code{configTable}. The data type can also be manually specified by giving the \code{type} argument one of the values \code{"cs"}, \code{"mv"}, or \code{"fs"}.
+The first required input \code{x} of \code{condition} is a character vector consisting of Boolean formulas composed of factor values that appear in \code{ct}, which is the second required input. \code{ct} can be a \code{configTable} or a data frame. If \code{ct} is a data frame and the \code{type} argument has its default value \code{"auto"}, \code{condition} first determines the data type and then converts the data frame to a \code{configTable}. The data type can also be manually specified by giving the \code{type} argument one of the values \code{"cs"}, \code{"mv"}, or \code{"fs"}.
 %
 %Data that feature factors taking values 1 or 0 only are called \emph{crisp-set}, in which case the \code{type} argument takes its default value \code{"cs"}. If the data contain at least one factor that takes more than two values, e.g. \{1,2,3\}, the data count as \emph{multi-value}, which is indicated by \code{type = "mv"}. Data featuring at least one factor taking real values from the interval [0,1] count as \emph{fuzzy-set}, which is specified by \code{type = "fs"}. 
 
@@ -111,8 +111,8 @@ University of Chicago Press.
 # Build the configuration table for d.irrigate.
 irrigate.ct <- configTable(d.irrigate)
 
-# Any Boolean functions involving the factors "A", "R", "F", "L", "C", "W" in d.irrigate
-# can be tested by condition().
+# Any Boolean functions involving values of the factors "A", "R", "F", "L", "C", "W" in 
+# d.irrigate can be tested by condition().
 condition("A*r + L*C", irrigate.ct)
 condition(c("A*r + !(L*C)", "A*-(L | -F)", "C -> A*R + C*l"), irrigate.ct)
 condition(c("A*r + L*C -> W", "!(A*L*R -> W)", "(A*R + C*l <-> F)*(W*a -> F)"),
@@ -217,4 +217,13 @@ condition("(C=1*D=2 +!(C=2*D=3 + A=1*B=1) <-> E=3)", realData)
 # Ragin 2008:63-68).
 summary(condition("A=2*B=1 * -(A=3*B=3) <-> C=1", realData)) # unique coverage of A=2*B=1
 summary(condition("-(A=2*B=1) * A=3*B=3 <-> C=1", realData)) # unique coverage of A=3*B=3
+
+# Note that expressions must feature factor VALUES contained in the data, they may not 
+# contain factor NAMES. The following calls produce errors.
+condition("C*D <-> E", realData)
+condition("A=2*B=1 + C=23", realData)
+# In case of mv expressions, negations of factor values must be written with brackets.
+condition("!(A=2)", realData)
+# The following produces an error.
+condition("!A=2", realData)
 }

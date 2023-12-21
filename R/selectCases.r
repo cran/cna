@@ -17,7 +17,7 @@ selectCases <- function(cond, x = full.ct(cond), type = "auto", cutoff = 0.5,
   stopifnot(length(cond) == 1)
   co <- condition.default(cond, x, force.bool = TRUE)[[1]]
   if (inherits(co, "invalidCond")){
-    stop("The condition is invalid (", reason(co), "): ", format.condString(cond))
+    stop("The condition is invalid (", invalidCondReason(co), "): ", format.condString(cond))
   }
   x[co[[1]] >= cutoff, , rm.dup.factors = rm.dup.factors, rm.const.factors = rm.const.factors]
 }
@@ -50,7 +50,7 @@ selectCases1 <- function(cond, x = full.ct(cond), type = "auto", con = 1, cov = 
   
   a <- condition.default(cond, x, rm.parentheses = TRUE)[[1]]
   if (inherits(a, "invalidCond"))
-    stop("The condition is invalid (", reason(a), "): ", format.condString(cond))
+    stop("The condition is invalid (", invalidCondReason(a), "): ", format.condString(cond))
   if (!inherits(a, "atomicCond")) stop("selectCases1 only works with a condition of type 'atomic'.")
   a <- ct2df(a)
   d <- a[[1L]] - a[[2L]]        # differences

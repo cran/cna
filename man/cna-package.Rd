@@ -33,8 +33,8 @@ There exist two additional R packages for data analysis with CNA: \CRANpkg{cnaOp
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 3.5.4\cr
-Date:    \tab 2023-08-10\cr
+Version: \tab 3.5.6\cr
+Date:    \tab 2023-12-21\cr
 License: \tab GPL (>= 2)\cr
     }
 }

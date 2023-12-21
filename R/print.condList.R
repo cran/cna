@@ -63,17 +63,22 @@ summary.condList <- function(object, ...){
 # boolean conditions are kept as they are. The corresponding columns are joined into 
 # one data.frame, each (part of a) condition appears once only.
 as.data.frame.condList <- function(x, row.names = attr(x, "cases"), optional = TRUE, ...){
+  x <- x[!sapply(x, inherits, "invalidCond")]
   n.obs <- attr(x, "n")
-  compl <- vapply(x, inherits, "complexCond", 
-                  FUN.VALUE = logical(1), USE.NAMES = FALSE)
-  x[compl] <- lapply(x[compl], flattenComplexCond)
-  dfList <- unname(lapply(x, data.frame, check.names = !optional))
-  keepCol <- split(!duplicated(unlist(lapply(dfList, names))), 
-                   rep(seq_along(dfList), lengths(dfList)))
-  out <- mapply("[", dfList, keepCol, 
-                SIMPLIFY = FALSE, USE.NAMES = TRUE)
-  out <- do.call(cbind, out)
-  out$n.obs <- n.obs
+  if (length(x) == 0){
+    out <- data.frame(n.obs)
+  } else {
+    compl <- vapply(x, inherits, "complexCond", 
+                    FUN.VALUE = logical(1), USE.NAMES = FALSE)
+    x[compl] <- lapply(x[compl], flattenComplexCond)
+    dfList <- unname(lapply(x, data.frame, check.names = !optional))
+    keepCol <- split(!duplicated(unlist(lapply(dfList, names))), 
+                     rep(seq_along(dfList), lengths(dfList)))
+    out <- mapply("[", dfList, keepCol, 
+                  SIMPLIFY = FALSE, USE.NAMES = TRUE)
+    out <- do.call(cbind, out)
+    out$n.obs <- n.obs
+  }
   if (missing(row.names) && is.list(row.names)){
     rownames(out) <- C_mconcat(row.names, sep = ",")
   } else {

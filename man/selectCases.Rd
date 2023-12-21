@@ -81,9 +81,9 @@ selectCases1("S -> C", con = .8, cov = .8, ct.js)  # selectCases1() makes no dis
               #  between "->" and "<->".
 condition("S -> C", selectCases1("S -> C", con = .8, cov = .8, ct.js))
 
-# selectCases() not only draws cases compatible with Boolean causal models. Any Boolean or 
-# set-theoretic function can be given as cond.
-selectCases("C > B", allCombs(2:4))
-selectCases("C=2 | B!=3", allCombs(2:4), type = "mv")
-selectCases("A=1 * !(C=2 + B!=3)", allCombs(2:4), type = "mv")
+# selectCases() not only draws cases compatible with Boolean causal models. Any Boolean 
+# function of factor values appearing in the data can be given as cond.
+selectCases("C=1*B=3", allCombs(2:4))
+selectCases("A=1 * !(C=2 + B=3)", allCombs(2:4), type = "mv")
+selectCases("A=1 + (C=3 <-> B=1)*D=3", allCombs(c(3,3,3,3)), type = "mv")
 }

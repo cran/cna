@@ -44,7 +44,6 @@ condFromCti <- function(x, cti, ct = cti2ct(cti), type = cti$type,
   condTypes <- as.vector(condTypes)
   
   n.cases <- cti$freq
-  negateCase <- type %in% c("cs", "fs") # use lower case negation in conditions' syntax?
   reshaped <- !mapply(function(s1, s2) grepl(s1, s2, fixed = TRUE),
                       x, noblanks(x.in), 
                       SIMPLIFY = TRUE, USE.NAMES = FALSE)
@@ -82,12 +81,20 @@ condFromCti <- function(x, cti, ct = cti2ct(cti), type = cti$type,
   }
   if (any(bool <- (condTypes == "boolean"))){
     out[bool] <- booleanCond(px[match(which(bool), px_ind)], 
-                             ct = ct, negateCase = negateCase)
+                             ct = ct)
+    # check and case handling below (and in booleanCond(), too) is necessary mainly 
+    # because the getCondType does not properly distinguish 
+    # unary '-' (valid) from binary '-' (invalid), as in condition("U-L", d.educate)
+    .newInvalid <- which(bool)[sapply(out[bool], inherits, "invalidCond")]
+    if (any(.newInvalid)){
+      bool[.newInvalid] <- FALSE
+      info$condTypes[.newInvalid] <- "invalidSyntax"
+    }
     info <- updateInfo(info, bool, getInfo_bool(out[bool], n.cases))
   }
   if (any(atomic <- (condTypes == "atomic"))){
     out[atomic] <- atomicCond(px[match(which(atomic), px_ind)], 
-                              ct = ct, negateCase = negateCase)
+                              ct = ct)
     info <- updateInfo(info, atomic,
                        getInfo_asf(structure(out[atomic], response = rhs(x[atomic])), 
                                    n.cases))
@@ -96,7 +103,7 @@ condFromCti <- function(x, cti, ct = cti2ct(cti), type = cti$type,
     i_x <- which(complx) 
     i_px <- match(i_x, px_ind)
     for (i in seq_along(i_x)){
-      out[[i_x[i]]] <- complexCond(px[[i_px[i]]], ct = ct, negateCase = negateCase)
+      out[[i_x[i]]] <- complexCond(px[[i_px[i]]], ct = ct)
     }
     info <- updateInfo(info, complx,
                        getInfo_customCsf(out[i_x], lengths(out[i_x]), n.cases))
@@ -155,23 +162,26 @@ cti2ct <- function(x, cases = TRUE){
 # returns a cond object
 
 # cond, "boolean" case
-booleanCond <- function(px, ct, negateCase, addClass = TRUE){
+booleanCond <- function(px, ct, addClass = TRUE){
   nms <- vapply(px, parsed2visible, character(1))
-  if (negateCase) {
+  type <- attr(ct, "type")
+  if (type %in% c("cs", "fs")) {
     px[] <- lapply(px, applyCaseNegation)
   }
-  datatype <- switch(attr(ct, "type"),
-                     cs = "integer",
-                     mv = "integer",
-                     fs = "numeric")
+  datatype <- switch(type, cs = "integer", mv = "integer", fs = "numeric")
   out <- vector("list", length(px))
   for (i in seq_along(px)){
     # evaluate
-    out_i <- eval(px[[i]], envir = ct, enclos = logicalOperators)
-    mode(out_i) <- datatype
-    out_i <- as.data.frame(out_i)
-    names(out_i) <- nms[[i]]
-    if (addClass) class(out_i) <- c("booleanCond", "cond", "data.frame")
+    out_i <- try(eval(px[[i]], envir = ct, enclos = logicalOperators), silent = TRUE)
+    if (inherits(out_i, "try-error")){
+      out_i <- invalidCond()
+      attr(out_i, "condType") <- "invalidSyntax"
+    } else {
+      mode(out_i) <- datatype
+      out_i <- as.data.frame(out_i)
+      names(out_i) <- nms[[i]]
+      if (addClass) class(out_i) <- c("booleanCond", "cond", "data.frame")
+    }
     out[[i]] <- out_i
   }
   out
@@ -179,14 +189,14 @@ booleanCond <- function(px, ct, negateCase, addClass = TRUE){
 
 
 # cond, "atomic" case
-atomicCond <- function(px, ct, negateCase){
+atomicCond <- function(px, ct){
   l <- length(px)
   bconds <- unlist(lapply(px, function(x){
       ind <- if (as.character(x[[1]]) != "=") 3:2 else 2:3
       as.list(x[ind])
       }), 
     recursive = FALSE)
-  bconds <- booleanCond(bconds, ct, negateCase, addClass = FALSE)
+  bconds <- booleanCond(bconds, ct, addClass = FALSE)
   out <- C_relist_List(bconds, rep(2, l))
   for (i in seq_along(out)){
     out_i <- as.data.frame(out[[i]], optional = TRUE)
@@ -197,7 +207,7 @@ atomicCond <- function(px, ct, negateCase){
 }
 
 # cond, "complex" case
-complexCond <- function(pxi, ct, negateCase){
+complexCond <- function(pxi, ct){
   strct <- .call2list(pxi)
   atConds <- rapply(strct, function(x) x, classes = c("call", "<-", "="), how = "unlist")
   cntr <- .counter()
@@ -205,7 +215,7 @@ complexCond <- function(pxi, ct, negateCase){
   strct <- rapply(strct, function(x) as.name(paste0("atomicCond..", cntr$increment())), 
                   classes = c("call", "<-", "="), how = "replace")
   restoredStruct <- .list2call(strct)
-  cc <- atomicCond(atConds, ct, negateCase = negateCase)
+  cc <- atomicCond(atConds, ct)
   names(cc) <- vapply(atConds, parsed2visible, character(1))
   attr(cc, "complStruct") <- restoredStruct
   class(cc) <- c("complexCond", "cond")
@@ -214,7 +224,8 @@ complexCond <- function(pxi, ct, negateCase){
 
 # invalidCond()
 invalidCond <- function() 
-  structure("Invalid condition", class = c("invalidCond", "cond", "character"))
+  structure("Invalid condition", 
+            class = c("invalidCond", "cond", "character"))
 
 
 # ==== Auxiliary functions used in booleanCond and atomicCond ====
@@ -252,23 +263,26 @@ applyCaseNegation <- function(x, negChar = "-"){
 
 # convert a call into a (nested) list (abstract syntax tree)
 # calls von stopOps werden nicht weiter zerlegt
+# type is irrelevant with the default stopOps !
 # Used in complexCond
-.call2list <- function(x, stopOps = c("<-", "<<-", "="), validOps = c("&", "|", "(", "-")){
+.call2list <- function(x, type = "cs", stopOps = c("<-", "<<-", "="), 
+                       validOps = c("&", "|", "(", "-", if (type == "mv") "==")){
   if (is.call(x)) {
     fn.name <- as.character(x[[1]])
     if (fn.name %in% stopOps){
       x
     } else {
-      if (!is.null(validOps) && !(fn.name %in% validOps)) 
-        stop("Invalid condition: ", deparse(x))
-      x[-1] <- lapply(x[-1], .call2list, stopOps = stopOps, validOps = validOps)
+      if (!is.null(validOps) && !(fn.name %in% validOps)){
+        stop("Invalid operation ", sQuote(parsed2visible(x[[1]])))
+      }
+      x[-1] <- lapply(x[-1], .call2list, type = type, stopOps = stopOps, validOps = validOps)
       as.list(x)
     }
   } else {
     x
   }
 }
-# .call2list(quote(A&B | -C), NULL)
+# .call2list(quote(A&B | -C))
 
 # convert a (nested) list into a call
 # Used in complexCond

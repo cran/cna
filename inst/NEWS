@@ -1,4 +1,9 @@
 
+Changes in version 3.5.6 (2023-12-19)
+  * In condition(), handling of invalid input has been slightly modified.
+  * In particular, in case of multi-value data, all conditions must contain factor values, not factor names. 
+  * These changes also affect condTbl(), selectCases() and other functions that use condition() internally.
+
 Changes in version 3.5.4 (2023-08-07)
   * Default values of arguments rm.const.factors and rm.dup.factors in configTable() and cna() have changed from TRUE to FALSE.
   * In randomConds(), the flexibility in specifying complexity in argument \code{compl} has been increased.

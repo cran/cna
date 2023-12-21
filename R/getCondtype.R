@@ -7,7 +7,7 @@
 # Possible values: 
 #   "stdBoolean", "stdAtomic", "stdComplex", 
 #   "boolean", "atomic", "complex",
-#   "invalidSyntax", "invalidComplex", "invalidValues"
+#   "invalidSyntax", "invalidFactor", "invalidValue", "factorInsteadOfValue
 # Examples:
 #' cond <- c("A+B", "a+b*C->E", "(a+b*C<->E)*(A+B<->D)",
 #'               "!a", "!(a+B)<->C", "(a+b*C<->E)*(A+!b<->D)",
@@ -35,18 +35,16 @@ getCondType <- function(x, cti, force.bool = FALSE, rm.parentheses = FALSE){
     return(structure(condTypes, x = x))
   }
   # All other cases: parsing is necessary
-  if (!anyUnknown){
-    return(structure(condTypes, x = x))
-  }
   px <- lapply(x[noqct], tryparse)
   px_ind <- which(noqct)
   syntax_ok <- !m_is.null(px)
   inPar_px <- logical(length(px))
   for (i in seq_along(px)){
     if (!syntax_ok[[i]]) next
+    if (!is.call(px[[i]])) next
     if (inPar_px[i] <- (as.character(px[[i]][[1]]) == "("))
       px[[i]] <- rm.parentheses(px[[i]])
-    px[[i]] <- reshapeCall(px[[i]])
+    px[[i]] <- reshapeCall(px[[i]], type = cti$type)
     x[[px_ind[i]]] <- parsed2visible(px[[i]])
   }
   inPar <- reshaped_px <- logical(length(x))
@@ -54,15 +52,23 @@ getCondType <- function(x, cti, force.bool = FALSE, rm.parentheses = FALSE){
   if (!all(syntax_ok))
     condTypes[noqct][!syntax_ok] <- "invalidSyntax"
   if (any(syntax_ok)){
-    vars_ok <- checkVariableNames(px[syntax_ok], if (cti$type == "mv") names(cti$nVal) else vnms)
-    ct <- character(sum(vars_ok))
-    ct_inPar <- !rm.parentheses & inPar_px[syntax_ok][vars_ok]
+    # Check valid factor _names_
+    factorNames <- if (cti$type == "mv") names(cti$nVal) else vnms
+    var_chk <- checkFactors(px[syntax_ok], factorNames)
+    if (cti$type == "mv"){
+      # Check valid factor _values_
+      chkVals <- checkMvFactorValues(px[syntax_ok][var_chk == "ok"], vnms, factorNames)
+      var_chk[var_chk == "ok"][chkVals != "ok"] <- chkVals[chkVals != "ok"]
+    }
+    ct <- character(sum(var_chk == "ok"))
+    ct_inPar <- !rm.parentheses & inPar_px[syntax_ok][var_chk == "ok"]
     if (any(ct_inPar)) ct[ct_inPar] <- "boolean"
     if (!all(ct_inPar))
-      ct[!ct_inPar] <- .condType(px[syntax_ok][vars_ok][!ct_inPar], force.bool)
-    condTypes[noqct][syntax_ok][vars_ok] <- ct
-    if (!all(vars_ok))
-      condTypes[noqct][syntax_ok][!vars_ok] <- "invalidValues"
+      ct[!ct_inPar] <- pcondType(px[syntax_ok][var_chk == "ok"][!ct_inPar], force.bool, 
+                                 type = cti$type)
+    condTypes[noqct][syntax_ok][var_chk == "ok"] <- ct
+    if (!all(var_chk == "ok"))
+      condTypes[noqct][syntax_ok][var_chk != "ok"] <- var_chk[var_chk != "ok"]
   }
   structure(condTypes, x = x, px = px, px_ind = px_ind)
 }
@@ -110,11 +116,42 @@ checkValues <- function(char, split, values, fixed = TRUE){
 
 # ==== checkVariables() ===
 # slower version of checkValues for parsed conditions
-checkVariableNames <- function(px, values){
+checkFactors <- function(px, values){
   vars <- lapply(px, all.vars)
   found <- happly(vars, function(x) match(x, table = values, nomatch = 0L) > 0L)
-  m_all(found)
+  out <- rep("ok", length(px))
+  out[!m_all(found)] <- "invalidFactor"
+  out
 }
+
+# ==== checkVariables() ===
+checkMvFactorValues <- function(px, fvals, fnms){
+  observedVals <- lapply(px, extractFactorValues)
+  ok <- m_all(happly(observedVals, 
+                     function(e) match(e, table = fvals, nomatch = 0) > 0))
+  out <- ifelse(ok, "ok", "invalidValue")
+  if (any(!ok)){
+    facNmsOk <- lengths(lapply(observedVals, setdiff, c(fnms, fvals))) == 0
+    out[!ok][facNmsOk] <- "factorInsteadOfValue"
+  }
+  out
+}
+# extractFactorValues: recursive function!
+extractFactorValues <- function(px){
+  if (is.call(px)) { # && as.character(px[[1]]) %in% ls(logicalOperators)){
+    if (as.character(px[[1]]) == "==" && length(px) == 3 && is.symbol(px[[2]]) && is.atomic(px[[3]])){
+      out <- parsed2visible(px)
+    } else {
+      out <- unlist(lapply(as.list(px[-1]), extractFactorValues))
+    }
+  } else if (is.atomic(px)){
+    out <- character(0)
+  } else {
+    out <- parsed2visible(px)
+  }
+  unique.default(out)
+}
+
 
 # ==== "maybe"-functions ====
 # check the syntactic form of the condition
@@ -174,7 +211,7 @@ maybeComplex <- function(x, ct_type, multiple.only = TRUE){
 # ==== .qcondType() ====
 # Determine the 'qtypes' of conditions (preliminary selection, without parsing)
 # possible values:
-# "constant" , "stdBoolean", "stdAtomic", "stdComplex", "unknown", "invalidValues"
+# "constant" , "stdBoolean", "stdAtomic", "stdComplex", "unknown", "invalidValue"
 .qcondType <- function(x, values, ct_type, stdComplex.multiple.only = TRUE){
   out <- rep("unknown", length(x))
   names(out) <- x
@@ -194,7 +231,7 @@ maybeComplex <- function(x, ct_type, multiple.only = TRUE){
   if (any(sel2)){
     sel3 <- checkValues(x[sel1][sel2], c("+", "*"), values)
     out[sel1][sel2][sel3] <- "stdBoolean"
-    out[sel1][sel2][!sel3] <- "invalidValues"
+    out[sel1][sel2][!sel3] <- "unknown"
     if (!is.null(invSyn <- attr(sel3, "syntax_ok"))){
       out[sel1][sel2][!invSyn] <- "invalidSyntax"
     }
@@ -214,7 +251,7 @@ maybeComplex <- function(x, ct_type, multiple.only = TRUE){
     sel3 <- checkValues(x[sel1][sel2], c("<*->", "+", "*"), values, 
                         fixed = c(FALSE, TRUE))
     out[sel1][sel2][sel3] <- "stdAtomic"
-    out[sel1][sel2][!sel3] <- "invalidValues"
+    out[sel1][sel2][!sel3] <- "unknown"
     if (!is.null(invSyn <- attr(sel3, "syntax_ok"))){
       out[sel1][sel2][!invSyn] <- "invalidSyntax"
     }
@@ -232,7 +269,7 @@ maybeComplex <- function(x, ct_type, multiple.only = TRUE){
     sel3 <-  checkValues(gsub("^\\(|\\)$", "", x[sel1][sel2]), c(")*(", "<*->", "+", "*"), 
                          values, fixed = c(TRUE, FALSE, TRUE))
     out[sel1][sel2][sel3] <- "stdComplex"
-    out[sel1][sel2][!sel3] <- "invalidValues"
+    out[sel1][sel2][!sel3] <- "unknown"
     if (!is.null(invSyn <- attr(sel3, "syntax_ok"))){
       out[sel1][sel2][!invSyn] <- "invalidSyntax"
     }
@@ -285,3 +322,57 @@ qcond2cond_csf <- function(x){
   lapply(qc, "class<-", c("stdComplexCond", "complexCond", "cond", "data.frame"))
 }
 
+
+# condtype
+# determines the type of a _parsed_ condition
+# px   quoted string
+# value  a character string: "boolean", "atomic" or "complex"
+pcondType <- function(px, force.bool, ops = c("<-", "=", "<<-"), type = "cs"){
+  if (force.bool) return(rep("boolean", length(px)))
+  outerOps <- vapply(px, function(x) if (is.call(x)) as.character(x[[1L]]) else "", character(1)) 
+  cntAssOp <- vapply(px, .containsAssignOp, logical(1), ops)
+  condType <- rep("boolean", length(px))
+  condType[outerOps %in% ops] <- "atomic"
+  condType[condType != "atomic" & cntAssOp & outerOps != "("] <- "complex"
+  complex.ok <- vapply(px[condType == "complex"], validCsf, logical(1), type = type)
+  condType[condType == "complex"][!complex.ok] <- "boolean"
+  condType
+}
+# Function to determine if a complex condition has a correct form
+# [several asf's linked with the operators */&, +/|, ( and !/-]
+validCsf <- function(px, type = "cs"){
+  li <- .call2list(px, type = type)
+  reduce <- function(x){
+    if (is.list(x) && length(x) > 1){
+      unlist(lapply(x[-1], reduce))
+    } else {
+      x
+    }
+  }
+  red <- reduce(li)
+  all(vapply(red, is.call, logical(1))) && 
+    all(vapply(red, function(x) as.character(x[[1]]), character(1))
+        %in% c("=", "<-", "<<-"))
+}
+
+# .containsAssignOp
+# determines whether an expression contains an assignment operator
+# x   quoted string
+# value: logical
+# Used in pcondType
+.containsAssignOp <- function(x, ops = c("<-", "<<-", "=")){
+  if (is.atomic(x) || is.name(x)) {
+    FALSE
+  } else if (is.call(x)) {
+    fn.name <- as.character(x[[1]])
+    if (fn.name %in% ops){
+      TRUE
+    } else {
+      any(vapply(x[-1], .containsAssignOp, logical(1)))
+    }
+  } else {
+    # User supplied incorrect input
+    stop("Don't know how to handle type ", typeof(x),
+         call. = FALSE)
+  }
+}

@@ -1,62 +1,7 @@
-# ==== auxiliary functions used in contision() ====
-# and other stuff used for switching between expresions and strings
+# ==== auxiliary functions used in condition() ====
+# and other stuff used for switching between expressions and strings
 
-# condtype
-# determines the type of a condition
-# px   quoted string
-# value  a character string: "boolean", "atomic" or "complex"
-.condType <- function(px, force.bool, ops = c("<-", "=", "<<-")){
-  if (force.bool) return(rep("boolean", length(px)))
-  outerOps <- vapply(px, function(x) if (is.call(x)) as.character(x[[1L]]) else "", character(1)) 
-  cntAssOp <- vapply(px, .containsAssignOp, logical(1), ops)
-  condType <- rep("boolean", length(px))
-  condType[outerOps %in% ops] <- "atomic"
-  condType[condType != "atomic" & cntAssOp & outerOps != "("] <- "complex"
-  complex.ok <- vapply(px[condType == "complex"], validCsf, logical(1))
-  condType[condType == "complex"][!complex.ok] <- "invalidComplex"
-  condType[condType != "atomic" & condType != "complex"]
-  condType
-}
-# Function to determine if a complex condition has a correct form
-# [several asf's linked with the operators */&, +/|, ( and !/-]
-validCsf <- function(px){
-  li <- .call2list(px)
-  reduce <- function(x){
-    if (is.list(x) && length(x) > 1){
-      unlist(lapply(x[-1], reduce))
-    } else {
-      x
-    }
-  }
-  red <- reduce(li)
-  all(vapply(red, is.call, logical(1))) && 
-    all(vapply(red, function(x) as.character(x[[1]]), character(1))
-        %in% c("=", "<-", "<<-"))
-}
 
-# .containsAssignOp
-# determines whether an expression contains an assignment operator
-# x   quoted string
-# value: logical
-# Used in .condType
-.containsAssignOp <- function(x, ops = c("<-", "<<-", "=")){
-  if (is.atomic(x) || is.name(x)) {
-    FALSE
-  } else if (is.call(x)) {
-    fn.name <- as.character(x[[1]])
-    if (fn.name %in% ops){
-      TRUE
-    } else {
-      any(vapply(x[-1], .containsAssignOp, logical(1)))
-    }
-  } else {
-    # User supplied incorrect input
-    stop("Don't know how to handle type ", typeof(x),
-         call. = FALSE)
-  }
-}
-
-# ==============================================================================
 
 # ==== Operators in 'visible' and 'parsed' notation and 
 #      function to switch between notations ====
@@ -120,7 +65,10 @@ visible2parsed <- function(x){
 }
 
 # Auxiliary function tryparse(): parse while catching errors
-tryparse <- function(x) tryCatch(visible2parsed(x)[[1]], error = function(e) NULL)
+tryparse <- function(x){
+  x <- sub("**", "^", x, fixed = TRUE)
+  tryCatch(visible2parsed(x)[[1]], error = function(e) NULL)
+}
 
 # parsed to visible
 parsed2visible <- function(px){
@@ -172,7 +120,7 @@ switchCase <- function(x){
 
 
 # reshaping of parsed calls 
-reshapeCall <- function(x){
+reshapeCall <- function(x, type = "cs"){
   if (is.call(x)) {
     fn.name <- as.character(x[[1]])
     # remove unnecessary parentheses
@@ -181,11 +129,11 @@ reshapeCall <- function(x){
       return(reshapeCall(x))
     }
     # switch "case negation" to negation with operator "-"
-    if (fn.name == "-" && is.name(x[[2]])){
+    if (type != "mv" && fn.name == "-" && length(x) == 2 && is.name(x[[2]])){
       return(as.name(switchCase(as.character(x[[2]]))))
     }
     # recurse
-    x[-1] <- lapply(x[-1], reshapeCall)
+    x[-1] <- lapply(x[-1], reshapeCall, type = type)
     x
   } else if (is.name(x)){
     # 'unify' case
@@ -294,6 +242,7 @@ emptyVector <- function(type, length){
 }
 
 updateInfo <- function(info, which, x){
+  if (!any(which)) return(info)
   which <- which(which) # logigal index -> integer index
   stopifnot(length(which) == nrow(x), names(x) %in% names(info))
   info[which, names(x)] <- x
