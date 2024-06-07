@@ -62,7 +62,8 @@ summary.condList <- function(object, ...){
 # Splits all conditions in x into rhs and lhs of <-> or ->,  
 # boolean conditions are kept as they are. The corresponding columns are joined into 
 # one data.frame, each (part of a) condition appears once only.
-as.data.frame.condList <- function(x, row.names = attr(x, "cases"), optional = TRUE, ...){
+as.data.frame.condList <- function(x, row.names = attr(x, "cases"), optional = TRUE, 
+                                   nobs = TRUE, ...){
   x <- x[!sapply(x, inherits, "invalidCond")]
   n.obs <- attr(x, "n")
   if (length(x) == 0){
@@ -77,7 +78,7 @@ as.data.frame.condList <- function(x, row.names = attr(x, "cases"), optional = T
     out <- mapply("[", dfList, keepCol, 
                   SIMPLIFY = FALSE, USE.NAMES = TRUE)
     out <- do.call(cbind, out)
-    out$n.obs <- n.obs
+    if (nobs) out$n.obs <- n.obs
   }
   if (missing(row.names) && is.list(row.names)){
     rownames(out) <- C_mconcat(row.names, sep = ",")

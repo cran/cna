@@ -19,7 +19,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
     only.minimal.msc = TRUE,  only.minimal.asf = TRUE, 
     maxSol = 1e6, suff.only = FALSE, 
     what = if (suff.only) "m" else "ac", cutoff = 0.5, 
-    border = c("down", "up", "drop"), details = FALSE, 
+    border = c("up", "down", "drop"), details = FALSE, 
     acyclic.only = FALSE, cycle.type = c("factor", "value"), 
     asf.selection = c("cs", "fs", "none"), verbose = FALSE)
 
@@ -35,7 +35,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{ordering}{Character string or list of character vectors specifying the causal ordering of
         the factors in \code{x}.}
   \item{strict}{Logical; if \code{TRUE}, factors on the same level of the causal
-        ordering are \emph{not} potential causes of each other; if \code{FALSE}, factors on the same level \emph{are} potential causes of each other.}
+        ordering are \emph{not} potential causes of each other; if \code{FALSE} (default), factors on the same level \emph{are} potential causes of each other.}
   \item{outcome}{Character vector specifying one or several factor values that are to be considered as potential outcome(s). For crisp- and fuzzy-set data, factor values are expressed by upper and lower cases, for multi-value data, they are expressed by the "factor=value" notation.  
   Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are considered as potential outcomes.}
   \item{con}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every minimally sufficient condition (msc), atomic solution formula (asf), and complex solution formula (csf) must satisfy. (See also the argument \code{con.msc} below).}
@@ -43,9 +43,9 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{con.msc}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every msc must satisfy. Overrides \code{con} for msc and, thereby, allows for imposing a consistency threshold on msc that differs from the threshold \code{con} imposes on asf and csf. Defaults to \code{con}.}
   \item{maxstep}{Vector of three integers; the first specifies the maximum number of conjuncts in each disjunct of an asf, the second specifies the maximum number of disjuncts in an asf, the third specifies the maximum \emph{complexity} of an asf. The complexity of an asf is 
   the total number of exogenous factor values in the asf. Default: \code{c(3,4,10)}.}
-  \item{inus.only}{Logical; if \code{TRUE}, only disjunctive normal forms that are free of redundancies are retained as asf (see also \code{\link{is.inus}}). \cr Defaults to \code{only.minimal.msc && only.minimal.asf}.}
-  \item{only.minimal.msc}{Logical; if \code{TRUE}, only minimal conjunctions are retained as msc. If \code{FALSE}, sufficient conjunctions are not required to be minimal.}
-  \item{only.minimal.asf}{Logical; if \code{TRUE}, only minimal disjunctions are retained as asf. If \code{FALSE}, necessary disjunctions are not required to be minimal. }
+  \item{inus.only}{Either \code{TRUE}/\code{FALSE} or a character string with possible values "implication" or "equivalence". The strings can be abbreviated. If \code{TRUE}, only disjunctive normal forms that are free of redundancies are retained as asf (see also \code{\link{is.inus}}). \cr Defaults to \code{only.minimal.msc && only.minimal.asf}.}
+  \item{only.minimal.msc}{Logical; if \code{TRUE} (default), only minimal conjunctions are retained as msc. If \code{FALSE}, sufficient conjunctions are not required to be minimal.}
+  \item{only.minimal.asf}{Logical; if \code{TRUE} (default), only minimal disjunctions are retained as asf. If \code{FALSE}, necessary disjunctions are not required to be minimal. }
   \item{maxSol}{Maximum number of asf calculated.}
   \item{suff.only}{Logical; if \code{TRUE}, the function only searches for msc and not for asf and csf.}
   \item{notcols}{Character vector of factors to be negated in \code{x}. If \code{notcols = "all"}, all factors in \code{x} are negated.}
@@ -53,7 +53,7 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
   \item{what}{Character string specifying what to print; \code{"t"} for the configuration table, \code{"m"} for msc, \code{"a"} for asf, \code{"c"} for csf, and \code{"all"} for all. Defaults to \code{"ac"} if \code{suff.only = FALSE}, and to \code{"m"} otherwise.}
   \item{cutoff}{Minimum membership score required for a factor to count as instantiated in the data and to be integrated in the analysis. Value in the unit interval [0,1]. The default cutoff is 0.5. Only meaningful if \code{type = "fs"}.}
   \item{border}{Character string specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}), rounded down (\code{"down"}) or dropped from the analysis (\code{"drop"}). Only meaningful if \code{type = "fs"}. }
-  \item{details}{Either \code{TRUE}/\code{FALSE}, or a character vector with possible elements \code{"exhaustiveness"}, \code{"faithfulness"}, \code{"coherence"}, \code{"redundant"}, \code{"cyclic"}. The strings can also be abbreviated, e.g.  \code{"e"} or \code{"exh"} for \code{"exhaustiveness"}, etc.}
+  \item{details}{Either \code{TRUE}/\code{FALSE} or a character vector with possible elements \code{"exhaustiveness"}, \code{"faithfulness"}, \code{"coherence"}, \code{"redundant"}, \code{"cyclic"}. The strings can be abbreviated, e.g.  \code{"e"} or \code{"exh"} for \code{"exhaustiveness"}, etc.}
   \item{acyclic.only}{Logical; if \code{TRUE}, csf featuring a cyclic substructure are not returned. \code{FALSE} by default.}
   \item{cycle.type}{Character string specifying what type of cycles to be detected: \code{"factor"} (the default) or \code{"value"} (cf. \code{\link{cyclic}}).}
   \item{asf.selection}{Character string specifying how to select asfs based on outcome variation in configurations incompatible with a model. \code{asf.selection = "cs"} (default): selection based on variation at the 0.5 anchor; \code{asf.selection = "fs"}: selection based on variation in the fuzzy-set value; \code{asf.selection = "none"}: no selection based on outcome variation in incompatible configurations.}
@@ -92,14 +92,14 @@ The \code{cna} function builds its models in four stages using a \strong{\emph{b
 
 As the combinatorial search space for asf is potentially too large to be exhaustively scanned in reasonable time, the argument \bold{\code{maxstep}} allows for setting an upper bound for the complexity of the generated asf. \code{maxstep} takes a vector of three integers \code{c(i, j, k)} as input, entailing that the generated asf have maximally \code{j} disjuncts with maximally \code{i} conjuncts each and a total of maximally \code{k} factor values (\code{k} is the maximal complexity). The default is \code{maxstep = c(3, 4, 10)}.
 
-Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to values different from 1. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2021), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. See also the R package \CRANpkg{frscore}. }
+Note that when the data feature noise due to uncontrolled background influences the default \code{con} and \code{cov} thresholds of 1 will often not yield any asf. In such cases, \code{con} and \code{cov} may be set to values different from 1. \code{con} and \code{cov} should neither be set too high, in order to avoid overfitting, nor too low, in order to avoid underfitting. The \strong{overfitting danger} is severe in causal modeling with CNA (and configurational causal modeling more generally). For a discussion of this problem see Parkkinen and Baumgartner (2023), who also introduce a procedure for robustness assessment that explores all threshold settings in a given interval---in an attempt to reduce both over- and underfitting. See also the R package \CRANpkg{frscore}. }
 
-\item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)} 
+\item{Fourth stage}{If \code{cna} finds asf, it builds \strong{complex solution formulas} (csf) from those asf. This is done in a stepwise manner as follows. First, all logically possible conjunctions featuring one asf of every outcome are built. Second, if \code{inus.only = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2023), and  tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated (cf. \code{\link{is.inus}}). [Note: as of package version 3.6.0, the "implication" definition of partial structural redundancy is used, see \code{\link{is.inus}} for details.] Third, if \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. Fourth, for those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. The remaining solutions are returned as csf. (See also \code{\link{csf}}.)} 
 } %% end \describe
 
 If \code{verbose} is set to its non-default value \code{TRUE}, some information about the progression of the algorithm is returned to the console during the execution of the \code{cna} function. The execution can easily be interrupted by ESC at all stages.
 
-The \bold{default output} of \code{cna} lists asf and csf, ordered by complexity and the product of consistency and coverage. It provides the consistency and coverage scores of each solution, a complexity score, which corresponds to the number of exogenous factor values in a solution, and a column \dQuote{\code{inus}} indicating whether a solution has INUS form, meaning whether it is redundancy-free as required by the \emph{INUS-theory} of causation (Mackie 1974, ch. 3; Baumgartner and Falk 2019). If \code{inus.only = TRUE}, all solutions automatically have INUS form, but if \code{only.minimal.msc} or 
+The \bold{default output} of \code{cna} lists asf and csf, ordered by complexity and the product of consistency and coverage. It provides the consistency and coverage scores of each solution, a complexity score, which corresponds to the number of exogenous factor values in a solution, and a column \dQuote{\code{inus}} indicating whether a solution has INUS form, meaning whether it is redundancy-free as required by the \emph{INUS-theory} of causation (Mackie 1974, ch. 3; Baumgartner and Falk 2023). If \code{inus.only = TRUE}, all solutions automatically have INUS form, but if \code{only.minimal.msc} or 
 \code{only.minimal.asf} are set to \code{FALSE}, non-INUS solutions may also be returned. 
 
 Apart from the standard solution attributes, \code{cna} can calculate a number of  \bold{further solution attributes}: \code{exhaustiveness}, \code{faithfulness}, \code{coherence}, \code{redundant}, and \code{cyclic} all of which are recovered by setting \code{details} to its non-default value \code{TRUE} or to a character vector specifying the attributes to be calculated. 
@@ -169,8 +169,8 @@ The option \dQuote{spaces} controls how the conditions are rendered. The current
 
 \note{In the first example described below (in \emph{Examples}), the two resulting complex solution formulas represent a common cause structure and a causal chain, respectively. The common cause structure is graphically depicted in figure (a) below, the causal chain in figure (b).
 
-\if{html}{\figure{structures3.png}{Causal Structures}}
-\if{latex}{\figure{structures3.png}{options: width=13.5cm}}
+\if{html}{\figure{structures.png}{Causal Structures}}
+\if{latex}{\figure{structures.pdf}{options: width=9cm}}
 }
 
 
@@ -185,14 +185,12 @@ Twenty Years of Biodiversity Conservation in Costa Rica.} \emph{Global Environme
 Baumgartner, Michael. 2009a. \dQuote{Inferring Causal Complexity.}
 \emph{Sociological Methods & Research} 38(1):71-101.
 
-Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.\cr 
-doi:10.1017/psrm.2018.45. 
+Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.
 
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2023. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}, 74(1), 171-197. 
 
 Hartmann, Christof, and Joerg Kemmerzell. 2010. \dQuote{Understanding Variations 
 in Party Bans in Africa.} \emph{Democratization} 17(4):642-65.
-doi: 10.1080/13510347.2010.491189.
 
 Krook, Mona Lena. 2010.
 \dQuote{Women's Representation in Parliament: A Qualitative Comparative Analysis.}
@@ -200,7 +198,7 @@ Krook, Mona Lena. 2010.
 
 Mackie, John L. 1974. \emph{The Cement of the Universe: A Study of Causation.} Oxford: Oxford University Press.
 
-Parkkinen, Veli-Pekka and Michael Baumgartner. 2021. \dQuote{Robustness and Model Selection in Configurational Causal Modeling}, \emph{Sociological Methods & Research}.  doi:10.1177/0049124120986200
+Parkkinen, Veli-Pekka and Michael Baumgartner. 2023. \dQuote{Robustness and Model Selection in Configurational Causal Modeling}, \emph{Sociological Methods & Research},  52(1), 176-208.
 
 Ragin, Charles C. 2006. \dQuote{Set Relations in Social Research: Evaluating Their Consistency and Coverage}. \emph{Political Analysis} 14(3):291-310.
 
@@ -409,6 +407,7 @@ dat1 <- selectCases(mycond)
 # There exist almost 2M csf. This is how to build the first 1076 of them, with 
 # additional messages about the csf building process.
 first.csf <- csf(ana1, verbose = TRUE)
+first.csf
 # Most of these csf are compatible with more configurations than are contained in 
 # dat1. Only 193 csf in first.csf are perfectly exhaustive (i.e. all compatible 
 # configurations are contained in dat1).

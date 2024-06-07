@@ -18,10 +18,9 @@ hasSubsetInM <- function(y, x){
 # returns a matrix with k columns containing all subsets of
 # k elements appearing in a row of x[, cols]
 findAllSubsets <- function(x, k, cols = seq_len(ncol(x))){
-  stopifnot(is.matrix(x), is.integer(x),
-            is.integer(k), length(k) == 1L, k<=length(cols),
-            is.integer(cols), cols >= 1L, max(cols) <= ncol(x),
-            anyDuplicated(cols) == 0L)
+  if (k == 1){
+    return(matrix(sort(unique.default(x[, cols])), ncol = 1))
+  }
   out <- combn(
     cols, k,
     FUN = function(a) C_uniqueCombs(x, a),
@@ -38,10 +37,6 @@ findAllSubsets <- function(x, k, cols = seq_len(ncol(x))){
 # value  A matrix with 2 rows and length(cols) columns:
 #        consistencies and coverages of conjunctions of columns of x
 conj_conCov <- function(cols, x, y, f){
-  stopifnot(mode(x)=="numeric", x>=0, x<=1,
-            is.integer(cols), is.matrix(cols), ncol(cols)<=ncol(x), cols>=1L, cols<= ncol(x),
-            mode(y)=="numeric", y>=0, y<=1,
-            is.integer(f), length(f)==nrow(x), f>=1L)
   out <- apply(cols, 1, C_conj_conCov, x, y, f)
   if (!is.matrix(out)) out <- matrix(out, nrow = 2L)
   rownames(out) <- c("con", "cov")
@@ -56,10 +51,6 @@ conj_conCov <- function(cols, x, y, f){
 # value  A matrix with 2 rows and length(cols) columns:
 #        consistencies and coverages of conjunctions of columns of x
 disj_conCov <- function(cols, x, y, f){
-  stopifnot(mode(x)=="numeric", x>=0, x<=1,
-            is.integer(cols), cols>=1L, cols<= ncol(x),
-            mode(y)=="numeric", y>=0, y<=1,
-            is.integer(f), length(f)==nrow(x), f>=1L)
   out <- apply(cols, 1, C_disj_conCov, x, y, f)
   if (!is.matrix(out)) out <- matrix(out, nrow = 2L)
   rownames(out) <- c("con", "cov")

@@ -6,7 +6,7 @@ cna <- function (x, type,
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf,
     only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6, 
     suff.only = FALSE, what = if (suff.only) "m" else "ac",
-    cutoff = 0.5, border = c("down", "up", "drop"),
+    cutoff = 0.5, border = c("up", "down", "drop"),
     details = FALSE, acyclic.only = FALSE, cycle.type = c("factor", "value"), 
     asf.selection = c("cs", "fs", "none"), verbose = FALSE){
   # call and type
@@ -14,6 +14,15 @@ cna <- function (x, type,
   if (!is.null(attr(x, "type"))) type <- attr(x, "type")
   if (missing(type)) type <- "auto"
 
+  # resolve inus.only in case it contains an inus definition
+  if (is.character(inus.only)){
+    inus.def <- match.arg(inus.only, c("implication", "equivalence"))
+    inus.only <- TRUE
+  } else {
+    stopifnot(is.logical(inus.only))
+    inus.def <- "implication"
+  }
+  
   # Checking/enforcing compatibility of inus.only with only.minimal.msc and only.minimal.asf
   if (inus.only){
     if (!only.minimal.msc) 
@@ -61,7 +70,8 @@ cna <- function (x, type,
   maxstep[1:2] <- pmin(maxstep[1:2], maxstep[3])
 
   # Define config, uniqueValues, resp_nms, factMat, nVal, valueId, scores
-  cti <- ctInfo(ct, cutoff = cutoff, border = match.arg(border))
+  border <- match.arg(border)
+  cti <- ctInfo(ct, cutoff = cutoff, border = border)
   vnms <- colnames(cti$scores)
   freqs <- cti$freq
   
@@ -165,11 +175,13 @@ cna <- function (x, type,
   out$ordering <- ordering
   out$notcols <- notcols
   out$configTable <- ct
+  if (attr(ct, "type") == "fs") out$fsInfo <- list(cutoff = cutoff, border = border)
   out$solution <- sol
   out$what <- what
   out$details <- details
   out[c("con", "cov", "con.msc", "inus.only", "acyclic.only", "cycle.type")] <- 
     list(con, cov, con.msc, inus.only, acyclic.only, cycle.type)
+  if (out$inus.only) out$inus.only <- inus.def
 
   return(out)
 }
@@ -183,12 +195,7 @@ findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.ms
   
   for (.step in seq_along(minSuff)){
     # Select .step-fold conditions occurring in the data
-    if (.step == 1L){
-      allkfoldConds <- matrix(unlist(cti$config[poteff], use.names = FALSE),
-                              ncol = 1)
-    } else {
-       allkfoldConds <- findAllSubsets(cti$valueId, .step, match(poteff, colnames(cti$valueId)))
-    }
+    allkfoldConds <- findAllSubsets(cti$valueId, .step, match(poteff, colnames(cti$valueId)))
     if (!only.minimal.msc){
       minimList[[.step]] <- rep(TRUE, nrow(allkfoldConds))
     }

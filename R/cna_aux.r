@@ -3,17 +3,23 @@
 # ======
 # transforms a fs-ct into a sc-ct
 # Note: fs2cs is designed to work with a data.frame, not a configTable!
-fs2cs <- function(x, cutoff = 0.5, border = c("down", "up", "drop")){
+fs2cs <- function(x, cutoff = 0.5, border = c("up", "down", "drop")){
   if (cutoff <= 0 | cutoff >= 1)
     stop("cutoff must be >0 and <1")
   border <- match.arg(border)
-  x.r <- x
-  x.r[] <- round(x.r + (0.5 - cutoff))
-  if (border == "up") 
-    x.r[x%%1 == cutoff] <- x.r[x%%1 == cutoff] + 1
-  if (border == "drop") 
-    x.r <- x.r[!rowAnys(x%%1 == cutoff), , drop = FALSE]
-  x.r
+  if (border == "drop") {
+    removeLines <- !rowAnys(x == cutoff)
+    x <- x[removeLines, , drop = FALSE]
+  }
+  xout <- if (inherits(x, "configTable")) as.data.frame(x, warn = FALSE) else x
+  xout[] <- rep(0L, nrow(x))
+  if (border == "up"){
+    xout[x >= cutoff] <- 1L
+  } else {
+    xout[x > cutoff] <- 1L
+  }
+  x[] <- xout
+  x
 }
 
 # ctInfo: 

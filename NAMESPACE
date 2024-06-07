@@ -51,6 +51,7 @@ S3method(as.data.frame, condList)
 
 S3method(print, condTbl)
 S3method(condition, condTbl)
+S3method(as.data.frame, condTbl)
 
 S3method(print, condString)
 S3method("[", condString)
@@ -67,6 +68,8 @@ S3method(format, stdAtomic)
 S3method(print, stdComplex)
 S3method("[", stdComplex)
 S3method(format, stdComplex)
+S3method("[", casesList)
+S3method(format, casesList)
 
 S3method(print, condList)
 S3method(summary, condList)

@@ -24,7 +24,7 @@ Logical; if \code{TRUE}, the result for csfs with the same number of component a
 }
 
 \details{
-According to the regularity theory of causation underlying CNA, a Boolean dependency structure is causally interpretable only if it does not contain any redundant elements. Boolean dependency structures may feature various types of redundancies, one of which are so-called \emph{structural redundancies}. A csf \eqn{\Phi} has a structural redundancy if, and only if, reducing \eqn{\Phi} by one or more of the asf it is composed of results in a csf \eqn{\Phi'} that is logically equivalent to \eqn{\Phi}. To illustrate, suppose that \eqn{\Phi} is composed of three asf: asf1 * asf2 * asf3; and suppose that \eqn{\Phi} is logically equivalent to \eqn{\Phi'}: asf1 * asf2. In that case, asf3 makes no difference to the behavior of the factors in \eqn{\Phi} and \eqn{\Phi'}; it is structurally redundant and, accordingly, must not be causally interpreted. For more details see the package vignette (\code{vignette("cna")}) or Baumgartner and Falk (2019).
+According to the regularity theory of causation underlying CNA, a Boolean dependency structure is causally interpretable only if it does not contain any redundant elements. Boolean dependency structures may feature various types of redundancies, one of which are so-called \emph{structural redundancies}. A csf \eqn{\Phi} has a structural redundancy if, and only if, reducing \eqn{\Phi} by one or more of the asf it is composed of results in a csf \eqn{\Phi'} that is logically equivalent to \eqn{\Phi}. To illustrate, suppose that \eqn{\Phi} is composed of three asf: asf1 * asf2 * asf3; and suppose that \eqn{\Phi} is logically equivalent to \eqn{\Phi'}: asf1 * asf2. In that case, asf3 makes no difference to the behavior of the factors in \eqn{\Phi} and \eqn{\Phi'}; it is structurally redundant and, accordingly, must not be causally interpreted. For more details see the package vignette (\code{vignette("cna")}) or Baumgartner and Falk (2023).
 
 
 
@@ -45,7 +45,7 @@ Falk, Christoph: identification and solution of the problem of structural redund
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2023. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}, 74(1), 171-197. 
 
 }
 
@@ -65,14 +65,23 @@ redundant(edu.sol, d.educate, simplify = FALSE)
 
 
 # Default application of csf() with automatic elimination of structural redundancies.
-\donttest{ct.pban <- configTable(d.pban)
+ct.pban <- configTable(d.pban)
 cna.pban <- cna(ct.pban, con = .75, cov = .75)
 csf.pban <- csf(cna.pban)
-redundant(csf.pban$condition, ct.pban) # no solutions with structural redundancies are returned
+# check for structural redundancies in the csf:
+redund.pban <- redundant(csf.pban$condition, ct.pban) 
+# show result for the first few:
+head(redund.pban)  
+# verify that no solutions with structural redundancies are returned
+any(unlist(redund.pban))  # FALSE - no redundancies
+
 # Non-default application of csf() without automatic elimination of structural redundancies.
 csf.pban <- csf(cna.pban, inus.only = FALSE)
-redundant(csf.pban$condition, ct.pban)} # various solutions with structural redundancies are 
-                                        # returned
+redund.pban <- redundant(csf.pban$condition, ct.pban)
+head(redund.pban)
+# various solutions with structural redundancies are returned:
+table(apply(redund.pban, 1, any)) # each TRUE corresponds to a csf with struct. redundancies
+
 
 # If no x is specified defining the factors' value ranges, the space of
 # logically possible configurations is limited to the factor values contained in

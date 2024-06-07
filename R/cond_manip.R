@@ -6,14 +6,14 @@ noblanks <- function(x){
   gsub("[[:space:]]", "", as.character(x))
 }
 # extract lhs from formula
-lhs <- function(x) sub("([^<]+)<*->.+", "\\1", x)
+lhs <- function(x) as.vector(sub("([^<]+)<*->.+", "\\1", x))
 
 # extract rhs from formula
 rhs <- function(x){
   out <- rep("", length(x))
   twosided <- grepl("->", x, fixed = TRUE)
   out[twosided] <- sub(".+<*->(.+)", "\\1", x[twosided])
-  out
+  as.vector(out)
 }
 
 # Extract asf strings from csf strings

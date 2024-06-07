@@ -5,13 +5,13 @@
 Check whether expressions in the syntax of CNA solutions have INUS form
 }
 \description{
-\code{is.inus} checks for each element of a character vector of disjunctive normal forms (DNFs) or expressions in the syntax of CNA solution formulas whether it has INUS form, meaning whether it is free of redundancies in necessary or sufficient conditions, structural redundancies, partial structural redundancies, whether it has constant factors or identical outcomes, and whether it is tautologous or contradictory.
+\code{is.inus} checks for each element of a character vector of disjunctive normal forms (DNFs) or expressions in the syntax of CNA solution formulas whether it has INUS form, meaning whether it is free of redundancies in necessary or sufficient conditions, free of structural redundancies and partial structural redundancies, whether it has constant factors or identical outcomes, and whether it is tautologous or contradictory.
 
 
 }
 
 \usage{
-is.inus(cond, x = NULL, csf.info = FALSE)
+is.inus(cond, x = NULL, csf.info = FALSE, def = c("implication", "equivalence"))
 }
 
 \arguments{
@@ -21,24 +21,23 @@ Character vector of DNFs or expressions in the syntax of CNA solutions (i.e. asf
 }
   \item{csf.info}{Logical; if \code{TRUE} and \code{cond} has the syntax of a csf, details about the performed INUS checks are printed. If \code{cond} does not have the syntax of a csf, \code{csf.info} has no effect.
 }
+  \item{def}{Character string specifying the definition of partial structural redundancy (PSR) to be applied. If \code{def = "implication"} (default), \code{cond} is treated as containing a PSR iff \code{cond} logically implies a proper submodel of itself. If \code{def = "equivalence"}, a PSR obtains iff  \code{cond} is logically equivalent with a proper submodel of itself. The character string can be abbreviated. \bold{Note:} To reproduce results produced by versions of the package prior to 3.6.0, def may have to be set to \code{"equivalence"}.}
 }
+
 
 \details{
 A Boolean dependency structure is not interpretable in terms of a deterministic causal structure if it contains at least one of the following (cf. the \dQuote{Examples} section for examples): \enumerate{ \item redundancies in necessary or sufficient conditions, \item structural redundancies,\item partial structural redundancies, \item constant factors, \item  tautologous or contradictory substructures, \item multiple instances of the same outcome. }
 
+The function \code{is.inus} takes a character vector \code{cond} specifying Boolean disjunctive normal forms (DNFs) or expressions in the syntax of CNA solution formulas as input and runs a series of checks on \code{cond}; one for each of the conditions (1) to (6). For instance, whenever \code{cond} logically implies a syntactic proper part of itself, the surplus in \code{cond} is redundant, meaning that it violates condition (1) and is not causally interpretable. To illustrate, \dQuote{A + a*B <-> C} implies and is even logically equivalent to \dQuote{A + B <-> C}. Hence, "a" is redundant in the first expression, which is not causally interpretable due to a violation of condition (1).
+Or the first asf in \dQuote{(a + C <-> D)*(D + G <-> A)} implies that whenever "a" is given, so is "D", while the second asf implies that whenever "D" is given, so is "A". It follows that "a" cannot ever be given, meaning that the factor A takes the constant value 1 and, hence, violates condition (4). As constant factors can neither be causes nor effects, \dQuote{(a + C <-> D)*(D + G <-> A)} is not a well-formed causal structure.
 
-
-The function \code{is.inus} takes a character vector \code{cond} specifying Boolean disjunctive normal forms (DNFs) or expressions in the syntax of CNA solution formulas as input and runs a series of checks on \code{cond}; one for each of the conditions (1) to (6). For instance, whenever a syntactic proper part of \code{cond} is logically equivalent to \code{cond} itself, the surplus in the latter is redundant, meaning that \code{cond} violates condition (1) and is not causally interpretable. To illustrate, \dQuote{A + a*B <-> C} is logically equivalent to \dQuote{A + B <-> C} and, hence, "a" redundant in the first expression, which is not causally interpretable due to a violation of condition (1).
-Or the first asf in \dQuote{(a + C <-> D)*(D + G <-> A)} entails that whenever "a" is given, so is "D", while the second asf entails that whenever "D" is given, so is "A". It follows that "a" cannot ever be given, meaning that the factor A takes the constant value 1 and, hence, violates condition (4). As constant factors can neither be causes nor effects, \dQuote{(a + C <-> D)*(D + G <-> A)} is not a well-formed causal structure. 
-
-If an expression passes the \code{is.inus}-check it can be interpreted as a causal structure according to Mackie's (1974) INUS-theory of causation or modern variants thereof (e.g. Grasshoff and May 2001; Baumgartner and Falk 2019). In other words, such an expression has the form of an INUS structure, i.e. it has \emph{INUS form}, for short.
+If an expression passes the \code{is.inus}-check it can be interpreted as a causal structure according to Mackie's (1974) INUS-theory of causation or modern variants thereof (e.g. Grasshoff and May 2001; Baumgartner and Falk 2023). In other words, such an expression has the form of an INUS structure, i.e. it has \emph{INUS form}, for short.
 
 In the function's default call with \code{x = NULL}, the INUS checks are performed relative to \code{full.ct(cond)}; if \code{x} is not \code{NULL}, the checks are performed relative to \code{full.ct(x)}. As \code{full.ct(cond)} and \code{full.ct(x)} coincide in case of binary factors, the argument \code{x} has no effect in the crisp-set and fuzzy-set cases. In case of multi-value factors, however, the argument \code{x} should be specified in order to define the factors' value ranges (see examples below).
 
 If the argument \code{csf.info} is set to its non-default value \code{TRUE} and \code{cond} has the syntax of a csf, the results of the individual checks of conditions (1) to (6) are printed (in that order) to the console.
 
 In its default setting, the \code{cna} function does not output solutions that do not have INUS form. But when \code{cna} is called with \code{inus.only = FALSE}, non-INUS solutions may be returned. The function \code{is.inus} is standardly called from within the \code{cna} function to determine whether its output has INUS form. 
-
 \code{is.inus} also serves an important purpose in the context of benchmark tests. Not any Boolean expression can be interpreted to represent a causal structure; only expressions in INUS form can. That means when simulating data on randomly drawn target structures, it must be ensured that the latter have INUS form. An expression as \dQuote{A + a*B <-> C}, which has a logically equivalent proper part and, hence, does not have INUS form, is not a well-formed causal structure that could be used as a search target in a benchmark test.
 
 
@@ -51,7 +50,7 @@ Logical vector of the same length as \code{cond}; if \code{cond} is a csf and \c
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2023. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}, 74(1), 171-197. doi:10.1093/bjps/axz047.
 
 Grasshoff, Gerd and Michael May. 2001. \dQuote{Causal Regularities.} In W Spohn, M Ledwig, M Esfeld (eds.), \emph{Current Issues in Causation}, pp. 85-114. Mentis, Paderborn.
 
@@ -93,6 +92,23 @@ cond2 <- "(A + B*c + c*E <-> D)*(B + C <-> E)"
 is.inus(cond2, csf.info = TRUE)
 # The second or third disjunct in the first asf of cond2 is redundant.
 cna(selectCases(cond2))
+# The notion of a partial structural redundancy (PSR) can be defined in two 
+# different ways. To illustrate, consider the following two csfs.
+cond2b <- "(B + F*C <-> A)*(A*e*f <-> B)"
+cond2c <- "(B + F*C <-> A)*(A*f <-> B)"
+# cond2c is a proper submodel of cond2b, and cond2b logically implies cond2c,
+# but the two csfs are not logically equivalent (i.e. cond2c does not 
+# imply cond2b). If a PSR is said to obtain when one csf logically implies 
+# a proper submodel of itself, then cond2b contains a PSR. If a csf has to be
+# logically equivalent to a proper submodel of itself in order for a PSR to 
+# obtain, then cond2b does not contain a PSR. This difference is implemented
+# in the argument def of is.inus(). The default is def = "implication".
+is.inus(cond2b, csf.info = TRUE, def = "implication")
+is.inus(cond2b, csf.info = TRUE, def = "equivalence")
+# The two definitions of PSR only come apart in case of cyclic structures.
+# In versions of cna prior to 3.6.0, is.inus() implemented the "equivalence" 
+# definition of PSR. That is, to reproduce results of earlier versions, def may
+# have to be set to "equivalence". 
 
 # A csf entailing that one factor is constant.
 is.inus("(a + C <-> D)*(D + G <-> A)", csf.info = TRUE)
@@ -154,7 +170,7 @@ is.inus("(A=1 + B=2 + D=3 <-> C=1)*(A=2 + B=3 + D=2 <-> C=1)", fullDat, csf.info
 fsdata <- configTable(d.jobsecurity)
 conds <- csf(cna(fsdata, con = 0.85, cov = 0.85, inus.only = FALSE))$condition
 # Various examples of different types.
-is.inus(conds, fsdata, csf.info = TRUE)
+is.inus(conds[1:10], fsdata, csf.info = TRUE)
 is.inus(c("S + s", "S + s*R", "S*s"), fsdata)
 
 # A redundancy in necessary or sufficient conditions, i.e. a 

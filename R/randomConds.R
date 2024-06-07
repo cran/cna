@@ -54,6 +54,9 @@ randomAsf <- function(x, outcome = NULL, positive = TRUE,
   if (!is.list(compl)) compl <- list(compl)
   if (length(compl) == 1) compl <- rep(compl, 2)
   compl[[1]] <- intersect(compl[[1]], seq_len(length(x)-1))
+  if (length(compl[[1]]) == 0) compl[[1]] <- length(x) - 1
+  compl[[2]] <- intersect(compl[[2]], seq_len(length(x)))
+  if (length(compl[[2]]) == 0) compl[[2]] <- length(x)
   compl_ok <- is.list(compl) &&
                 (length(compl) == 2) &&
                 all(sapply(compl, is.numeric)) &&
@@ -111,7 +114,6 @@ msamp <- function(x, n) vapply(sample(x, n), sample, 1, FUN.VALUE = character(1)
 # msamp(x, 3)
 
 
-
 # === randomCsf === 
 # randCsf: Determine a random csf
 randomCsf <- function(x, outcome = NULL, positive = TRUE, 
@@ -130,6 +132,10 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
   }
   
   if(length(x) < 4) stop("randomCsf() expects 'x' with at least 4 factors.")
+  if (is.null(n.asf)) n.asf <- pmin(sample(2:4, 1), length(x) - 2)
+  if (n.asf > length(x) - 2) 
+    stop("n.asf (=", n.asf, " in the present call) must not be >ncol(x)-2 (=", 
+         ncol(x)-2, " here).")
   maxVarNum <- min(maxVarNum, length(x))
 
   # outcome, number and complexity of asf's
@@ -160,21 +166,27 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
   if (anyDuplicated(outcomeFactors)){
     stop("Invalid ", sQuote("outcome"), ": factors are not allowed to appear repeatedly.")
   }
-  if (is.null(compl)) compl <- 2:pmin(ncol(x) - n.asf, 4)
+  if (is.null(compl)) compl <- 2:4
+  if (!is.list(compl)){
+    compl_ok <- compl <= ncol(x) - n.asf
+    if (any(compl_ok)){
+      compl <- compl[compl_ok]
+    } else {
+      compl <- ncol(x) - n.asf
+    }
+  }
   if (!is.list(compl)) compl <- list(compl)
   if (length(compl) == 1) compl <- rep(compl, 2)
-  if (min(compl[[1]]) + n.asf > length(x)){
-    stop("Cann not generate a csf of specified complexity.")
-  }
-
   lhs_factors <- setdiff(names(x), outcomeFactors)
   outCsf <- ""
   for (i in seq_along(outcome)){
     if (i > 1) lhs_factors <- c(lhs_factors, outcomeFactor)
     outc <- outcome[[i]]
     outcomeFactor <- outcomeFactors[[i]]
-
+    
+    .count_attempts <- 0L
     repeat{
+      .count_attempts <- .count_attempts + 1L
       if (length(lhs_factors) <= maxVarNum){
         xx <- full.ct(x[c(lhs_factors, outcomeFactor)])
       } else {
@@ -203,6 +215,11 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
       }
       rasf <- randomAsf(xx, outcome = outc, compl = compl, how = "minimal")
       if (!(lhs(rasf) %in% c("0", "1"))) break
+      if (.count_attempts >= 100){
+        # usually should not happen...
+        warning("Did not succeed in generating random csf as requested - returning NA")
+        return(NA_character_)
+      }
     }
     outCsf <- paste0(outCsf, if (nzchar(outCsf)) "*", "(", rasf, ")")
   }

@@ -19,7 +19,7 @@ int C_find_first_false(const LogicalVector x){
   return i;
 }
 
-// selects the rows with only one FALSE and determines the columns with only TRUE value in these rows
+// selects the rows with only one FALSE and determines the columns with the only TRUE value in these rows
 // [[Rcpp::export]]
 LogicalVector C_redund(const LogicalMatrix x){
   int k = x.ncol();

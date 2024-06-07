@@ -6,12 +6,21 @@ csf <- function (x, n.init = 1000, details = x$details,
                  acyclic.only = x$acyclic.only, cycle.type = x$cycle.type, 
                  verbose = FALSE){
 
+  # resolve inus.only in case it contains an inus definition
+  if (is.character(inus.only)){
+    inus.def <- match.arg(inus.only, c("implication", "equivalence"))
+    inus.only <- TRUE
+  } else {
+    stopifnot(is.logical(inus.only))
+    inus.def <- "implication"
+  }
+  
   # details
   details <- clarify_details(details, available = x$details, 
                              notrequired = c("cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"), 
                              warn = TRUE)
   details <- union("inus", details)
-  if (inus.only && !x$inus.only){
+  if (inus.only && isFALSE(x$inus.only)){
     stop("Calling csf() with inus.only=TRUE on a cna-object generated as cna(..., inus.only = FALSE) is not meaningful.")
   }
   # Checking/enforcing compatibility of inus.only and minimalizeCsf
@@ -67,15 +76,15 @@ csf <- function (x, n.init = 1000, details = x$details,
   
   # ---- Calculate required details if not done in the previous step ----
   if (length(details_without_cyclic <- setdiff(details, "cyclic"))){
-    if (!x$inus.only) inus_from_asfs <- out$inus
+    if (isFALSE(x$inus.only)) inus_from_asfs <- out$inus
     if (useCtiList(cti)){
       cti <- ctiList(cti, out$condition)
     }
     out[details_without_cyclic] <- 
       .det(cti, out$condition, 
            what = details_without_cyclic, available = details,
-           cycle.type = cycle.type, in.csf = TRUE)[details_without_cyclic]
-    if (!x$inus.only) out$inus <- out$inus & inus_from_asfs
+           cycle.type = cycle.type, in.csf = TRUE, inus.def = inus.def)[details_without_cyclic]
+    if (isFALSE(x$inus.only)) out$inus <- out$inus & inus_from_asfs
   }
 
   # ---- Remove partial structural redundancies (if inus.only=TRUE) ---

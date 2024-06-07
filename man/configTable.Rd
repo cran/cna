@@ -61,7 +61,7 @@ The \code{row.names} argument of the \code{print} function determines whether th
 An object of type \dQuote{configTable}, i.e. a data.frame with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
 }
 
-\note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{configuration table} is a different type of object than a QCA \emph{truth table}. While a truth table is a list indicating whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a configuration table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A configuration table does not express relations of sufficiency.
+\note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{configuration table} is a different type of object than a QCA \emph{truth table}. While a truth table indicates whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a configuration table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A configuration table does not express relations of sufficiency.
 }
 
 

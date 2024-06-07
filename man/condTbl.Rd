@@ -1,6 +1,7 @@
 \name{condTbl}
 \alias{condTbl}
 \alias{print.condTbl}
+\alias{as.data.frame.condTbl}
 \alias{as.condTbl}
 \alias{condTbl}
 \alias{msc}
@@ -21,7 +22,7 @@ Given a solution object \code{x} produced by \code{\link{cna}}, \code{msc(x)} ex
 }
 
 \usage{
-msc(x, details = x$details)
+msc(x, details = x$details, cases = FALSE)
 asf(x, details = x$details, warn_details = TRUE)
 csf(x, n.init = 1000, details = x$details,
     asfx = asf(x, details, warn_details = FALSE),
@@ -29,6 +30,7 @@ csf(x, n.init = 1000, details = x$details,
     acyclic.only = x$acyclic.only, cycle.type = x$cycle.type,
     verbose = FALSE)
 \method{print}{condTbl}(x, n = 20, digits = 3, quote = FALSE, row.names = TRUE, ...)
+\method{as.data.frame}{condTbl}(x, ...)
 
 condTbl(...)
 as.condTbl(x, ...)
@@ -37,12 +39,13 @@ as.condTbl(x, ...)
 \arguments{
   \item{x}{Object of class \dQuote{cna}. In \code{as.condTbl}, \code{x} is a list of evaluated conditions as returned by \code{condition}. In \code{print}, \code{x} is an object returned by \code{msc}, \code{asf}, or \code{csf}.}
   \item{details}{Either \code{TRUE/FALSE} or a character vector specifying which solution attributes to print (see \code{\link{cna}}). Note that \code{msc} and \code{asf} can only display attributes that are saved in \code{x}, i.e. those that have been requested in the \code{details} argument within the call of \code{\link{cna}}.}
+  \item{cases}{Logical; if \code{TRUE}, an additional column listing the cases where the msc is instantiated in combination with the outcome is added to the output.}
   \item{warn_details}{Logical; if \code{TRUE}, a warning is issued when some attribute requested in \code{details} is not available in \code{x} (parameter for internal use).}
   \item{n.init}{Integer capping the amount of initial asf combinations. Default at 1000. Serves to control the computational complexity of the csf building process. %After combining the asf to a preliminary set of csf, the number of these csf is reduced to \code{n.init} in order to limit the computational burden.
   }
   \item{asfx}{Object of class \dQuote{condTbl} produced by the \code{asf} function.}
-  \item{inus.only}{Logical; if \code{TRUE}, csf are freed of structural redundancies and only csf not featuring partial structural redundancies are retained  (see the fourth stage of \code{\link{cna}}'s search algorithm). Defaults to \code{x$inus.only}.}
-  \item{minimalizeCsf}{Logical; if \code{TRUE}, csf are freed of structural redundancies.}
+  \item{inus.only}{Either \code{TRUE}/\code{FALSE} or a character string with possible values "implication" or "equivalence". The strings can be abbreviated. If \code{TRUE}, csf are freed of structural redundancies and only csf not featuring partial structural redundancies are retained  (see the fourth stage of \code{\link{cna}}'s search algorithm; see also \code{\link{is.inus}}). Defaults to \code{x$inus.only}.}
+    \item{minimalizeCsf}{Logical; if \code{TRUE}, csf are freed of structural redundancies.}
   \item{acyclic.only}{Logical; if \code{TRUE}, csf featuring a cyclic substructure are not returned. \code{FALSE} by default.}
   \item{cycle.type}{Character string specifying what type of cycles to be detected: \code{"factor"} (the default) or \code{"value"} (cf. \code{\link{cyclic}}).}
   \item{verbose}{Logical; if \code{TRUE}, some details on the csf building process are printed. \code{FALSE} by default.}
@@ -56,7 +59,7 @@ as.condTbl(x, ...)
 The outputs of \code{msc}, \code{asf}, and \code{csf} can be further processed by the \code{\link[cna]{condition}} function.
 
 While \code{msc} and \code{asf} merely extract information stored in \code{x}, \code{csf} builds csf from the inventory of asf recovered at the end of the third stage of the \code{\link{cna}} algorithm. That is, the \code{csf} function implements the fourth stage of that algorithm. It proceeds in a stepwise manner as follows.
-\enumerate{\item \code{n.init} possible conjunctions featuring one asf of every outcome are built. \item  If \code{inus.only = TRUE} or \code{minimalizeCsf = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2019). 
+\enumerate{\item \code{n.init} possible conjunctions featuring one asf of every outcome are built. \item  If \code{inus.only = TRUE} or \code{minimalizeCsf = TRUE}, the solutions resulting from step 1 are freed of structural redundancies (cf. Baumgartner and Falk 2023). 
 \item If \code{inus.only = TRUE}, tautologous and contradictory solutions as well as solutions with partial structural redundancies and constant factors are eliminated. 
 [If \code{inus.only = FALSE} and \code{minimalizeCsf = TRUE}, only structural redundancies are eliminated, meaning only step 2, but not step 3, is executed.]
 \item If \code{acyclic.only = TRUE}, solutions with cyclic substructures are eliminated. \item For those solutions that were modified in the previous steps, consistency and coverage are re-calculated and solutions that no longer reach \code{con} or \code{cov} are eliminated. 
@@ -94,7 +97,7 @@ Falk, Christoph: development, testing
 }
 
 \references{
-Baumgartner, Michael and Christoph Falk. 2019. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}.\cr doi:10.1093/bjps/axz047.
+Baumgartner, Michael and Christoph Falk. 2023. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation}. \emph{The British Journal for the Philosophy of Science}, 74(1), 171-197. 
 
 Lam, Wai Fung, and Elinor Ostrom. 2010.
 \dQuote{Analyzing the Dynamic Complexity of Development Interventions: Lessons
@@ -128,6 +131,11 @@ asf(cna.irrigate)
 # Extract all minimally sufficient conditions.
 msc(cna.irrigate) # capped at 20 rows
 print(msc(cna.irrigate), n = Inf) # prints all rows
+# Add cases featuring the minimally sufficient conditions combined 
+# with the outcome.
+(msc.table <- msc(cna.irrigate, cases = TRUE))
+# Render as data frame.
+as.data.frame(msc.table)
 
 # Extract only the conditions (solutions).
 csf(cna.irrigate)$condition
@@ -155,6 +163,7 @@ csf(cna.irrigate, verbose = TRUE)
 
 # Return solution attributes with 5 digits.
 print(cna2.irrigate.asf, digits = 5)
+ 
 
 # Further examples
 # ----------------
@@ -168,31 +177,38 @@ csf(ana1, verbose = TRUE)
 csf(ana1, verbose = TRUE, inus.only = FALSE)
 
 # An example generating partial structural redundancies.
-dat2 <- data.frame(A = c(1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                   B = c(1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1),
-                   C = c(1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0),
-                   D = c(1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   E = c(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0),
-                   F = c(1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0))
-ana2 <- cna(dat2, con = .8, cov = .8, maxstep = c(3, 4, 10))
+dat2 <- data.frame(A=c(0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+        1),B=c(0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1),C=c(1,
+        1,0,0,0,1,0,0,1,1,0,1,1,0,1,1,0,1,1,1,0,1,0,1,0,1,0),D=c(0,1,1,1,
+        0,1,1,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,1,0,0,1,0),E=c(1,0,0,0,0,1,1,
+        1,1,1,1,0,0,1,0,0,0,1,1,1,1,0,0,0,0,1,1),F=c(1,1,1,1,1,0,0,0,0,0,
+        0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0),G=c(1,1,1,1,1,1,1,1,1,1,1,1,1,
+        0,0,0,0,0,0,0,0,0,0,0,0,1,1))
+ana2 <- cna(dat2, con = .8, cov = .8, maxstep = c(3, 3, 10))
 # Run csf without elimination of partial structural redundancies.
 csf(ana2, inus.only = FALSE, verbose = TRUE)
 # Run csf with elimination of partial structural redundancies.
 csf(ana2, verbose = TRUE)
-# Only acyclic models.
+# Prior to version 3.6.0, the "equivalence" definition of partial structural
+# redandancy was used by default (see ?is.inus() for details). Now, the 
+# "implication" definition is used. To replicate old behavior
+# set inus.only to "equivalence".
+csf(ana2, verbose = TRUE, inus.only = "equivalence")
+# The two definitions only come apart in case of cyclic structures.
+# Build only acyclic models.
 csf(ana2, verbose = TRUE, acyclic.only = TRUE)
 
 # Feed the outputs of msc, asf, and csf into the condition function to further inspect the 
 # properties of minimally sufficient conditions and atomic and complex solution formulas.
-condition(msc(ana2)$condition, dat2)
-condition(asf(ana2)$condition, dat2)
-condition(csf(ana2)$condition, dat2)
+head(condition(msc(ana2)$condition, dat2), 3) # (showing output for first 3 only)
+head(condition(asf(ana2)$condition, dat2), 3)
+head(condition(csf(ana2)$condition, dat2), 3)
 
 # Reshape the output of the condition function in such a way as to make it identical to the
 # output returned by msc, asf, and csf.
-as.condTbl(condition(msc(ana2)$condition, dat2))
-as.condTbl(condition(asf(ana2)$condition, dat2))
-as.condTbl(condition(csf(ana2)$condition, dat2))
+head(condition(msc(ana2)$condition, dat2), 3)
+head(condition(asf(ana2)$condition, dat2), 3)
+head(condition(csf(ana2)$condition, dat2), 3)
 
-condTbl(csf(ana2)$condition, dat2) # Same as preceding line
+head(condTbl(csf(ana2)$condition, dat2), 3) # Same as preceding line
 }

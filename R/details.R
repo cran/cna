@@ -2,8 +2,8 @@
 # ==== details ====
 details <- function(cond, x, 
   what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-  cycle.type = c("factor", "value")){
-  .det(x, noblanks(cond), what = what, cycle.type = cycle.type)
+  cycle.type = c("factor", "value"), ...){
+  .det(x, noblanks(cond), what = what, cycle.type = cycle.type, ...)
 }
 
 
@@ -16,7 +16,7 @@ details <- function(cond, x,
 #  Converts x to a configTable and then calls the .det.cti
 .det.default <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
-    type, cycle.type = "factor", ...){
+    type, cycle.type = "factor", inus.def = "implication", ...){
   if (!inherits(x, "configTable")){
     if (missing(type)) type <- "auto"
     x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
@@ -33,7 +33,8 @@ details <- function(cond, x,
          call. = FALSE)
   }
   if (useCtiList(cti)) cti <- ctiList(cti, cond)
-  .det(cti, cond = cond, what = what, available = x$details, cycle.type = cycle.type)
+  .det(cti, cond = cond, what = what, available = x$details, cycle.type = cycle.type, 
+       inus.def = inus.def)
 }
 
 # ==== Method for class 'cti' ====
@@ -47,7 +48,7 @@ details <- function(cond, x,
 .det.cti <- function(x, cond, 
     what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"),
     available = what, cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE, 
-    ...){
+    inus.def = "implication", ...){
 
   what <- clarify_details(what, available = available)
   if (any(c("redundant", "inus", "exhaustiveness", "faithfulness") %in% what)){
@@ -63,14 +64,16 @@ details <- function(cond, x,
     if (in.csf){
       out$inus <- !red
       const <- rep(FALSE, length(cond))
-      const[out$inus] <- constCols(qcond_csf(cond[out$inus], x_full$scores, force.bool = TRUE))
+      const[out$inus] <- constCols(qcond_csf(cond[out$inus], x_full$scores, 
+                                             force.bool = TRUE))
       if (any(const)) out$inus[const] <- FALSE
       constFact <- constFact(cond[out$inus], x_full)
       if (any(constFact)) out$inus[out$inus][constFact] <- FALSE
-      partStrRed <- partiallyRedundant(extract_asf(cond[out$inus]), x_full)
+      partStrRed <- partiallyRedundant(extract_asf(cond[out$inus]), x_full, 
+                                       def = inus.def)
       if (any(partStrRed)) out$inus[out$inus][partStrRed] <- FALSE
     } else {
-      out$inus <- .inus.cti(x_full, cond, full = TRUE)
+      out$inus <- .inus.cti(x_full, cond, full = TRUE, def = inus.def)
     }
   }
   if ("cyclic" %in% what){

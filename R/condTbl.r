@@ -1,6 +1,6 @@
 
 # extract msf from cna-object
-msc <- function(x, details = x$details){
+msc <- function(x, details = x$details, cases = FALSE){
   stopifnot(inherits(x, "cna"))
   msc.list <- lapply(x$solution, "[[", "msc")
   all.msc <- do.call(rbind, msc.list)
@@ -14,6 +14,20 @@ msc <- function(x, details = x$details){
   all.msc$condition <- paste0(all.msc[["condition"]], "->", all.msc[["outcome"]])
   out <- data.frame(all.msc[c(basicCols, detailCols)],
                     row.names = NULL, stringsAsFactors = FALSE)
+  if (cases){
+    conds <- paste0(lhs(out$condition), "*", rhs(out$condition))
+    casesList <- attr(x$configTable, "cases")
+    tbl <- as.data.frame(condition(lhs(conds), x$configTable), 
+                         nobs = FALSE)
+    if ("fsInfo" %in% names(x)){
+      instantiated <- fs2cs(tbl, cutoff = x$fsInfo$cutoff, border = x$fsInfo$border)
+    } else {
+      instantiated <- tbl
+    }
+    out$cases <- lapply(instantiated, function(v) unlist(casesList[v == 1]))
+    class(out$cases) <- "casesList"
+    names(out$cases) <- NULL
+  }
   as.condTbl(out, condClass = "stdAtomic")
 }
 
@@ -130,7 +144,8 @@ emptyCondTbl <- function(condClass = "condString", details = FALSE, msc = FALSE)
 # Code taken from print.data.frame, except for leftAlignedColnames 
 print.condTbl <- function(x, n = 20, digits = 3, quote = FALSE, 
   row.names = TRUE, ...){
-  leftAlignedColnames <- c("outcome", "condition", "solution")
+  leftAlignedColnames <- intersect(c("outcome", "condition", "solution", "cases"), 
+                                   names(x))
   n.total <- nrow(x)
   n.print <- min(n, n.total)
   if (length(x) == 0L || n.print == 0L) {
@@ -140,18 +155,21 @@ print.condTbl <- function(x, n = 20, digits = 3, quote = FALSE,
     if (short) x <- x[seq_len(n.print), , drop = FALSE]
     m <- as.matrix(format.data.frame(x, digits = digits, quote = quote, 
       na.encode = FALSE))
-    if (!isTRUE(row.names)) 
-      dimnames(m)[[1L]] <- if (identical(row.names, FALSE)) 
+    if (!isTRUE(row.names)){
+      dimnames(m)[[1L]] <- if (identical(row.names, FALSE)){
         rep.int("", n.print)
-      else row.names
-
-    for (nm in leftAlignedColnames)
+      } else {
+        row.names
+      }
+    }
+    for (nm in leftAlignedColnames){
       m <- leftAlignColname(m, nm)
-    
+    }
     print(m, ..., quote = quote, right = TRUE)
-    if (short) 
+    if (short){
       cat(" ... (total no. of formulas: ", n.total, ")\n", 
         sep = "")
+    }
   }
   invisible(x)
 }
@@ -164,6 +182,26 @@ leftAlignColname <- function(m, nm){
   m
 }
 
+`[.casesList` <- function(x, ...){
+  structure(NextMethod(), class = class(x)) 
+}
+format.casesList <- function(x, maxlen = 40, align = TRUE, ...){
+  fmtd <- vapply(x, formatCases, maxlen = maxlen, FUN.VALUE = character(1))
+  if (align) fmtd <- format(fmtd, justify = "left")
+  fmtd
+}
+formatCases <- function(x, maxlen){
+  if (length(x) == 0) return("")
+  stringLengths <- cumsum(nchar(x)) + seq_along(x) - 1
+  if (stringLengths[length(stringLengths)] <= maxlen)
+    return(C_concat(x, sep = ","))
+  l <- length(x)
+  suffix <- paste0(",... (", l, " cases)")
+  i <- findInterval(maxlen - nchar(suffix), stringLengths)
+  if (i == 0) return(paste0("(", l, " cases)"))
+  paste0(C_concat(head(x, i), ","), suffix)
+}
+
 # condTbl
 condTbl <- function(...){
   cl <- match.call()
@@ -174,4 +212,16 @@ condTbl <- function(...){
 # condition method for class condTbl
 condition.condTbl <- function(x, ct = full.ct(x[["condition"]]), ...)
   condition.default(x[["condition"]], ct, ...)
+
+# as.data.frame method for class condTbl - removes all class attributes and 
+# transforms list of cases (if present) to (','-separated) enumerations in a 
+# character vector.
+as.data.frame.condTbl <- function(x, ...){
+  if (inherits(x$cases, "casesList")){
+    x$cases <- format(x$cases, maxlen = Inf, align = FALSE)
+  }
+  x[] <- lapply(x, unclass)
+  class(x) <- "data.frame"
+  x
+}
 

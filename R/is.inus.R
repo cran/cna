@@ -1,9 +1,11 @@
 
-is.inus <- function(cond, x = NULL, csf.info = FALSE){
+is.inus <- function(cond, x = NULL, csf.info = FALSE, 
+                    def = c("implication", "equivalence")){
   cond <- noblanks(cond)
+  def = match.arg(def)
   out <- rep(NA, length(cond))
   names(out) <- cond
-  result <- .inus(x, cond, csf.info = csf.info)
+  result <- .inus(x, cond, csf.info = csf.info, def = def)
   out[] <- result
   attr(out, "csf.info") <- attr(result, "csf.info")
   ok <- !is.na(out)
@@ -66,7 +68,7 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE){
                       qtypes = .qcondType(cond, colnames(x$scores), x$type,  
                                           stdComplex.multiple.only = FALSE), 
                       full = FALSE, const.ok = FALSE, csf.info = FALSE, 
-                      ...){
+                      def = "implication", ...){
   out <- rep(NA, length(cond))
 
   # condition type "constant"
@@ -91,7 +93,7 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE){
 
   # condition type "stdAtomic"
   if (any(selCond <- !is.na(qtypes) & qtypes == "stdComplex")){
-    out_csf <- .inusInternal_csf(cond[selCond], x, info = csf.info)
+    out_csf <- .inusInternal_csf(cond[selCond], x, info = csf.info, def = def)
     out[selCond] <- out_csf
     attr(out, "csf.info") <- attr(out_csf, "csf.info")
   }
@@ -188,14 +190,14 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE){
 #   * there is >=1 case & < nrow(full.ct) 
 #   * struct redundancies
 #   * partial str red
-.inusInternal_csf <- function(cond, cti, info = FALSE){
+.inusInternal_csf <- function(cond, cti, info = FALSE, def = "implication"){
   # asfs are inus
   asfs <- extract_asf(cond)
   asf_not_inus <- !m_all(lapply(asfs, .inusInternal_asf, cti))
   # structural redundancies?
   redund <- m_any(.redund.cti(cti, cond, simplify = FALSE)) 
   # partial structural redundancies?
-  redundInCsf <- partiallyRedundant(asfs, cti)
+  redundInCsf <- partiallyRedundant(asfs, cti, def = def)
   # constant Factor?
   constFact <- constFact(cond, cti)
   # constant?
@@ -229,13 +231,20 @@ constantCols <- function(x){
 }
 
 # Aux function: partial redundancy
-partiallyRedundant <- function(x, cti){
+partiallyRedundant <- function(x, cti, def = "implication"){
   out <- logical(length(x))
   l1 <- lengths(x) == 1
   out[l1] <- FALSE
   for (i in which(!l1)){
+    if (def == "implication"){
+      sel <- as.vector(qcond_csf(C_concat(paste0("(", x[[i]], ")"), "*"), 
+                                 cti$scores, force.bool = TRUE)) == 1L
+    }
     for (j in seq_along(x[[i]])){
-      sel <- as.vector(qcond_csf(C_concat(paste0("(", x[[i]][-j], ")"), "*"), cti$scores, force.bool = TRUE)) == 1L
+      if (def == "equivalence"){
+        sel <- as.vector(qcond_csf(C_concat(paste0("(", x[[i]][-j], ")"), "*"), 
+                                   cti$scores, force.bool = TRUE)) == 1L
+      }
       .pR <- !.inus.cti(subset(cti, sel), cond = lhs(x[[c(i, j)]]), full = TRUE, const.ok = TRUE)
       if (.pR){
         out[[i]] <- TRUE

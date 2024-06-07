@@ -132,8 +132,9 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
 }
 
 checkFactorNames <- function(nms, warn = TRUE){
-  nms <- gsub("[\\._]+", "", as.character(nms))
-  ok <- nms == make.names(nms, unique = TRUE) & !grepl("[[:punct:][:space:]]", nms)
+  nms <- as.character(nms)
+  ok <- nms == make.names(nms, unique = TRUE) & 
+    !grepl("[[:punct:][:space:]]", gsub("[\\._]+", "", as.character(nms)))
   if (any(!ok) && warn){
     warning("configTable has invalid names (", paste0(nms[!ok], collapse = ", "), 
             "). condition(), cna() and other functions may not work.",

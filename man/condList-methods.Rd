@@ -13,7 +13,7 @@ The output of the \code{\link[cna]{condition}} function is a nested list of clas
 \usage{
 \method{summary}{condList}(object, ...)
 
-\method{as.data.frame}{condList}(x, row.names = attr(x, "cases"), optional = TRUE, ...)
+\method{as.data.frame}{condList}(x, row.names = attr(x, "cases"), optional = TRUE, nobs = TRUE, ...)
 
 group.by.outcome(object, cases = TRUE)
 }
@@ -22,6 +22,8 @@ group.by.outcome(object, cases = TRUE)
   \item{object,x}{An object of class \dQuote{condList}, the output of the \code{\link[cna]{condition}} function.}
   \item{\dots}{Not used.}
   \item{row.names,optional}{As in \code{\link[base]{as.data.frame}}.}
+  \item{nobs}{Logical; if \code{TRUE}, the returned data frame has a 
+        column named \dQuote{n.obs} indicating how many cases instantiate a given configuration in the data.}
   \item{cases}{Logical; if \code{TRUE}, the returned data frame has a
         column named \dQuote{cases}.}
 }
@@ -45,6 +47,7 @@ as.data.frame(csfList)
 as.data.frame(csfList[1]) # Include the first condition only
 as.data.frame(csfList, row.names = NULL)
 as.data.frame(csfList, optional = FALSE)
+as.data.frame(csfList, nobs = FALSE)
 
 (asfList <- condition(asf(ana1)$condition, d.educate))
 as.data.frame(asfList)  

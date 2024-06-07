@@ -108,11 +108,13 @@ full.ct.ctiList <- function(x, ...){
 
 
 .inus.ctiList <- function(x, cond, qtypes, full = FALSE, 
-                          const.ok = FALSE, csf.info = FALSE, ...){
+                          const.ok = FALSE, csf.info = FALSE, 
+                          def = "implication", ...){
   out0 <- mapply(.inus.cti, 
     x = x$tbls, cond = split(x$conds, x$indices), 
     qtypes = split(qtypes, x$indices), 
-    MoreArgs = list(full = full, const.ok = const.ok, csf.info = csf.info),
+    MoreArgs = list(full = full, const.ok = const.ok, csf.info = csf.info, 
+                    def = def),
     SIMPLIFY = FALSE, USE.NAMES = FALSE)
   out <- do.call(c, out0)
   out <- out[getPos(x)]
