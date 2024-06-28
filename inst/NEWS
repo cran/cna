@@ -1,4 +1,7 @@
 
+Changes in version 3.6.1
+  * New argument excl in cna().
+
 Changes in version 3.6.0 
   * is.inus() has a new argument def accepting character strings "implication" (default) and "equivalence", corresponding to different definitions of the notion of a partial structural redundancy. Note that "equivalence" corresponds to the behavior of is.inus() in earlier versions of the package, i.e. the default behaviour has changed in version 3.6.0.
   * Correspondingly, argument inus.only in cna() also accepts "implication" and "equivalence". The default TRUE resolves to "implication". That is, the default output of cna() may be different than in earlier versions.

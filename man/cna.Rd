@@ -12,7 +12,7 @@ causal chain structures.
 }
 
 \usage{
-cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE, 
+cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE, exclude = character(0),
     con = 1, cov = 1, con.msc = con,
     notcols = NULL, rm.const.factors = FALSE, rm.dup.factors = FALSE,  
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf, 
@@ -38,7 +38,8 @@ cna(x, type, ordering = NULL, strict = FALSE, outcome = TRUE,
         ordering are \emph{not} potential causes of each other; if \code{FALSE} (default), factors on the same level \emph{are} potential causes of each other.}
   \item{outcome}{Character vector specifying one or several factor values that are to be considered as potential outcome(s). For crisp- and fuzzy-set data, factor values are expressed by upper and lower cases, for multi-value data, they are expressed by the "factor=value" notation.  
   Defaults to \code{outcome = TRUE}, which means that all factor values in \code{x} are considered as potential outcomes.}
-  \item{con}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every minimally sufficient condition (msc), atomic solution formula (asf), and complex solution formula (csf) must satisfy. (See also the argument \code{con.msc} below).}
+  \item{exclude}{Character vector...}
+\item{con}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every minimally sufficient condition (msc), atomic solution formula (asf), and complex solution formula (csf) must satisfy. (See also the argument \code{con.msc} below).}
   \item{cov}{Numeric scalar between 0 and 1 to set the minimum coverage threshold every asf and csf must satisfy.}
   \item{con.msc}{Numeric scalar between 0 and 1 to set the minimum consistency threshold every msc must satisfy. Overrides \code{con} for msc and, thereby, allows for imposing a consistency threshold on msc that differs from the threshold \code{con} imposes on asf and csf. Defaults to \code{con}.}
   \item{maxstep}{Vector of three integers; the first specifies the maximum number of conjuncts in each disjunct of an asf, the second specifies the maximum number of disjuncts in an asf, the third specifies the maximum \emph{complexity} of an asf. The complexity of an asf is 

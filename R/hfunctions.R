@@ -22,7 +22,7 @@ hstrsplit <- function(x, split, fixed = TRUE, relist = TRUE,
   if (length(split) > 1){
     if (length(fixed) > 1) fixed <- fixed[-1]
     s <- hstrsplit(s, split[-1], fixed = fixed, relist = relist, 
-                   split.attr = split.attr)
+                   split.attr = split.attr, lengths.attr = lengths.attr)
   }
   if (!relist){
     s <- unlist(s, recursive = TRUE, use.names = FALSE)

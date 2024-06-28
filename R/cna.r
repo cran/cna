@@ -1,6 +1,6 @@
 
 cna <- function (x, type,
-    ordering = NULL, strict = FALSE, outcome = TRUE, 
+    ordering = NULL, strict = FALSE, outcome = TRUE, exclude = character(0), 
     con = 1, cov = 1, con.msc = con, 
     notcols = NULL, rm.const.factors = FALSE, rm.dup.factors = FALSE,  
     maxstep = c(3, 4, 10), inus.only = only.minimal.msc && only.minimal.asf,
@@ -113,13 +113,17 @@ cna <- function (x, type,
     if (!all(notcols %in% names(ct))) stop("Wrong specification of 'notcols'")
   }
 
+  fVals <- factorValues(cti)
+  exclude <- resolveExclude(exclude, outcome, notcols, fVals)
+
   # main loop over outcomes  
   for (zname in outcome){
-  
+
     # Identify minimal sufficient conditions
     # --------------------------------------
     # Initialize minSuff, list of minimal sufficient combinations
     poteff <- potential.effects(cti, zname, ordering, strict)
+
     if (length(poteff) == 0L) next
     
     y <- cti$scores[, zname, drop = TRUE]
@@ -127,9 +131,17 @@ cna <- function (x, type,
       y[] <- 1-y
       names(sol) <- sub(paste0("^", zname, "$"), tolower(zname), names(sol))
       zname <- tolower(zname)
-    }  
+    }
+    
+    if (zname %in% names(exclude)){
+      excl_z <- match(exclude[[zname]], colnames(cti$scores), 0L)
+      excl_z <- sort(excl_z[excl_z>0])
+    } else {
+      excl_z <- integer(0)
+    }
     minSuff <- findMinSuff(cti, y, poteff, freqs, con.msc, 
-                           maxstep, only.minimal.msc)
+                           maxstep, only.minimal.msc, exclValues = excl_z)
+
     if (all(m_is.null(minSuff))) next
     
     msc <- lapply(minSuff, make.msc, outcome = zname, cti = cti, 
@@ -187,7 +199,8 @@ cna <- function (x, type,
 }
 
 
-findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.msc){
+findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.msc, 
+                        exclValues = integer(0)){
   if (cti$type == "mv") poteff <- unique(sub("(.+)=.+", "\\1", poteff))
   nsteps <- min(length(poteff), maxstep[1L])
   minSuff <- vector("list", nsteps)
@@ -195,7 +208,9 @@ findMinSuff <- function(cti, y, poteff, freqs, con.msc, maxstep, only.minimal.ms
   
   for (.step in seq_along(minSuff)){
     # Select .step-fold conditions occurring in the data
-    allkfoldConds <- findAllSubsets(cti$valueId, .step, match(poteff, colnames(cti$valueId)))
+    allkfoldConds <- findAllSubsets(cti$valueId, .step, match(poteff, colnames(cti$valueId)), 
+                                    exclValues = exclValues)
+    if (NROW(allkfoldConds) == 0) next
     if (!only.minimal.msc){
       minimList[[.step]] <- rep(TRUE, nrow(allkfoldConds))
     }

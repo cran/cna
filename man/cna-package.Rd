@@ -34,7 +34,7 @@ There exist three additional R packages for data analysis with CNA: \CRANpkg{cau
 Package: \tab cna\cr
 Type:    \tab Package\cr
 Version: \tab 3.6.0\cr
-Date:    \tab 2024-06-07\cr
+Date:    \tab 2024-06-25\cr
 License: \tab GPL (>= 2)\cr
     }
 }

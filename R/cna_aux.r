@@ -216,4 +216,109 @@ add12each <- function(x)
   SIMPLIFY = FALSE)
 
 
+# functions related to 'exclude'
+resolveExclude <- function(excl, outcomes, notcols, fVals){
+  if (!is.character(excl) && !is.null(excl)){
+    stop("'exclude' must be NULL or a character vector.")
+  }
+  if (!length(excl)) return(excl)
+  excl <- noblanks(excl)
+  # output before further adjustments
+  out <- structure(strsplit(lhs(excl), ",", fixed = TRUE), 
+                   names = rhs(excl))
+  # check input
+  nms <- sub("*", "", names(out), fixed = TRUE)
+  unlisted <- unlist(out, use.names = FALSE)
+  values <- sub("*", "", unlisted, fixed = TRUE)
+  validValues <- c(names(fVals), unlist(fVals, use.names = FALSE))
+  ok_nms <- nms %in% validValues
+  ok_vals <- values %in% validValues
+  if (!all(ok_nms, ok_vals)){
+    ok_up <- toupper(c(nms, values)) %in% validValues
+    if (!all(ok_up)) 
+      stop("'exclude' is invalid", 
+           " because it specifies factor values not contained in the data", 
+           " or is syntatically incorrect.")
+    # record values that need to be adjusted in exclude
+    # (strings with mixed lower/uppercase
+  }
+  # adjust case according to adjValues
+  if (!all(ok_nms)){
+    adjNms <- nms[!ok_nms]
+    names(out) <- adjust2upper(adjNms, names(out))
+  }
+  adjValues <- values[!ok_vals]
+  adjElement <- values %in% adjValues
+  if (any(adjElement)){
+    unlisted[adjElement] <- adjust2upper(adjValues, unlisted[adjElement])
+    out[] <- C_relist_Char(unlisted, lengths(out))
+  }
+  # adjust outcomes acc. to notcols (only binary data)
+  negated_outcome <- outcomes %in% toupper(notcols)
+  outcomes[negated_outcome] <- tolower(outcomes[negated_outcome])
+  mv_data <- any(grepl("=", unlist(fVals, use.names = FALSE), fixed = TRUE))
+  if (mv_data){
+    # factor names in mv case -> add star
+    # - rhs
+    factNm <- toupper(names(out)) %in% sub("=[0-9+]$", "", outcomes)
+    names(out)[factNm] <- paste0(toupper(names(out)[factNm]), "*")
+    # - lhs
+    factNm <- toupper(unlist(out)) %in% sub("=[0-9+]$", "", names(fVals))
+    unlisted <- unlist(out, use.names = FALSE)
+    unlisted[factNm] <- paste0(toupper(unlisted[factNm]), "*")
+    out[] <- C_relist_Char(unlisted, lengths(out))
+  }
+  starred_outcome <- grepl("*", names(out), fixed = TRUE)
+  if (any(starred_outcome)){
+    st_outc <- toupper(sub("*", "", names(out)[starred_outcome], fixed = TRUE))
+    st_outc <- intersect(st_outc, names(fVals))
+    stVals <- fVals[st_outc]
+    out <- c(
+      structure(rep(out[starred_outcome], lengths(stVals)), 
+                names = unlist(fVals[st_outc], use.names = FALSE)),
+      out[!starred_outcome])
+  }
+  if (anyDuplicated(names(out))>0){
+    out <- split.default(unlist(out, use.names = FALSE), 
+                         rep(names(out), lengths(out)))
+  }
+  out <- out[intersect(outcomes, names(out))]
+  # resolve "star"-notation on lhs
+  if (any(has_star <- grepl("*", unlist(out, use.names = FALSE), fixed = TRUE))){
+    has_star <- structure(C_relist_Log(has_star, lengths(out)), 
+                          names = names(out))
+    for (zname in names(out)[m_any(has_star)]){
+      has_star1 <- has_star[[zname]]
+      factnm <- toupper(sub("*", "", out[[zname]][has_star1], fixed = TRUE))
+      if (any(factnm %in% names(fVals))){
+        out[[zname]] <- unique(c(unlist(fVals[factnm], use.names = FALSE), 
+                                 out[[zname]][!has_star1]))
+      }
+    }
+  }
+  out
+}
 
+factorValues <- function(cti){
+  structure(
+    C_relist_Char(colnames(cti$scores), cti$nVal), 
+    names = names(cti$nVal))
+}
+# factorValues(ctInfo(configTable(d.educate)))
+# factorValues(ctInfo(configTable(d.pban))) -> mv case not yet properly resolved!!
+
+# aux fun adjust2upper:
+#   patterns  value strings to be replaced by uppercase chars
+#   x         vector to be adjusted
+# Returns a adjusted vefsion of x  
+adjust2upper <- function(patterns, x){
+  x_nostar <- sub("*", "", x, fixed = TRUE)
+  doAdj <- rowAnys(
+    matrix(vapply(patterns, 
+                  function(pa) match(x_nostar, table = pa, nomatch = 0) > 0, 
+                  FUN.VALUE = logical(length(x_nostar))), 
+           nrow = length(x_nostar)))
+  x[doAdj] <- toupper(x[doAdj])
+  x
+}
+# adjust2upper(c("Abc", "bCd"), c("Abc*", "Abcd", "xyz"))

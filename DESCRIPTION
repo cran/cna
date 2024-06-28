@@ -1,8 +1,8 @@
 Package: cna
 Type: Package
 Title: Causal Modeling with Coincidence Analysis
-Version: 3.6.0
-Date: 2024-06-07
+Version: 3.6.1
+Date: 2024-06-25
 Authors@R: c(person("Mathias", "Ambuehl", role = c("aut", "cre", "cph"), 
                     email = "mathias.ambuehl@consultag.ch"),
              person("Michael", "Baumgartner", role = c("aut", "cph"),
@@ -26,6 +26,6 @@ Author: Mathias Ambuehl [aut, cre, cph],
   Ruedi Epple [ctb],
   Veli-Pekka Parkkinen [ctb],
   Alrik Thiem [ctb]
-Packaged: 2024-06-07 13:25:17 UTC; MAM
+Packaged: 2024-06-25 08:08:54 UTC; MAM
 Repository: CRAN
-Date/Publication: 2024-06-07 15:40:02 UTC
+Date/Publication: 2024-06-28 08:30:14 UTC

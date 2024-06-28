@@ -12,22 +12,29 @@ hasSubsetInM <- function(y, x){
 }
 
 # function findAllSubsets
-#   x     integer matrix
-#   k     integer vector, k<=length(cols)
-#   cols  column subsetting in x, all 1<=k<=ncol(x)
+#   x           integer matrix
+#   k           integer vector, k<=length(cols)
+#   cols        column subsetting in x, all 1<=k<=ncol(x)
+#   exclValues  excluded values: rows containing one of these will be eliminated
 # returns a matrix with k columns containing all subsets of
 # k elements appearing in a row of x[, cols]
-findAllSubsets <- function(x, k, cols = seq_len(ncol(x))){
+findAllSubsets <- function(x, k, cols = seq_len(ncol(x)), exclValues = integer(0)){
   if (k == 1){
-    return(matrix(sort(unique.default(x[, cols])), ncol = 1))
+    out <- matrix(sort(unique.default(x[, cols])), ncol = 1)
+  } else {
+    out <- combn(
+      cols, k,
+      FUN = function(a) C_uniqueCombs(x, a),
+      simplify = FALSE)
+    out <- do.call(rbind, out)
   }
-  out <- combn(
-    cols, k,
-    FUN = function(a) C_uniqueCombs(x, a),
-    simplify = FALSE)
-  do.call(rbind, out)
+  if (length(exclValues)){
+    match_excl <- array(FALSE, dim = dim(out))
+    match_excl[] <- match(out, table = exclValues, nomatch = 0L) > 0L
+    out <- out[!rowAnys(match_excl), , drop = FALSE]
+  }
+  out
 }
-
 
 # conj_conCov: Fast calculation of coverages of conjunctions of conjunctions
 #   x      A "scores" matrix with numeric values between 0 and 1
