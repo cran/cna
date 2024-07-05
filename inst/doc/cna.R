@@ -92,7 +92,13 @@ configTable(d.women)
 
 
 ###################################################
-### code chunk number 13: odering1
+### code chunk number 13: outcome1 (eval = FALSE)
+###################################################
+## cna(d.volatile, outcome = "VO2")
+
+
+###################################################
+### code chunk number 14: odering1
 ###################################################
 dat.aut.1 <- d.autonomy[15:30, c("AU","EM","SP","CO")]
 ana.aut.1 <- cna(dat.aut.1, ordering = "EM, SP, CO < AU", strict = TRUE,
@@ -102,7 +108,7 @@ csf(ana.aut.1)[printCols]
 
 
 ###################################################
-### code chunk number 14: odering2
+### code chunk number 15: odering2
 ###################################################
 ana.aut.2 <- cna(dat.aut.1, ordering = "EM, SP, CO < AU", strict = FALSE, 
   con = .9, cov = .9)
@@ -110,7 +116,7 @@ csf(ana.aut.2)[printCols]
 
 
 ###################################################
-### code chunk number 15: outcome2 (eval = FALSE)
+### code chunk number 16: outcome2 (eval = FALSE)
 ###################################################
 ## cna(d.pban, ordering = "T, PB", con = .75, cov = .75)
 ## cna(d.pban, outcome = c("T=2", "PB=1"), ordering = "T, PB",
@@ -118,7 +124,21 @@ csf(ana.aut.2)[printCols]
 
 
 ###################################################
-### code chunk number 16: maxstep0 (eval = FALSE)
+### code chunk number 17: exclude1 (eval = FALSE)
+###################################################
+## cna(d.pban, outcome = c("T=2", "PB=1"), ordering = "T, PB", 
+##   con = .75, cov = .75, exclude = c("C=2 -> T=2", "T=1,V=0 -> PB=1"))
+
+
+###################################################
+### code chunk number 18: exclude2 (eval = FALSE)
+###################################################
+## cna(d.jobsecurity, con = .85, cov = .85, exclude = c("s,c -> JSR",
+##   "jsr, L -> R"))
+
+
+###################################################
+### code chunk number 19: maxstep0 (eval = FALSE)
 ###################################################
 ## cna(d.highdim,  outcome = c("V13", "V11"), con = .8, cov = .8)
 ## cna(d.highdim,  outcome = c("V13", "V11"), con = .8, cov = .8,
@@ -126,7 +146,7 @@ csf(ana.aut.2)[printCols]
 
 
 ###################################################
-### code chunk number 17: maxstep1 (eval = FALSE)
+### code chunk number 20: maxstep1 (eval = FALSE)
 ###################################################
 ## cna(d.volatile, ordering = "VO2", maxstep = c(3,4,10))
 ## vol1 <- cna(d.volatile, ordering = "VO2", maxstep = c(4,4,10))
@@ -134,13 +154,13 @@ csf(ana.aut.2)[printCols]
 
 
 ###################################################
-### code chunk number 18: maxstep2 (eval = FALSE)
+### code chunk number 21: maxstep2 (eval = FALSE)
 ###################################################
 ## cna(d.volatile, ordering = "VO2", maxstep = c(8,10,40), suff.only = TRUE)
 
 
 ###################################################
-### code chunk number 19: maxstep3
+### code chunk number 22: maxstep3
 ###################################################
 ana.jsc.1 <- cna(d.jobsecurity, ordering = "JSR", con = .9, cov = .85)
 csf(ana.jsc.1)[printCols]
@@ -150,7 +170,7 @@ csf(ana.jsc.2)[printCols]
 
 
 ###################################################
-### code chunk number 20: notcols
+### code chunk number 23: notcols
 ###################################################
 ana.aut.3 <- cna(dat.aut.1, outcome = c("au", "em"), con = .88, cov = .82) 
 csf(ana.aut.3)[printCols]
@@ -160,7 +180,7 @@ csf(ana.aut.4)[printCols]
 
 
 ###################################################
-### code chunk number 21: tab2c (eval = FALSE)
+### code chunk number 24: tab2c (eval = FALSE)
 ###################################################
 ## dat5 <- allCombs(c(2, 2, 2, 2, 2)) -1
 ## dat6 <- selectCases("(A + B <-> C)*(A*B + D <-> E)", dat5)
@@ -170,14 +190,14 @@ csf(ana.aut.4)[printCols]
 
 
 ###################################################
-### code chunk number 22: details (eval = FALSE)
+### code chunk number 25: details (eval = FALSE)
 ###################################################
 ## cna(d.educate, details = TRUE)
 ## cna(d.educate, details = c("co", "cy"))
 
 
 ###################################################
-### code chunk number 23: what (eval = FALSE)
+### code chunk number 26: what (eval = FALSE)
 ###################################################
 ## cna(d.educate, what = "tm")
 ## cna(d.educate, what = "mac")
@@ -185,7 +205,7 @@ csf(ana.aut.4)[printCols]
 
 
 ###################################################
-### code chunk number 24: vol1 (eval = FALSE)
+### code chunk number 27: vol1 (eval = FALSE)
 ###################################################
 ## vol2 <- cna(d.volatile, ordering = "VO2", con = .9, cov = .9)
 ## msc(vol2)
@@ -194,20 +214,20 @@ csf(ana.aut.4)[printCols]
 
 
 ###################################################
-### code chunk number 25: vol1 (eval = FALSE)
+### code chunk number 28: vol1 (eval = FALSE)
 ###################################################
 ## csf(vol2, n.init = 2000)
 ## csf(vol2, n.init = 100)
 
 
 ###################################################
-### code chunk number 26: vol1 (eval = FALSE)
+### code chunk number 29: vol1 (eval = FALSE)
 ###################################################
 ## csf(vol2, verbose = TRUE)
 
 
 ###################################################
-### code chunk number 27: inus1
+### code chunk number 30: inus1
 ###################################################
 dat.inu.1 <- allCombs(c(2, 2, 2)) -1
 dat.inu.2 <- some(dat.inu.1, 40, replace = TRUE)
@@ -216,7 +236,7 @@ asf(cna(dat.inu.3, con = 1, cov = 1, inus.only = FALSE))
 
 
 ###################################################
-### code chunk number 28: inus2
+### code chunk number 31: inus2
 ###################################################
 set.seed(26)
 dat.inu.4 <- some(dat.inu.1, 40, replace = TRUE)
@@ -225,45 +245,45 @@ asf(cna(dat.inu.5, con = .8, cov = .8, inus.only = FALSE))
 
 
 ###################################################
-### code chunk number 29: inus4
+### code chunk number 32: inus4
 ###################################################
 asf(cna(dat.inu.5, con = .8, cov = .8, inus.only = TRUE))
 
 
 ###################################################
-### code chunk number 30: d.edu1
+### code chunk number 33: d.edu1
 ###################################################
 printCols <- c("condition", "consistency", "coverage", "exhaustiveness")
 csf(cna(d.educate, details = "exhaust"))[printCols]
 
 
 ###################################################
-### code chunk number 31: d.edu2
+### code chunk number 34: d.edu2
 ###################################################
 csf(cna(d.educate[-1,], details = "exhaust"))[printCols]
 
 
 ###################################################
-### code chunk number 32: d.edu3
+### code chunk number 35: d.edu3
 ###################################################
 printCols <- c("condition", "consistency", "coverage", "faithfulness")
 csf(cna(d.educate, details = "faithful"))[printCols]
 
 
 ###################################################
-### code chunk number 33: d.edu4
+### code chunk number 36: d.edu4
 ###################################################
 csf(cna(rbind(d.educate,c(1,1,0,1,0)), con = .8, details = "f"))[printCols]
 
 
 ###################################################
-### code chunk number 34: rownames
+### code chunk number 37: rownames
 ###################################################
 rownames(d.educate) <- 1:8
 
 
 ###################################################
-### code chunk number 35: coherence
+### code chunk number 38: coherence
 ###################################################
 d.edu.exp1 <- rbind(d.educate, c(1,0,1,0,0))
 printCols <- c("condition", "consistency", "coverage", "coherence")
@@ -271,33 +291,33 @@ csf(cna(d.edu.exp1, con = .8, details = "cohere"))[printCols]
 
 
 ###################################################
-### code chunk number 36: redundant1
+### code chunk number 39: redundant1
 ###################################################
 (dat.redun <- ct2df(selectCases("(A*B + C <-> D)*(a + c <-> E)")))
 
 
 ###################################################
-### code chunk number 37: redundant2
+### code chunk number 40: redundant2
 ###################################################
 printCols <- c("condition", "consistency", "coverage", "inus", "redundant")
 csf(cna(dat.redun, details = "r"))[printCols]
 
 
 ###################################################
-### code chunk number 38: redundant3
+### code chunk number 41: redundant3
 ###################################################
 csf(cna(dat.redun, details = "r"), inus.only = FALSE, 
     minimalizeCsf = FALSE)[printCols]
 
 
 ###################################################
-### code chunk number 39: redundant4a
+### code chunk number 42: redundant4a
 ###################################################
 options(width=80)
 
 
 ###################################################
-### code chunk number 40: redundant4
+### code chunk number 43: redundant4
 ###################################################
 printCols <- c("condition", "consistency", "coverage", "inus")
 csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94, 
@@ -305,27 +325,27 @@ csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94,
 
 
 ###################################################
-### code chunk number 41: redundant5
+### code chunk number 44: redundant5
 ###################################################
 condTbl("EM -> SP", fsct(d.autonomy))
 
 
 ###################################################
-### code chunk number 42: redundant6
+### code chunk number 45: redundant6
 ###################################################
 csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94, 
    maxstep = c(2, 2, 8), inus.only = TRUE))[printCols]
 
 
 ###################################################
-### code chunk number 43: cycle1
+### code chunk number 46: cycle1
 ###################################################
 csf(cna(d.irrigate, con = .77, cov = .77, acyclic.only = F)) |> nrow()
 csf(cna(d.irrigate, con = .77, cov = .77, acyclic.only = T)) |> nrow()
 
 
 ###################################################
-### code chunk number 44: dat.redun (eval = FALSE)
+### code chunk number 47: dat.redun (eval = FALSE)
 ###################################################
 ## library(causalHyperGraph)
 ## ana.dat.redun <- cna(dat.redun)
@@ -333,13 +353,13 @@ csf(cna(d.irrigate, con = .77, cov = .77, acyclic.only = T)) |> nrow()
 
 
 ###################################################
-### code chunk number 45: dat.redun (eval = FALSE)
+### code chunk number 48: dat.redun (eval = FALSE)
 ###################################################
 ## causalHyperGraph("(A=1*B=2 + C=0*D=2 <-> E=1)*(E=1 + F=0 <-> G=1)")
 
 
 ###################################################
-### code chunk number 46: ambigu1
+### code chunk number 49: ambigu1
 ###################################################
 dat7 <- selectCases("a*B + A*b + B*C <-> D")
 printCols <- c("condition", "consistency", "coverage", "inus",
@@ -348,13 +368,13 @@ csf(cna(dat7, details = c("exhaust", "inus")))[printCols]
 
 
 ###################################################
-### code chunk number 47: ambigu2
+### code chunk number 50: ambigu2
 ###################################################
 csf(cna(d.pban, cov = .95, maxstep = c(3, 5, 10)))["condition"]
 
 
 ###################################################
-### code chunk number 48: ambigu3
+### code chunk number 51: ambigu3
 ###################################################
 ana.ban.1 <- cna(d.pban, cov = .95, maxstep = c(6, 6, 10), details = T)
 csf.ban.1 <- csf(ana.ban.1)
@@ -362,20 +382,20 @@ length(csf.ban.1$condition)
 
 
 ###################################################
-### code chunk number 49: ambigu4
+### code chunk number 52: ambigu4
 ###################################################
 csf.ban.1.ex <- subset(csf.ban.1, exhaustiveness >= .85)
 length(csf.ban.1.ex$condition)
 
 
 ###################################################
-### code chunk number 50: ambigu5
+### code chunk number 53: ambigu5
 ###################################################
 subset(csf.ban.1.ex, complexity == min(csf.ban.1.ex$complexity))
 
 
 ###################################################
-### code chunk number 51: back1
+### code chunk number 54: back1
 ###################################################
 dat.aut.2 <- d.autonomy[15:30, c("AU","EM","SP","CO","RE","DE")]
 ana.aut.3 <- cna(dat.aut.2, outcome = c("EM","AU"), con = .91, cov = .91)
@@ -383,13 +403,13 @@ condition(csf(ana.aut.3)$condition, dat.aut.2)
 
 
 ###################################################
-### code chunk number 52: back2
+### code chunk number 55: back2
 ###################################################
 group.by.outcome(condition(asf(ana.aut.3)$condition, dat.aut.2))$AU
 
 
 ###################################################
-### code chunk number 53: details (eval = FALSE)
+### code chunk number 56: details (eval = FALSE)
 ###################################################
 ## # Draw a ground truth.
 ## fullData <- allCombs(c(4,4,4,4,4))

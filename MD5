@@ -1,4 +1,4 @@
-25824a3d8127226bee8d9377583dfd83 *DESCRIPTION
+eff26a2c3f6f2d01344ffbfdd8f0a1f7 *DESCRIPTION
 f62572b276d3a12a9714c9d45186203b *NAMESPACE
 e2dd1c231238ece21a0859d14b8bb693 *R/RcppExports.R
 f4a3e9d06c4ff6d032789dda48695363 *R/allCombs_makefuzzy.r
@@ -55,15 +55,15 @@ dfa181b6390a1df889aae8a33f9d301c *data/d.pban.tab.gz
 8c018ee8a696fd2ce0b20b1576bf07ed *data/d.performance.tab.gz
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
-4db8d5f684b76195eabe4752951eaf36 *inst/NEWS
-7f7b8ab52a7741b9533aa2d4a6241f61 *inst/doc/cna.R
-b9c17dd791e197e74fda7f08474b7880 *inst/doc/cna.Rnw
-74602d5937d63beb84181a1ade8b92de *inst/doc/cna.pdf
+9ab3ad3ac34f35ed9b2d54ae2136cdf8 *inst/NEWS
+159d1d48830ba7e678a0aa8de1032a31 *inst/doc/cna.R
+b7806f008b46906ab4362d3b10a8f7f3 *inst/doc/cna.Rnw
+e8d3c83457884d0728d8ce9c4f044130 *inst/doc/cna.pdf
 7ab6836b06a4c30f53106af54a6be515 *man/allCombs.Rd
 4bbe9f9c6b702e6b149f5c618c6441a3 *man/cna-deprecated.Rd
 f5911e9cbcecca15247ed721333dc9df *man/cna-internals.Rd
-8b93864b034528e37574729bea1df9ba *man/cna-package.Rd
-3fd82ce6e1dc365a2474fb30939ab59b *man/cna.Rd
+98db721dfc40466dfd470f8adaa0b8f9 *man/cna-package.Rd
+764fecc06ccd5260bf0a8e9c59e76aac *man/cna.Rd
 e68ca1c0515517d20ffd6ec98cfe2bc4 *man/coherence.Rd
 adc8bc912619bd9587511547d7ca3824 *man/condList-methods.Rd
 6852d02014f5c3ae6f03d57fc3ba5d15 *man/condTbl.Rd
@@ -111,7 +111,7 @@ d3f573231043368b9a50cc4d4e1ac111 *src/headers.h
 8ee118edd348ea3f5481ca2a1e3f943d *src/typedefs.h
 273359272d284700ce806d5209badb5f *src/uniqueCombs.cpp
 6a0b18a0f24db8cbc8b1de5fcb7fa72d *src/utils.cpp
-b9c17dd791e197e74fda7f08474b7880 *vignettes/cna.Rnw
+b7806f008b46906ab4362d3b10a8f7f3 *vignettes/cna.Rnw
 6493a6390a369e1a7ba0f530783a0d2b *vignettes/fig1.pdf
 4e2c8195bea6cbfc075bf9a5d4e9923c *vignettes/plot1.pdf
 e0d6d92ac0292f96d35b16c0916d58da *vignettes/plot2.pdf
