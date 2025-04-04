@@ -8,26 +8,6 @@ using namespace Rcpp;
 
 //=============================================================================
 
-// Calculate con and cov of disjunctions
-//
-//   x   membership scores of antecendens
-//   y   membership scores of consequens
-// [[Rcpp::export]]
-NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f){
-  int n=x.size();
-  NumericVector Sums(3), conCov(2);
-  for (int i=0; i<n; i++){
-    Sums(0)+=x[i]*f(i);
-    Sums(1)+=y[i]*f(i);
-    Sums(2)+=std::min(x[i], y[i])*f(i);
-  };
-  conCov(0) = Sums(2)/Sums(0);
-  conCov(1) = Sums(2)/Sums(1);
-  return(conCov);
-}
-
-//=============================================================================
-
 // C_subsetMin: minimum of a subset of the elements of an integer vector
 //   x    vector
 //   sub  subset of elements to consider
@@ -178,19 +158,26 @@ mytest(sample(c(1L, 2L, 3L, 3L, 4L, 5L, 5L, 5L, 6L, 7L)))
 
 //==============================================================================
 
+long int capAtLimit(double x){
+  long int maxVal = std::numeric_limits<long int>::max();
+  if (x > static_cast<double>(maxVal)) return maxVal;
+  return static_cast<long int>(x);
+}
 
 // Find asf's of a given structure (=lengths of the conjunctions in the disjunctions)
 // [[Rcpp::export]]
 IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, 
                          const NumericVector y, const IntegerVector f,
                          const double con, const double cov, 
-                         const long int maxSol){
+                         const double maxSol, 
+                         const IntegerVector def = Rcpp::IntegerVector::create(1, 2)){
   int n_conj = conjlen.size();
 
   // st = indicator, =true if conj hast same length as precedent conj
   LogicalVector st(n_conj - 1);
   st = (Rcpp::diff(conjlen) == 0);
-  
+  long int maxSolInt = capAtLimit(maxSol);
+
   // nn = number of conjunctions
   IntegerVector nn(n_conj);
   for (int i=0; i<n_conj; i++){
@@ -200,8 +187,11 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
   // intialize ii, count, out; define lim
   IntegerVector ii=C_init_ii(nn, st);
   long int count=0L;
-  IntegerMatrix out(maxSol, n_conj);
+  IntegerMatrix out(maxSolInt, n_conj);
   IntegerVector lim=C_set_lim(nn, st);
+  
+  // Functions for computing con/cov variations
+  ccFun conFn = pickCCFn(def(0)), covFn = pickCCFn(def(1));
   
   // Main loop over combinations
   do {
@@ -214,7 +204,7 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
       //Rcpp::Rcout << /*"min: " << minim << ", */ "max: " << ms << std::endl;
     }
     // calculate con und cov
-    NumericVector coco=C_conCov(ms, y, f);
+    NumericVector coco=C_conCov(ms, y, f, conFn, covFn);
     //Rcpp::Rcout << "coco: " << coco << std::endl;
     
     // Conditionally insert in next row of the matrix
@@ -228,8 +218,8 @@ IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x,
     // increment:
     C_increment(ii, nn, st, lim);
     
-    if (count>=maxSol){
-      Rcpp::Rcout << "Not all candidate solutions are recorded (maxSol="<< maxSol << ")" 
+    if (count>=maxSolInt){
+      Rcpp::Rcout << "Not all candidate solutions are recorded (maxSol="<< maxSolInt << ")" 
                   << std::endl;
       break;
     }

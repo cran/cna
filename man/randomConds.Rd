@@ -18,14 +18,14 @@ randomCsf(x, outcome = NULL, positive = TRUE,
 }
 
 \arguments{
-  \item{x}{Data frame or \code{configTable}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns, in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
+  \item{x}{Data frame or \code{\link{configTable}}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns, in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
   \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor value(s) in the solution formula. Must be factor values, e.g. \code{"A"} or \code{"b"} in case of binary data or \code{"A=1"} in case of multi-value data. With multi-value data, factor \emph{names} are also allowed; a value of that factor will then be chosen at random. \code{outcome} overrides \code{positive} and \code{n.asf}.
 }
   \item{positive}{Logical; if TRUE (default), the outcomes all have positive values. If \code{FALSE}, a value (positive or negative in case of binary data) will be picked at random. \code{positive} has no effect if the \code{outcome} argument is not \code{NULL} or if \code{x} contains multi-value data.}
   \item{maxVarNum}{Maximal number of factors in \code{x} that can appear in the generated asf or csf. The default depends on the type of the data contained in \code{x}.
 }
   \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf). Alternatively, \code{compl} can be a list of two integer vectors; then the first vector is used for the initial complexity of the msc and the second for that of the asf.}
-  \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see details below).}
+  \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see Details below).}
   \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by\cr \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \cr \code{ncol(x)-2}.}
 }
 
@@ -33,7 +33,7 @@ randomCsf(x, outcome = NULL, positive = TRUE,
 \details{
 \code{randomAsf} and \code{randomCsf} can be used to randomly draw data generating structures (ground truths) in inverse search trials benchmarking the output of \code{\link{cna}}. In the regularity theoretic context in which the CNA method is embedded, a causal structure is a redundancy-free Boolean dependency structure. Hence, \code{randomAsf} and \code{randomCsf} both produce redundancy-free Boolean dependency structures. \code{randomAsf} generates structures with one outcome, i.e. atomic solution formulas (asf), \code{randomCsf} generates structures with multiple outcomes, i.e. complex solution formulas (csf), that are free of cyclic substructures. In a nutshell, \code{randomAsf} proceeds by, first, randomly drawing disjunctive normal forms (DNFs) and by, second, eliminating redundancies from these DNFs. \code{randomCsf} essentially consists in repeated executions of \code{randomAsf}.
 
-The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{configTable} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. %If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
+The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{\link{configTable}} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. %If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
 
 The optional argument \code{outcome} determines which values of which factors in \code{x} shall be treated as outcomes. If \code{outcome = NULL} (default), \code{randomAsf} and \code{randomCsf} randomly draw factor values from \code{x} to be treated as outcome(s). If \code{positive = TRUE} (default), only positive outcome values are chosen in case of crisp-set data; if \code{positive = FALSE}, outcome values are drawn from the set \{1,0\} at random. \code{positive} only has an effect if \code{x} contains crisp-set data and \code{outcome = NULL}.
 
@@ -46,7 +46,7 @@ The maximal number of factors included in the generated asf and csf can be contr
 The argument \code{compl} controls the complexity of the generated asf and csf. More specifically, the \emph{initial} complexity of asf and csf (i.e. the number of factors included in msc and the number of msc included in asf prior to redundancy elimination) is drawn from the vector or list of vectors \code{compl}. As this complexity might be reduced in the subsequent process of redundancy elimination, issued asf or csf will often have lower complexity than specified in \code{compl}. The default value of \code{compl} is determined by the number of columns in \code{x}. %Assigning unduly high values to \code{compl} results in an error.
 
 
-\code{randomAsf} has the additional argument \code{how} with the two possible values \code{"inus"} and \code{"minimal"}. \code{how = "inus"} determines that the generated asf is redundancy-free relative to all logically possible configurations of the factors in \code{x}, i.e. relative to \code{full.ct(x)}, whereas in case of \code{how = "minimal"} redundancy-freeness is imposed only relative to all configurations actually contained in \code{x}, i.e. relative to \code{x} itself. Typically \code{"inus"} should be used; the value \code{"minimal"} is relevant mainly in repeated \code{randomAsf} calls from within \code{randomCsf}. Moreover, setting \code{how = "minimal"} will return an error if \code{x} is a \code{\link{configTable}} of type \code{"fs"}.
+\code{randomAsf} has the additional argument \code{how} with the two possible values \code{"inus"} and \code{"minimal"}. \code{how = "inus"} determines that the generated asf is redundancy-free relative to all logically possible configurations of the factors in \code{x}, i.e. relative to \code{full.ct(x)}, whereas in case of \code{how = "minimal"} redundancy-freeness is imposed only relative to all configurations actually contained in \code{x}, i.e. relative to \code{x} itself. Typically \code{"inus"} should be used; the value \code{"minimal"} is relevant mainly in repeated \code{randomAsf} calls from within \code{randomCsf}. Moreover, setting \code{how = "minimal"} will return an error if \code{x} is a \code{configTable} of type \code{"fs"}.
 
 The argument \code{n.asf} controls the number of asf in the generated csf. Its value is limited to \code{ncol(x)-2} and overridden by \code{length(outcome)}, if \code{outcome} is not \code{NULL}. Analogously to \code{compl}, \code{n.asf} specifies the number of asf prior to redundancy elimination, which, in turn, may further reduce these numbers. That is, \code{n.asf} provides an upper bound for the number of asf in the resulting csf.
 }
@@ -188,8 +188,9 @@ x <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ]
 # Add random noise.
 incompData <- dplyr::setdiff(ct2df(fullData), idealData)
 x <- rbind(ct2df(incompData[sample(1:nrow(incompData), nrow(x)*0.05), ]), x)  
-# Run CNA without an ordering.
-mycna <- cna(x, con = .7, cov = .65, maxstep = c(3, 3, 12))
+# Run CNA without an ordering, using antecedent-adjusted evaluation measures.
+mycna <- cna(x, con = .85, cov = .85, measures = c("AACcon", "AAcov"), 
+             maxstep = c(3, 3, 12))
 mycna
 # Extract the csf. 
 csfs <- csf(mycna)

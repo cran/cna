@@ -4,20 +4,32 @@ msc <- function(x, details = x$details, cases = FALSE){
   stopifnot(inherits(x, "cna"))
   msc.list <- lapply(x$solution, "[[", "msc")
   all.msc <- do.call(rbind, msc.list)
-  basicCols <- intersect(c("outcome", "condition", "consistency", "coverage", "complexity", "minimal"),
-                         names(all.msc))
-  detailCols <- clarify_details(details, 
-                                measures = c("exhaustiveness", "faithfulness"),
-                                available = x$details)
-  if (all(m_is.null(msc.list)))
-    return(emptyCondTbl("stdAtomic", details = detailCols, msc = TRUE))
+  basicCols <- intersect(
+    c("outcome", "condition", "con", "cov", "complexity", "minimal"),
+    names(all.msc))
+  details <- resolveDetails(details)
+  details <- removeDetailMeasure(details, c("inus", "coherence", "redundant", "cyclic"))
+  detailCols <- getDetailCols(details)
+  if (NROW(all.msc) == 0L) 
+    return(emptyCondTbl("stdAtomic", measures = x$measures, 
+                        minimal = "minimal" %in% basicCols,
+                        details = detailCols))
   all.msc$condition <- paste0(all.msc[["condition"]], "->", all.msc[["outcome"]])
-  out <- data.frame(all.msc[c(basicCols, detailCols)],
+  availableCols <- c(basicCols, intersect(detailCols, names(all.msc)))
+  out <- data.frame(all.msc[availableCols], 
                     row.names = NULL, stringsAsFactors = FALSE)
+  computeCols <- setdiff(detailCols, availableCols)
+  if (length(computeCols)){
+    add_det <- .det(ctInfo(x$configTable), out$condition, # cutoff / border  
+                    what = intersect(getDetailCols(details, "details"), computeCols),
+                    conCovMeasures = 
+                      intersect(getDetailCols(details, "conCov"), computeCols))
+    out[names(add_det)] <- add_det
+  }
   if (cases){
     conds <- paste0(lhs(out$condition), "*", rhs(out$condition))
     casesList <- attr(x$configTable, "cases")
-    tbl <- as.data.frame(condition(lhs(conds), x$configTable), 
+    tbl <- as.data.frame(condList(lhs(conds), x$configTable), 
                          nobs = FALSE)
     if ("fsInfo" %in% names(x)){
       instantiated <- fs2cs(tbl, cutoff = x$fsInfo$cutoff, border = x$fsInfo$border)
@@ -28,25 +40,40 @@ msc <- function(x, details = x$details, cases = FALSE){
     class(out$cases) <- "casesList"
     names(out$cases) <- NULL
   }
-  as.condTbl(out, condClass = "stdAtomic")
+  as.condTbl(out[union(c(basicCols, detailCols), names(out))], 
+             measures = x$measures, condClass = "stdAtomic")
 }
 
 # extract msf from cna-object
-asf <- function(x, details = x$details, warn_details = TRUE){
+asf <- function(x, details = x$details){
   stopifnot(inherits(x, "cna"))
   asf.list <- lapply(x$solution, "[[", "asf")
-  basicCols <- c("outcome", "condition", "consistency", "coverage", "complexity")
-  detailCols <- clarify_details(details, 
-                                measures = c("inus", "exhaustiveness", "faithfulness"),
-                                available = x$details, warn = warn_details)
-  detailCols <- union("inus", detailCols)
-  if (all(vapply(asf.list, NROW, integer(1)) == 0L))
-    return(emptyCondTbl("stdAtomic", details = detailCols))
   all.asf <- do.call(rbind, asf.list)
+  basicCols <- intersect(
+    c("outcome", "condition", "con", "cov", "complexity", "minimal"),
+    names(all.asf))
+  details <- resolveDetails(details) 
+  details <- removeDetailMeasure(details, c("coherence", "redundant", "cyclic"))
+  detailCols <- getDetailCols(details)
+  if (NROW(all.asf) == 0L) 
+    return(emptyCondTbl("stdAtomic", measures = x$measures, 
+                        minimal = "minimal" %in% basicCols,
+                        details = detailCols))
+  
   all.asf$condition <- paste0(all.asf[["condition"]], "<->", all.asf[["outcome"]])
-  out <- data.frame(all.asf[c(basicCols, detailCols)],
+  availableCols <- c(basicCols, intersect(detailCols, names(all.asf)))
+  out <- data.frame(all.asf[availableCols], 
                     row.names = NULL, stringsAsFactors = FALSE)
-  as.condTbl(out, condClass = "stdAtomic")
+  computeCols <- setdiff(detailCols, availableCols)
+  if (length(computeCols)){
+    add_det <- .det(ctInfo(x$configTable), out$condition, # cutoff / border  
+                    what = intersect(getDetailCols(details, "details"), computeCols),
+                    conCovMeasures = 
+                      intersect(getDetailCols(details, "conCov"), computeCols))
+    out[names(add_det)] <- add_det
+  }
+  as.condTbl(out[c(basicCols, detailCols)], 
+             measures = x$measures, condClass = "stdAtomic")
 }
 
 
@@ -89,11 +116,11 @@ format.outcomeString <- function(x, ...){
 # as.condTbl: builds a "condTbl"-object from a list of "cond"-objects 
 as.condTbl <- function (x, ...) UseMethod("as.condTbl")
 
-as.condTbl.condList <- function (x, ...){
+as.condTbl.condList <- function (x, measures = attr(x, "measures"), ...){
   info <- attr(x, "info")
   stopifnot(is.list(x), vapply(x, inherits, logical(1), "cond"))
   outcome <- character(length(x))
-  out <- info[c("outcome", "condition", "consistency", "coverage", "complexity", "freq")]
+  out <- info[c("outcome", "condition", "con", "cov", "complexity", "freq")]
   ctypes <- info$condTypes
   if (any(bool <- ctypes %in% c("boolean", "stdBoolean")))
     out$outcome[bool] <- "(No outcome)"
@@ -107,43 +134,49 @@ as.condTbl.condList <- function (x, ...){
     class(out$condition) <- c("condString", "character")
   }
   if (!is.null(out$outcome)) class(out$outcome) <- c("outcomeString", "character")
-  additionalCols <- setdiff(names(out), c("outcome", "condition", "consistency", "coverage", "complexity"))
+  additionalCols <- setdiff(names(out), c("outcome", "condition", "con", "cov", "complexity"))
   rmCols <- subset(additionalCols, colAlls(is.na(out[additionalCols])))
   out[rmCols] <- NULL
-  as.condTbl(out)
+  as.condTbl(out, measures = measures)
 }
-as.condTbl.data.frame <- function(x, condClass = "condString", ...){
+as.condTbl.data.frame <- function(x, condClass = "condString", measures = NULL, 
+                                  ...){
   if (any(fac <- vapply(x, is.factor, logical(1))))
     x[fac] <- lapply(x[fac], as.character)
   if (!is.null(x$condition) && identical(class(x$condition), "character")) 
     class(x$condition) <- c(condClass, "character")
   if (!is.null(x$outcome) && identical(class(x$outcome), "character"))
     class(x$outcome) <- c("outcomeString", "character")
-  structure(x, class = c("condTbl", "data.frame"))
+  structure(x, measures = measures, row.names = seq_len(nrow(x)), 
+            class = c("condTbl", "data.frame"))
 }
-emptyCondTbl <- function(condClass = "condString", details = FALSE, msc = FALSE){
-  out <- data.frame(outcome = character(0),
-                    condition = character(0),
-                    consistency = numeric(0),
-                    coverage = numeric(0),
-                    complexity = numeric(0))
-  if (msc){
+emptyCondTbl <- function(condClass = "condString", details = character(0), 
+                         minimal = FALSE, ...){
+  stopifnot(is.character(details))   # 'details' must be either default/empty or output of getDetailCols!!
+  out <- data.frame(outcome = structure(character(0), 
+                                        class = c("outcomeString", "character")),
+                    condition = structure(character(0), 
+                                          class = c("condString", "character")),
+                    con = numeric(0),
+                    cov = numeric(0),
+                    complexity = integer(0))
+  if (minimal){
     out$minimal <- logical(0)
   }
-  for (d in clarify_details(details)){
+  for (d in details){
     out[[d]] <- if (d %in% c("inus", "redundant", "cyclic")){
       logical(0)
     } else {
       numeric(0)
     }
   }
-  as.condTbl(out)
+  as.condTbl(out, ...)
 }
 
 # print method for class condTbl
 # Code taken from print.data.frame, except for leftAlignedColnames 
 print.condTbl <- function(x, n = 20, digits = 3, quote = FALSE, 
-  row.names = TRUE, ...){
+  row.names = TRUE, printMeasures = TRUE, ...){
   leftAlignedColnames <- intersect(c("outcome", "condition", "solution", "cases"), 
                                    names(x))
   n.total <- nrow(x)
@@ -171,6 +204,7 @@ print.condTbl <- function(x, n = 20, digits = 3, quote = FALSE,
         sep = "")
     }
   }
+  if (printMeasures) prntMeasures(attr(x, "measures"))
   invisible(x)
 }
 
@@ -203,16 +237,11 @@ formatCases <- function(x, maxlen){
 }
 
 # condTbl
-condTbl <- function(...){
+condTbl <- function(x, ...){
   cl <- match.call()
   cl[[1]] <- as.name("condition")
   as.condTbl(eval.parent(cl))
 }
-
-# condition method for class condTbl
-condition.condTbl <- function(x, ct = full.ct(x[["condition"]]), ...)
-  condition.default(x[["condition"]], ct, ...)
-
 # as.data.frame method for class condTbl - removes all class attributes and 
 # transforms list of cases (if present) to (','-separated) enumerations in a 
 # character vector.
@@ -220,8 +249,34 @@ as.data.frame.condTbl <- function(x, ...){
   if (inherits(x$cases, "casesList")){
     x$cases <- format(x$cases, maxlen = Inf, align = FALSE)
   }
-  x[] <- lapply(x, unclass)
+  cnaClasses <- c("condString", "outcomeString", "stdAtomic", "stdBoolean", "stdComplex")
+  unclassCols <- sapply(x, inherits, cnaClasses)
+  x[unclassCols] <- lapply(x[unclassCols], unclass)
   class(x) <- "data.frame"
+  attributes(x) <- attributes(x)[c("names", "class", "row.names")]
   x
+}
+
+# `[` method for class condTbl - keeps measures attributes if 'condition', 
+# 'con' and  'cov' are still present as columns in the output
+`[.condTbl` <- function(x, ...){
+   out <- NextMethod()
+   nms <- colnames(out)
+   cnaClasses <- c("condString", "outcomeString", "stdAtomic", "stdBoolean", "stdComplex")
+   keepClass <- any(vapply(out, inherits, cnaClasses, FUN.VALUE = logical(1)))
+   conCovRelevant <- if (keepClass){
+     all(c("con", "cov") %in% colnames(out)) &&
+       any(rowAlls(!is.na(out[c("con", "cov")])))
+     } else FALSE
+   if (keepClass){
+     attr(out, "measures") <- if (conCovRelevant){
+       attr(x, "measures")
+     } else NULL
+   } else {
+     out[] <- lapply(out, as.vector)
+     class(out) <- setdiff(class(out), "condTbl")
+     attr(out, "measures") <- NULL
+   }
+   out
 }
 

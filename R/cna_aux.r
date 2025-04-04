@@ -3,14 +3,10 @@
 # ======
 # transforms a fs-ct into a sc-ct
 # Note: fs2cs is designed to work with a data.frame, not a configTable!
-fs2cs <- function(x, cutoff = 0.5, border = c("up", "down", "drop")){
+fs2cs <- function(x, cutoff = 0.5, border = "up", verbose = FALSE){
   if (cutoff <= 0 | cutoff >= 1)
     stop("cutoff must be >0 and <1")
-  border <- match.arg(border)
-  if (border == "drop") {
-    removeLines <- !rowAnys(x == cutoff)
-    x <- x[removeLines, , drop = FALSE]
-  }
+  border <- resolveBorder(border)
   xout <- if (inherits(x, "configTable")) as.data.frame(x, warn = FALSE) else x
   xout[] <- rep(0L, nrow(x))
   if (border == "up"){
@@ -18,18 +14,45 @@ fs2cs <- function(x, cutoff = 0.5, border = c("up", "down", "drop")){
   } else {
     xout[x > cutoff] <- 1L
   }
+  madeConst <- !vapply(x, isConstant, logical(1), USE.NAMES = FALSE) & 
+    vapply(xout, isConstant, logical(1), USE.NAMES = FALSE)
+  if (any(madeConst)) {
+    nms.constcols <- names(x)[madeConst]
+    # if (rm.const.factors) {
+    #   ct <- ct[, !constcols, drop = FALSE]
+    #   if (verbose) 
+    #     message("The following factors are constant and therefore eliminated: ", 
+    #       C_concat(nms.constcols, sep = ", "))
+    # }
+    # else 
+    if (verbose){
+      message("The following factors are constantly on one side of the cutoff: ", 
+        C_concat(nms.constcols, sep = ", "))
+    }
+  }
   x[] <- xout
   x
+}
+
+resolveBorder <- function(border = c("up", "down", "drop")){
+  border <- match.arg(border)
+  if (border == "drop"){
+    warning("The setting border=\"drop\" has been deprecated; border=\"up\" is used instead.", 
+              call. = FALSE)
+    border <- "up"
+  }
+  border
 }
 
 # ctInfo: 
 # ========
 # Auxiliary function that extracts useful informations from a configTable
-ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
+ctInfo <- function(ct, cutoff = 0.5, border = "up"){
   stopifnot(inherits(ct, "configTable"))
   type <- attr(ct, "type")
-  border <- match.arg(border)
+  border <- resolveBorder(border)
   ctmat <- as.matrix(ct)
+  freq <- attr(ct, "n")
   
   if (type == "cs") {
     uniqueValues <- lapply(ct, function(x) 1:0)
@@ -79,10 +102,10 @@ ctInfo <- function(ct, cutoff = 0.5, border = c("down", "up", "drop")){
       as.vector(rbind(names(ct), tolower(names(ct)))))
   }
   mode(scores) <- "numeric"
-  freq <- attr(ct, "n")
-  structure(mget(c("type", "resp_nms", "nVal", "uniqueValues", "config", 
-                   "valueId", "scores", "freq")),
-            class = c("cti", "tti"))
+  out <- mget(c("type", "resp_nms", "nVal", "uniqueValues", "config", 
+                "valueId", "scores", "freq"))
+  if (type == "fs") out$fsInfo <- list(cutoff = cutoff, border = border)
+  structure(out, class = "cti")
 }
 
 # subset method for class "cti"
@@ -93,20 +116,17 @@ subset.cti <- function(x, i, ...){
   x
 }
 
-# old function name (for compatibility of material outside the package)
-tt.info <- ctInfo
-
 # function to build 'scores' matrix
 # --- reintroduced because of cnaOpt dependence!
 factMat <- function(type){
   switch(type, 
-    cs =  function(x, ct = tt, tt){
+    cs =  function(x, ct){
       structure(cbind(ct[[x]], 1 - ct[[x]]), 
                 .Dimnames = list(NULL, c(x, tolower(x))))},
-    mv = function(x, ct = tt, tt){
+    mv = function(x, ct){
       v <- eval(parse(text = sub("=", "==", x, fixed = TRUE), keep.source = FALSE), ct)
       matrix(as.integer(v), dimnames = list(NULL, x))},
-    fs = factMat <- function(x, ct = tt, tt){
+    fs = factMat <- function(x, ct){
       structure(cbind(ct[[x]], 1 - ct[[x]]), 
                 .Dimnames = list(NULL, c(x, tolower(x))))}
   )
@@ -156,6 +176,21 @@ ordering_from_string <- function(x){
   hstrsplit(noblanks(x), split = c("<", ","))[[1]]
 }
 
+# check arg notcols in cna()
+resolveNotCols <- function(notcols, nms, type){
+  if (is.null(notcols)) return(NULL)
+  if (type == "mv") stop("\"notcols\" not applicable if type==\"mv\"")
+  if (length(notcols) == 1L && notcols == "all"){
+    notcols <- nms 
+    if ("ALL" %in% nms) 
+      warning("'notcols=\"all\"' is ambiguous if a variable has name \"ALL\". ",
+              "notcols is applied to _all_ variables.", call. = FALSE)
+  }
+  if (!is.character(notcols)) notcols <- nms[notcols]
+  notcols <- toupper(notcols)
+  if (!all(notcols %in% nms)) stop("Wrong specification of 'notcols'")
+  notcols
+}
 
 # potential.effects:
 # ==================
@@ -322,3 +357,15 @@ adjust2upper <- function(patterns, x){
   x
 }
 # adjust2upper(c("Abc", "bCd"), c("Abc*", "Abcd", "xyz"))
+
+
+resolveWhat <- function(what){
+  what <- tolower(what)
+  if (what == "all") return("tmac")
+  if (nzchar(gsub("[tmac]+", "", what))){
+    warning("Unexpected characters in argument 'what' are ignored.")
+  }
+  paste0("", if (grepl("t", what)) "t", if (grepl("m", what)) "m", 
+         if (grepl("a", what)) "a", if (grepl("c", what)) "c")
+}  
+

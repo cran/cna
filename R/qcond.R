@@ -59,45 +59,58 @@ qcond_asf <- function(condstr, sc, force.bool = FALSE){
 }
 # quick version of condTbl for 'atomic condition'
 # parametes: as above
-# Value: condTbl with columns outcome, condition, consistency, coverage
-qcondTbl_asf <- function(condstr, sc, freqs, asf.selection = "none"){
+# Value: condTbl with columns outcome, condition, con, cov
+qcondTbl_asf <- function(condstr, cti, asf.selection = "none", conCovDef = 1:2, ...){
   stopifnot(asf.selection %in% c("none", "cs", "fs"))
-  cond <- qcond_asf(condstr, sc)
+  if (cti$type == "fs"){
+    cutoff <- cti$fsInfo$cutoff
+    border <- cti$fsInfo$border
+  } else {
+    cutoff <- 0.5
+    border <- "up"
+  }
+  cond <- qcond_asf(condstr, cti$scores)
   if (asf.selection != "none"){
     # select condition where outcome varies within concordant cases:
-    varying <- apply(cond, 3, function(tbl) C_varies(tbl[, 1], tbl[, 2], asfSelection = asf.selection), 
-                     simplify = TRUE)
+    varying <- apply(cond, 3, function(tbl){
+        C_varies(tbl[, 1], tbl[, 2], asfSelection = asf.selection, 
+                 cutoff = cutoff, border = border)
+      }, simplify = TRUE)
+    if (!any(varying)) return(emptyCondTbl("stdAtomic", measures = conCovDef))
     cond <- structure(cond[, , varying, drop = FALSE], 
                       condition = attr(cond, "condition")[varying],
                       response = attr(cond, "response")[varying])
   }
-  cond2condTbl(cond, freqs)
+  cond2condTbl(cond, cti$freq, conCovDef = conCovDef, ...)
 }
 
 # Take an expanded 'qcond_asf' array and return the corresponding condTbl
-# cond   output from qcondTbl
-cond2condTbl <- function(cond, freqs){
-  left <- matrix(cond[, 1, , drop = TRUE], dim(cond)[[1]])
-  right <- matrix(cond[, 2, , drop = TRUE], dim(cond)[[1]])
-  lrmin <- left
-  lrmin[right<left] <- right[right<left]
-  Sx <- colSums(left * freqs)
-  Sy <- colSums(right * freqs)
-  Sxy <- colSums(lrmin * freqs)
-  if (nrow(cond) == 0){
-    consistency <- coverage <- NA_real_
+# cond   output from qcond_asf or qcond_csf
+cond2condTbl <- function(cond, freqs, conCovDef = 1:2, imposeLength2 = TRUE){
+  coco <- conCovFromArray(cond, freqs, def = conCovDef, 
+                          imposeLength2 = imposeLength2)  # !detailed
+  if (imposeLength2){
+    out <- structure(
+      data.frame(outcome = structure(attr(cond, "response"), 
+                                     class = c("outcomeString", "character")),
+                 condition = structure(attr(cond, "condition"),
+                                       class = c("stdAtomic", "character")),
+                 con = coco[1, ], cov = coco[2, ], 
+                 row.names = NULL, stringsAsFactors = FALSE),
+      measures = if (imposeLength2) resolveMeasures(conCovDef), 
+      class = c("condTbl", "data.frame"))
   } else {
-    consistency <- Sxy/Sx
-    coverage <- Sxy/Sy
+    meas <- resolveMeasures(conCovDef, imposeLength2 = FALSE)
+    colnames(coco) <- make.names(meas$shortNames) 
+    out <- structure(
+      data.frame(outcome = structure(attr(cond, "response"), 
+                                     class = c("outcomeString", "character")),
+                 condition = structure(attr(cond, "condition"),
+                                       class = c("stdAtomic", "character")),
+                 coco, row.names = NULL, stringsAsFactors = FALSE),
+      class = c("condTbl", "data.frame"))
   }
-  structure(
-    data.frame(outcome = attr(cond, "response"),
-               condition = structure(attr(cond, "condition"),
-                                     class = c("stdAtomic", "character")),
-               consistency, coverage,
-               row.names = NULL,
-               stringsAsFactors = FALSE),
-    class = c("condTbl", "data.frame"))
+  out
 }
 
 # ===== Handling of 'csf' strings =====
@@ -111,8 +124,8 @@ cond2condTbl <- function(cond, freqs){
 # - if flat = TRUE: Returns an array resulting from applying qcond_asf() to the (flattended) 
 # vector of all asf present in 'condstr', with additional attribute csflengths
 # - if flat = FALSE: Returns a list with a separate object as returned by qcond_asf() for each csf
-qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
-                      freqs = NULL){
+qcond_csf <- function(condstr, sc, conCovDef = NULL, freqs = NULL, 
+                      flat = FALSE, force.bool = FALSE){
   if (inherits(sc, "cti")) sc <- sc$scores
   n <- nrow(sc)
   asfs <- extract_asf(condstr)
@@ -131,13 +144,13 @@ qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
       numeric(n)), nrow = nrow(sc))
     colnames(out) <- condstr
     return(out)
-  } else if (!flat & !is.null(freqs)){
-    ctbl <- cond2condTbl(varray, freqs)
-    asfCons <- C_relist_Num(ctbl$consistency, lengths)
-    asfCovs<- C_relist_Num(ctbl$coverage, lengths)
+  } else if (!flat & !is.null(freqs) & !is.null(conCovDef)){
+    ctbl <- cond2condTbl(varray, freqs, conCovDef = conCovDef)
+    asfCons <- C_relist_Num(ctbl$con, lengths)
+    asfCovs<- C_relist_Num(ctbl$cov, lengths)
     conCov <- data.frame(
-      consistency = vapply(asfCons, min, numeric(1)),
-      coverage = vapply(asfCovs, min, numeric(1)))
+      con = vapply(asfCons, min, numeric(1)),
+      cov = vapply(asfCovs, min, numeric(1)))
     conCov$asfCons <- asfCons
     conCov$asfCovs <- asfCovs
     conCov$outcome <- C_mconcat(C_relist_Char(ctbl$outcome, lengths), sep = ",")
@@ -157,29 +170,31 @@ qcond_csf <- function(condstr, sc, flat = FALSE, force.bool = FALSE,
 }
 # Quick version of condTbl for 'complex condition'
 # parametes: as above
-# Value: condTbl with columns outcome, condition, consistency, coverage
-qcondTbl_csf <- function(condstr, sc, freqs){
+# Value: condTbl with columns outcome, condition, con, cov
+qcondTbl_csf <- function(condstr, sc, freqs, conCovDef, imposeLength2 = TRUE){
   qc <- qcond_csf(condstr, sc, flat = TRUE)
-  ctbl <- cond2condTbl(qc, freqs)
+  ctbl <- cond2condTbl(qc, freqs, conCovDef = conCovDef, imposeLength2 = imposeLength2)
   lengths <- attr(qc, "csflengths")
   gr <- rep(seq_along(lengths), lengths)
+  conCov <- vapply(ctbl[-(1:2)], gmins, gr, FUN.VALUE = numeric(gr[[length(gr)]]))
+  if (!is.matrix(conCov)) 
+    conCov <- matrix(conCov, nrow = 1, dimnames = list(NULL, names(conCov)))
   data.frame(
     outcome = C_mconcat(split.default(ctbl$outcome, gr), sep = ","),
     condition = condstr,
-    con = vapply(split.default(ctbl$consistency, gr), min, numeric(1)),
-    cov = vapply(split.default(ctbl$coverage, gr), min, numeric(1)),
+    conCov,
     stringsAsFactors = FALSE
   )
 }
-# Grouped version of condTbl for csf-strings [apparently not used anywhere...]
-groupedCondTbl_csf <- function(condstr, sc, freqs){
-  qc <- qcond_csf(condstr, sc, flat = TRUE)
-  ctbl <- cond2condTbl(qc, freqs)
-  lengths <- attr(qc, "csflengths")
-  out <- split(ctbl, 
-               rep(seq_along(lengths), lengths))
-  names(out) <- condstr
-  out <- lapply(out, "rownames<-", NULL)
-  out
-}
 
+# # Grouped version of condTbl for csf-strings
+# groupedCondTbl_csf <- function(condstr, sc, freqs, conCovDef = 1:2){
+#   qc <- qcond_csf(condstr, sc, flat = TRUE)
+#   ctbl <- cond2condTbl(qc, freqs, conCovDef)
+#   lengths <- attr(qc, "csflengths")
+#   out <- split(ctbl, 
+#                rep(seq_along(lengths), lengths))
+#   names(out) <- condstr
+#   out <- lapply(out, "rownames<-", NULL)
+#   out
+# }

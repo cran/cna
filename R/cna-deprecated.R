@@ -1,29 +1,41 @@
 
-# Function deprecated from 3.0.0
-truthTab <- function(...){
+# Function deprecated from 4.0.0
+cscna <- function(...){
+  .Deprecated("cna", package = "cna")
+  cna(..., type = "cs")
+}
+mvcna <- function(...){
+  .Deprecated("cna", package = "cna")
+  cna(..., type = "mv")
+}
+fscna <- function(...){
+  .Deprecated("cna", package = "cna")
+  cna(..., type = "fs")
+}
+
+csct <- function(...){
   .Deprecated("configTable", package = "cna")
-  configTable(...)
+  configTable(..., type = "cs")
 }
-cstt <- function(...){
-  .Deprecated("csct", package = "cna")
-  csct(...)
+mvct <- function(...){
+  .Deprecated("configTable", package = "cna")
+  configTable(..., type = "mv")
 }
-fstt <- function(...){
-  .Deprecated("fsct", package = "cna")
-  fsct(...)
-}
-mvtt <- function(...){
-  .Deprecated("mvct", package = "cna")
-  mvct(...)
+fsct <- function(...){
+  .Deprecated("configTable", package = "cna")
+  configTable(..., type = "fs")
 }
 
-
-full.tt <- function(...){
-  .Deprecated("full.ct", package = "cna")
-  full.ct(...)
+cscond <- function(...){
+  .Deprecated("condition", package = "cna")
+  condition(..., type = "cs")
 }
-tt2df <- function(...){
-  .Deprecated("ct2df", package = "cna")
-  ct2df(...)
+mvcond <- function(...){
+  .Deprecated("condition", package = "cna")
+  condition(..., type = "mv")
+}
+fscond <- function(...){
+  .Deprecated("condition", package = "cna")
+  condition(..., type = "fs")
 }
 

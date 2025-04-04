@@ -100,12 +100,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_relist_Int
-List C_relist_Int(IntegerVector x, const IntegerVector l);
+List C_relist_Int(const IntegerVector x, const IntegerVector l);
 RcppExport SEXP _cna_C_relist_Int(SEXP xSEXP, SEXP lSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const IntegerVector >::type l(lSEXP);
     rcpp_result_gen = Rcpp::wrap(C_relist_Int(x, l));
     return rcpp_result_gen;
@@ -160,28 +160,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_varies
-bool C_varies(NumericVector x, NumericVector y, std::string asfSelection);
-RcppExport SEXP _cna_C_varies(SEXP xSEXP, SEXP ySEXP, SEXP asfSelectionSEXP) {
+bool C_varies(NumericVector x, NumericVector y, NumericVector cutoff, std::string border, std::string asfSelection);
+RcppExport SEXP _cna_C_varies(SEXP xSEXP, SEXP ySEXP, SEXP cutoffSEXP, SEXP borderSEXP, SEXP asfSelectionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cutoff(cutoffSEXP);
+    Rcpp::traits::input_parameter< std::string >::type border(borderSEXP);
     Rcpp::traits::input_parameter< std::string >::type asfSelection(asfSelectionSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_varies(x, y, asfSelection));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_conCov
-NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f);
-RcppExport SEXP _cna_C_conCov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_conCov(x, y, f));
+    rcpp_result_gen = Rcpp::wrap(C_varies(x, y, cutoff, border, asfSelection));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -259,8 +248,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_find_asf
-IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const long int maxSol);
-RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP) {
+IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, const NumericVector y, const IntegerVector f, const double con, const double cov, const double maxSol, const IntegerVector def);
+RcppExport SEXP _cna_C_find_asf(SEXP conjlenSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP conSEXP, SEXP covSEXP, SEXP maxSolSEXP, SEXP defSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -270,36 +259,274 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
     Rcpp::traits::input_parameter< const double >::type con(conSEXP);
     Rcpp::traits::input_parameter< const double >::type cov(covSEXP);
-    Rcpp::traits::input_parameter< const long int >::type maxSol(maxSolSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_find_asf(conjlen, x, y, f, con, cov, maxSol));
+    Rcpp::traits::input_parameter< const double >::type maxSol(maxSolSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type def(defSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_find_asf(conjlen, x, y, f, con, cov, maxSol, def));
     return rcpp_result_gen;
 END_RCPP
 }
-// C_conj_conCov
-NumericVector C_conj_conCov(const IntegerVector cols, const NumericMatrix x, const NumericVector y, const IntegerVector f);
-RcppExport SEXP _cna_C_conj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+// C_con
+double C_con(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_con(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type cols(colsSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_conj_conCov(cols, x, y, f));
+    rcpp_result_gen = Rcpp::wrap(C_con(x, y, f));
     return rcpp_result_gen;
 END_RCPP
 }
-// C_disj_conCov
-NumericVector C_disj_conCov(const IntegerVector cols, const NumericMatrix x, const NumericVector y, const IntegerVector f);
-RcppExport SEXP _cna_C_disj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+// C_cov
+double C_cov(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_cov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type cols(colsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cov(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_ccon
+double C_ccon(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_ccon(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_ccon(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_ccov
+double C_ccov(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_ccov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_ccov(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wcon
+double C_wcon(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wcon(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wcon(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wcov
+double C_wcov(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wcov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wcov(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wccov
+double C_wccov(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wccov(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wccov(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wccon
+double C_wccon(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wccon(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wccon(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_mconj_conCov
+NumericMatrix C_mconj_conCov(const IntegerMatrix cols, const NumericMatrix x, const NumericVector y, const IntegerVector f, const IntegerVector def);
+RcppExport SEXP _cna_C_mconj_conCov(SEXP colsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP fSEXP, SEXP defSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerMatrix >::type cols(colsSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_disj_conCov(cols, x, y, f));
+    Rcpp::traits::input_parameter< const IntegerVector >::type def(defSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_mconj_conCov(cols, x, y, f, def));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_conCovFromArray
+NumericMatrix C_conCovFromArray(const NumericVector x, const IntegerVector dim, const IntegerVector f, const IntegerVector def);
+RcppExport SEXP _cna_C_conCovFromArray(SEXP xSEXP, SEXP dimSEXP, SEXP fSEXP, SEXP defSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type def(defSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_conCovFromArray(x, dim, f, def));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_severalMeasures
+NumericMatrix C_severalMeasures(const NumericVector x, const IntegerVector dim, const IntegerVector f, const IntegerVector def);
+RcppExport SEXP _cna_C_severalMeasures(SEXP xSEXP, SEXP dimSEXP, SEXP fSEXP, SEXP defSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type def(defSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_severalMeasures(x, dim, f, def));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_con_det
+NumericVector C_con_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_con_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_con_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_cov_det
+NumericVector C_cov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_cov_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_cov_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_ccon_det
+NumericVector C_ccon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_ccon_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_ccon_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_ccov_det
+NumericVector C_ccov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_ccov_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_ccov_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wcon_det
+NumericVector C_wcon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wcon_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wcon_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wcov_det
+NumericVector C_wcov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wcov_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wcov_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wccov_det
+NumericVector C_wccov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wccov_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wccov_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_wccon_det
+NumericVector C_wccon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+RcppExport SEXP _cna_C_wccon_det(SEXP xSEXP, SEXP ySEXP, SEXP fSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_wccon_det(x, y, f));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_conCovFromArrayDetailed
+NumericMatrix C_conCovFromArrayDetailed(const NumericVector x, const IntegerVector dim, const IntegerVector f, const IntegerVector def);
+RcppExport SEXP _cna_C_conCovFromArrayDetailed(SEXP xSEXP, SEXP dimSEXP, SEXP fSEXP, SEXP defSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type f(fSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type def(defSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_conCovFromArrayDetailed(x, dim, f, def));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -330,14 +557,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_minimal
-LogicalVector C_minimal(const recIntList x, const recIntList ref, bool strict);
+LogicalVector C_minimal(const recIntList x, const recIntList ref, const bool strict);
 RcppExport SEXP _cna_C_minimal(SEXP xSEXP, SEXP refSEXP, SEXP strictSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const recIntList >::type x(xSEXP);
     Rcpp::traits::input_parameter< const recIntList >::type ref(refSEXP);
-    Rcpp::traits::input_parameter< bool >::type strict(strictSEXP);
+    Rcpp::traits::input_parameter< const bool >::type strict(strictSEXP);
     rcpp_result_gen = Rcpp::wrap(C_minimal(x, ref, strict));
     return rcpp_result_gen;
 END_RCPP
@@ -530,6 +757,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const intList >::type x(xSEXP);
     Rcpp::traits::input_parameter< const intList >::type y(ySEXP);
     rcpp_result_gen = Rcpp::wrap(C_append_intList(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gmins
+NumericVector gmins(NumericVector x, IntegerVector gr);
+RcppExport SEXP _cna_gmins(SEXP xSEXP, SEXP grSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type gr(grSEXP);
+    rcpp_result_gen = Rcpp::wrap(gmins(x, gr));
     return rcpp_result_gen;
 END_RCPP
 }

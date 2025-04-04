@@ -80,18 +80,18 @@ print.cond <- function (x, digits = 3, print.table = TRUE,
   }
   info <- attr(x, "info")
   if (condType == "atomic"){
-    cat("Consistency: ", 
-        formatC(info[["consistency"]], format = "f", digits = digits), 
-        " (", info[["sxy"]], "/", info[["sx"]], ")\n", 
-        "Coverage:    ", 
-        formatC(info[["coverage"]], format = "f", digits = digits), 
-        " (", info[["sxy"]], "/", info[["sy"]], ")\n", 
+    cat("con-value:  ", 
+        formatC(info[["con"]], format = "f", digits = digits), 
+        " (", info[["conNum"]], "/", info[["conDenom"]], ")\n", 
+        "cov-value:  ", 
+        formatC(info[["cov"]], format = "f", digits = digits), 
+        " (", info[["covNum"]], "/", info[["covDenom"]], ")\n", 
         "Total no. of cases: ", info[["sumf"]], "\n", sep = "")
   }
   else 
     cat("Frequency:   ", 
         formatC(info[["freq"]], format = "f", digits = digits), 
-        " (", info[["sy"]], "/", info[["sumf"]], ")\n", 
+        " (", info[["sumSc"]], "/", info[["sumf"]], ")\n", 
         sep = "")
   invisible(x)
 }
@@ -132,13 +132,13 @@ print.complexCond <- function (x, digits = 3, print.table = TRUE,
     printDfwithBars(dfr, row.names = show.cases, ..., bar.after = bar.after)
   }
   info <- attr(x, "info")
-  cat("Consistency: ", formatC(info[["consistency"]], format = "f", digits = digits), "\n", 
-      "Coverage:    ", formatC(info[["coverage"]], format = "f", digits = digits), "\n", 
+  cat("con-value:  ", formatC(info[["con"]], format = "f", digits = digits), "\n", 
+      "cov-value:  ", formatC(info[["cov"]], format = "f", digits = digits), "\n", 
       "Total no. of cases: ", sum(attr(x, "n", exact = TRUE)), "\n", 
       sep = "")
-  cat("Consistency and coverage of components:\n")
+  cat("con and cov of components:\n")
   conCov <- cbind(info[["asfCons"]][[1]], info[["asfCovs"]][[1]])
-  dimnames(conCov) <- list(names(x), c("consistency", "coverage"))
+  dimnames(conCov) <- list(names(x), c("con", "cov"))
   print.default(conCov, digits = digits)
   invisible(x)
 }

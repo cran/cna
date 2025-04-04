@@ -1,5 +1,12 @@
 
 # x must is a cti object
+
+# Purpose of ctiList:
+# Allow computing lighter 'full.cti'.
+# A ctiList is always related to a set of conditions;
+# every tbls-component of ctiList contains only the factors
+# that are present in the respective cond's.
+
 # cond a (general) cond
 ctiList <- function(x, cond){
   cond <- noblanks(cond)
@@ -21,7 +28,8 @@ ctiList <- function(x, cond){
   indices <- match(nmsStrings, uNmsStrings)
   tbls <- lapply(uNmsList, function(nms) selectFactors(x, nms))
   structure(c(
-    x[c("type", "resp_nms", "nVal", "uniqueValues")],    
+    x[c("type", "resp_nms", "nVal", "uniqueValues", 
+        if (x$type == "fs") "fsInfo")],
     list(scores = x$scores[0, , drop = FALSE],
          conds = cond, 
          tbls = tbls, 
@@ -100,14 +108,14 @@ full.ct.ctiList <- function(x, ...){
   out <- mapply(.det.cti, 
     x = x$tbls, cond = split(x$conds, x$indices), 
     MoreArgs = list(what = what, available = available, cycle.type = cycle.type, 
-                    in.csf = in.csf),
+                    in.csf = in.csf, ...),
     SIMPLIFY = FALSE, USE.NAMES = FALSE)
   out <- do.call(rbind, out)
   out[getPos(x), , drop = FALSE]
 }
 
 
-.inus.ctiList <- function(x, cond, qtypes, full = FALSE, 
+.inus.ctiList <- function(x, cond, full = FALSE, qtypes, 
                           const.ok = FALSE, csf.info = FALSE, 
                           def = "implication", ...){
   out0 <- mapply(.inus.cti, 
@@ -140,7 +148,7 @@ full.ct.ctiList <- function(x, ...){
   out
 }
 
-exff.ctiList <- function(x, cond, num = TRUE, names = TRUE, 
+.exff.ctiList <- function(x, cond, num = TRUE, names = TRUE, 
     cti.full = full.ct(x, cond = cond), 
     ...){
   cti <- lapply(x$tbls, unique_cti_cs)

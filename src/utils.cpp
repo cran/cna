@@ -135,7 +135,7 @@ LogicalVector C_hasSupersetIn(const intList x, const intList y, const bool ignor
 }
 
 
-// Version of C_hasSubsetIn that appies to IntegerMatrix'es
+// Version of C_hasSubsetIn that applies to IntegerMatrix's
 // [[Rcpp::export]]
 LogicalVector C_hasSubsetInM(const IntegerMatrix y, const IntegerMatrix x){ 
   // "M" indicates application to matrices
@@ -185,3 +185,37 @@ intList C_append_intList(const intList x, const intList y){
   return(as<intList>(out));
 }
 
+
+// -----------------------------------------------------------------------------
+
+// Calculate Groupwise Minima from a NumericVector
+// NOTE: gr is assumed to be (not strictly) increasing from 1 in steps of 1
+// (such that the last number of gr is equal to the number of groups)
+// [[Rcpp::export]]
+NumericVector gmins(NumericVector x, IntegerVector gr){
+  int l=x.size();
+  int outlen=gr(l-1);
+  NumericVector out(outlen);
+  int j=0;
+  double a=x(0);
+  out(0)=a;
+  for (int i=1; i<l; ++i){
+    if (gr(i)!=gr(i-1)){
+      out(j)=a;
+      ++j;
+      a=x(i);
+    } else {
+      a = std::min(a, x(i));
+    }
+    out(j)=a;
+  }
+  return out;
+}
+
+/* example in R:
+gr <- as.numeric(rep(1:4, sample(1:4)))
+x <- round(runif(length(gr)), 2)
+split(x, gr)
+gmins(x, gr)
+all(gmins(x, gr) == tapply(x, gr, min))
+*/

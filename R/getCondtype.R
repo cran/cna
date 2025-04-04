@@ -7,7 +7,7 @@
 # Possible values: 
 #   "stdBoolean", "stdAtomic", "stdComplex", 
 #   "boolean", "atomic", "complex",
-#   "invalidSyntax", "invalidFactor", "invalidValue", "factorInsteadOfValue
+#   "invalidSyntax", "invalidFactor", "invalidValue", "factorInsteadOfValue"
 # Examples:
 #' cond <- c("A+B", "a+b*C->E", "(a+b*C<->E)*(A+B<->D)",
 #'               "!a", "!(a+B)<->C", "(a+b*C<->E)*(A+!b<->D)",
@@ -327,52 +327,38 @@ qcond2cond_csf <- function(x){
 # determines the type of a _parsed_ condition
 # px   quoted string
 # value  a character string: "boolean", "atomic" or "complex"
-pcondType <- function(px, force.bool, ops = c("<-", "=", "<<-"), type = "cs"){
+pcondType <- function(px, force.bool, asf_ops = c("<-", "=", "<<-"), type = "cs"){
   if (force.bool) return(rep("boolean", length(px)))
   outerOps <- vapply(px, function(x) if (is.call(x)) as.character(x[[1L]]) else "", character(1)) 
-  cntAssOp <- vapply(px, .containsAssignOp, logical(1), ops)
+  # cntAssOp <- vapply(px, .containsAssignOp, logical(1), asf_ops)
   condType <- rep("boolean", length(px))
-  condType[outerOps %in% ops] <- "atomic"
-  condType[condType != "atomic" & cntAssOp & outerOps != "("] <- "complex"
-  complex.ok <- vapply(px[condType == "complex"], validCsf, logical(1), type = type)
-  condType[condType == "complex"][!complex.ok] <- "boolean"
+  condType[outerOps %in% asf_ops] <- "atomic"
+  csf_candidates <- outerOps == "&"
+  condType[csf_candidates][.isCsf(px[csf_candidates])] <- "complex"
+  # complex.ok <- vapply(px[condType == "complex"], validCsf, logical(1), type = type)
+  # condType[condType == "complex"][!complex.ok] <- "boolean"
   condType
 }
-# Function to determine if a complex condition has a correct form
-# [several asf's linked with the operators */&, +/|, ( and !/-]
-validCsf <- function(px, type = "cs"){
-  li <- .call2list(px, type = type)
-  reduce <- function(x){
-    if (is.list(x) && length(x) > 1){
-      unlist(lapply(x[-1], reduce))
-    } else {
-      x
-    }
+
+# determine if proper csf structure is given
+# px is a list of language expressions
+.isCsf <- function(px){
+  l <- length(px)
+  out <- logical(l)
+  len_gt_1 <- lengths(px) > 1L
+  out[!len_gt_1] <- FALSE
+  out[len_gt_1] <- vapply(px[len_gt_1], 
+    function(e) all(.decompose_expr(e) %in% c("<-", "<<-", "=")), 
+    FUN.VALUE = logical(1))
+  out
+}
+.decompose_expr <- function(e){
+  e <- rm.parentheses(e)
+  outerOps <- if (is.call(e)) as.character(e[[1L]]) else NA_character_
+  if (outerOps == "&" && length(e) == 3L){
+    unlist(lapply(as.list(e[2:3]), .decompose_expr))
+  } else {
+    outerOps
   }
-  red <- reduce(li)
-  all(vapply(red, is.call, logical(1))) && 
-    all(vapply(red, function(x) as.character(x[[1]]), character(1))
-        %in% c("=", "<-", "<<-"))
 }
 
-# .containsAssignOp
-# determines whether an expression contains an assignment operator
-# x   quoted string
-# value: logical
-# Used in pcondType
-.containsAssignOp <- function(x, ops = c("<-", "<<-", "=")){
-  if (is.atomic(x) || is.name(x)) {
-    FALSE
-  } else if (is.call(x)) {
-    fn.name <- as.character(x[[1]])
-    if (fn.name %in% ops){
-      TRUE
-    } else {
-      any(vapply(x[-1], .containsAssignOp, logical(1)))
-    }
-  } else {
-    # User supplied incorrect input
-    stop("Don't know how to handle type ", typeof(x),
-         call. = FALSE)
-  }
-}

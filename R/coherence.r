@@ -1,6 +1,5 @@
 
-
-# Generic function minimalizeCsf
+# Generic function coherence
 coherence <- function(x, ...){
   UseMethod("coherence")
 }
@@ -12,15 +11,7 @@ coherence <- function(x, ...){
 # x      character vector
 # ct     configTable or data frame
 # type   type of configTable
-coherence.default <- function(x, ct, type, ..., tt){
-  
-    # Ensure backward compatibility of argument tt
-    if (!missing(tt)){
-      warning("Argument tt is deprecated in coherence(); use ct instead.", 
-              call. = FALSE)
-      if (missing(ct)) ct <- tt
-    }
-
+coherence.default <- function(x, ct, type, ...){
   if (length(x) == 0L) return(numeric(0))
   x <- noblanks(x)
   if (inherits(ct, "configTable")){

@@ -1,10 +1,19 @@
 
-print.condList <- function (x, ...){
+print.condList <- function (x, n = 3, printMeasures = TRUE, ...){
   nn <- names(x)
   ll <- length(x)
-  if (length(nn) != ll)
-    nn <- paste("Component", seq.int(ll))
-  for (i in seq_len(ll)){
+  if (length(nn) != ll) nn <- paste("Condition", seq.int(ll))
+  cat(sQuote("condList"), " containing ", ncond <- length(x), " condition", 
+      if (ll>1) "s", "\n", sep = "")
+  n.print <- min(n, ll)
+  if (n.print < ll){
+    cat("  The first n=", n.print, 
+        if (n.print==1) " condition is" else " conditions are", " shown\n", 
+        if (missing(n)) "  (print with a higher value of 'n' to see more)\n", 
+            sep = "")
+  }
+  cat("\n")
+  for (i in seq_len(n.print)){
     x1 <- x[[i]]
     info <- attr(x1, "info")
     cat(addblanks(nn[i]), 
@@ -13,14 +22,18 @@ print.condList <- function (x, ...){
     print(x1, ...)
     cat("\n")
   }
+  if (printMeasures) prntMeasures(attr(x, "measures"))
   invisible(x)
 }
 
 `[.condList` <- function(x, ...){
   out <- NextMethod()
+  conCovRelevant <- vapply(out, inherits, c("atomicCond", "complexCond"), 
+                           FUN.VALUE = logical(1))
   attributes(out) <- c(
     attributes(out),
-    attributes(x)[c("class", "type", "n", "cases", "ct")]
+    attributes(x)[c("class", "type", "n", "cases", 
+                    if (any(conCovRelevant)) "measures", "ct")]
   )
   i <- eval.parent(sys.call()[[3]])
   if (is.character(i)) i <- match(i, names(x), 0L)
@@ -52,8 +65,8 @@ print.condList <- function (x, ...){
 
 
 # summary.condList: print.condList with print.table = FALSE
-summary.condList <- function(object, ...){
-  print.condList(object, print.table = FALSE, ...)
+summary.condList <- function(object, n = 6, ...){
+  print.condList(object, n = n, print.table = FALSE, ...)
 }
 
 # ------------------------------------------------------------------------------

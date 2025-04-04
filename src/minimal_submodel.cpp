@@ -49,7 +49,7 @@ LogicalVector C_is_submodel(const recIntList x, const intList ref, const bool st
 // Use separate functions for cases strictly and not strictly minimal
 // [[Rcpp::export]]
 LogicalVector C_minimal(const recIntList x, const recIntList ref, 
-                        bool strict){ 
+                        const bool strict){ 
   int lenx = x.size(), lenr = ref.size();
   LogicalVector out(lenx);
   for (int i=0; i<lenx; ++i){

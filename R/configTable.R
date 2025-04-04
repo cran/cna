@@ -15,10 +15,9 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
     x <- as.data.frame(x)
   } else if (inherits(x, "configTable")){
     if (!is.null(frequency))
-      stop(nm.x, " already is a configTable - argument frequency is not admissable in this case!")
+      stop(nm.x, " already is a configTable - argument frequency is not admissible in this case!")
     frequency <- attr(x, "n", exact = TRUE)
     .cases <- attr(x, "cases")
-    type <- attr(x, "type")
     x <- as.data.frame(x, warn = FALSE)
   }
   type <- tolower(type)
@@ -42,11 +41,11 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
                            mv2cs = "integer")
   xvalues <- unlist(x, use.names = FALSE, recursive = FALSE)
   if (type == "cs" & !all(xvalues %in% 0:1))
-    stop("Only values 0 and 1 are allowed in x with type=\"cs\".")
+    stop("Only values 0 and 1 are allowed in x if type=\"cs\".")
   if (type == "mv" & !all(xvalues %% 1 == 0 & xvalues >= 0))
-    stop("Only integer values >=0 are allowed in x with type=\"mv\".")
+    stop("Only integer values >=0 are allowed in x if type=\"mv\".")
   if (type == "fs" & !all(xvalues >= 0 & xvalues <= 1))
-    stop("Only values >=0 and <=1 are allowed in x with type=\"fs\".")
+    stop("Only values >=0 and <=1 are allowed in x if type=\"fs\".")
   for (i in seq_along(x)) mode(x[[i]]) <- datatype
   cx <- do.call(paste, c(x, list(sep = "\r")))
   cx <- factor(cx, levels = unique(cx))
@@ -121,7 +120,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
   nms <- names(ct) <- make.unique(toupper(names(ct)))
   checkFactorNames(nms)
   # output
-  class(ct) <- c("configTable", "data.frame", "truthTab")
+  class(ct) <- c("configTable", "data.frame")
   attr(ct, "n") <- as.vector(f)
   if (any(lc <- lengths(.cases)>1L)){
     .cases[lc] <- lapply(.cases[lc], function(x) sort(unlist(x, use.names = FALSE, recursive = FALSE)))
@@ -131,16 +130,20 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
   ct
 }
 
-checkFactorNames <- function(nms, warn = TRUE){
+checkFactorNames <- function(nms, stop_if_inadmissible = TRUE){
   nms <- as.character(nms)
-  ok <- nms == make.names(nms, unique = TRUE) & 
-    !grepl("[[:punct:][:space:]]", gsub("[\\._]+", "", as.character(nms)))
-  if (any(!ok) && warn){
-    warning("configTable has invalid names (", paste0(nms[!ok], collapse = ", "), 
-            "). condition(), cna() and other functions may not work.",
-            call. = FALSE)
+  ok1 <- grepl("[[:alpha:]]", nms)
+  if (stop_if_inadmissible && !all(ok1)) 
+    stop("All column names must contain a letter.", call. = FALSE)
+  ok2 <- !duplicated(tolower(nms))
+  if (stop_if_inadmissible && !all(ok2))
+    stop("Column names must be unique when case is ignored!", call. = FALSE)
+  ok3 <- !grepl("[[:punct:][:space:]]", gsub("[\\._]+", "", nms))
+  if (stop_if_inadmissible && !all(ok3)){
+    stop("Column names contain inadmissible special characters",
+         call. = FALSE)
   }
-  ok
+  ok1 & ok2 & ok3
 }
 
 # Determine data type from input data (for case type = "auto")
@@ -299,35 +302,3 @@ tail.configTable <- function (x, n = 6L, ...)
   x[seq.int(to = nrx, length.out = n), , ...]
 }
 
-# combine:
-# ========
-# Neu ist der Parameter sep
-# combine <- function (x, rows = rownames(x), sep = ""){
-#   rows <- do.call(paste, c(x, sep = sep))
-#   factor(rows, levels = unique(rows))
-# }
-
-################################################################################
-
-# versions of configTable with fixed type
-csct <- function(...){
-  cl <- match.call(configTable, sys.call())
-  stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(configTable)
-  cl$type <- "cs"
-  eval.parent(cl)
-}
-mvct <- function(...){
-  cl <- match.call(configTable, sys.call())
-  stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(configTable)
-  cl$type <- "mv"
-  eval.parent(cl)
-}
-fsct <- function(...){
-  cl <- match.call(configTable, sys.call())
-  stopifnot(is.null(cl$type))
-  cl[[1]] <- quote(configTable)
-  cl$type <- "fs"
-  eval.parent(cl)
-}

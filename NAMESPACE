@@ -1,23 +1,24 @@
-export(allCombs, makeFuzzy, selectCases, selectCases1, 
-       configTable, csct, mvct, fsct, ct2df,
-       condition, cscond, mvcond, fscond,
-       msc, asf, csf, condTbl, as.condTbl, coherence, minimalizeCsf,
-       cna, cscna, mvcna, fscna,
-       group.by.outcome,
-       cyclic, full.ct, is.inus, is.submodel, identical.model, minimalize, 
-       redundant, randomAsf, randomCsf, 
-       some,
-       truthTab, cstt, fstt, mvtt, full.tt, tt2df,
-       
+export(makeFuzzy, selectCases, selectCases1, 
+       configTable, ct2df, condition, condList,
+       msc, asf, csf, condTbl, as.condTbl, coherence, 
+       cna, cnaControl, group.by.outcome, cyclic, 
+       full.ct, allCombs, is.inus, is.submodel, identical.model, minimalize, 
+       randomAsf, randomCsf, detailMeasures, some, 
+       showConCovMeasures, showDetailMeasures, showMeasures,
        # exported "internal" objects
-       getCond, rreduce, 
+       getCond, rreduce, .det, .inus, 
        noblanks, rhs, lhs, extract_asf, 
        ctInfo, qcond_csf, qcond_asf, qcond_bool, 
        stdCond, matchCond, 
+       redundant, minimalizeCsf,
        fs2cs, C_recCharList2char, C_relist_Int, 
-       relist1, C_mconcat, hstrsplit, 
+       relist1, C_concat, C_mconcat, hstrsplit, 
        C_redund, getComplexity, getCondType, 
-       C_is_submodel
+       C_is_submodel, 
+       # Deprecated fns:
+       cscna, mvcna, fscna, 
+       csct, mvct, fsct, 
+       cscond, mvcond, fscond
 )
 
 useDynLib(cna, .registration = TRUE)
@@ -43,15 +44,16 @@ S3method(tail, configTable)
 
 S3method(print, cna)
 S3method(print, cond)
-S3method(condition, default)
+S3method(condList, character)
 
 S3method(as.condTbl, condList)
 S3method(as.condTbl, data.frame)
 S3method(as.data.frame, condList)
 
 S3method(print, condTbl)
-S3method(condition, condTbl)
+S3method(condList, condTbl)
 S3method(as.data.frame, condTbl)
+S3method("[", condTbl)
 
 S3method(print, condString)
 S3method("[", condString)
@@ -89,6 +91,7 @@ S3method(full.ct, default)
 S3method(full.ct, configTable)
 S3method(full.ct, cti)
 S3method(full.ct, ctiList)
+S3method(full.ct, condTbl)
 
 S3method(.det, default)
 S3method(.det, cti)
@@ -104,9 +107,9 @@ S3method(.redund, configTable)
 S3method(.redund, cti)
 S3method(.redund, ctiList)
 
-S3method(exff, default)
-S3method(exff, configTable)
-S3method(exff, ctiList)
+S3method(.exff, default)
+S3method(.exff, configTable)
+S3method(.exff, ctiList)
 
 S3method(minimalizeCsf, default)
 S3method(minimalizeCsf, cna)
@@ -117,4 +120,4 @@ S3method(.minCsf, ctiList)
 S3method(coherence, default)
 S3method(coherence, cti)
 
-S3method(print, equivClass)
+S3method(print, measuresDefinition)

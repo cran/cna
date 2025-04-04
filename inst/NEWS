@@ -1,4 +1,18 @@
 
+Changes in version 4.0.0 (2025-04-04)
+  * cna() accepts alternative definitions of consistency and coverage. Users can change their selection of definitions and specify their choice in the new argument measure.
+  * The vignette has been thoroughly revised to introduce these new definitions/measures. 
+  * Correspondingly, con/cov measures can be selected in condition(), condTbl() and other functions.
+  * New function detailMeasures() is available at the user level (previously present but not visible). 
+  * New functions showMeasures(), showConCovMeasures() and showDetailMeasures() list available summary measures for configuration tables.
+  * The implementation logic of secondary (fine-tuning) parameters in cna() has been revised. In particular, parameters that are not relevant for the ordinary user have been outsourced to a new function cnaControl().
+  * The building of complex solution formulas (csf) has been changed such that csf that are submodels of other csf are no longer returned by the function csf(). 
+  * New function fs2cs() is available at the user level (previously present but not visible). 
+  * Argument inus.only in cna()/cnaControl() has new default value TRUE.
+  * The choice of columns printed by default in msc, asf and csf tables changed.
+  * Functions and arguments that had been deprecated since V3.0 have now been removed. 
+  * More minor changes - not fully listed here.
+
 Changes in version 3.6.2 (2024-07-05)
   * Improved documentation of argument exclude in cna().
   * Update of vignette.

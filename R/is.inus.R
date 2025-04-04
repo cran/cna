@@ -2,10 +2,11 @@
 is.inus <- function(cond, x = NULL, csf.info = FALSE, 
                     def = c("implication", "equivalence")){
   cond <- noblanks(cond)
-  def = match.arg(def)
+  def <- match.arg(def)
   out <- rep(NA, length(cond))
   names(out) <- cond
-  result <- .inus(x, cond, csf.info = csf.info, def = def)
+  result <- .inus(x, cond, full = FALSE,
+                  csf.info = csf.info, def = def)
   out[] <- result
   attr(out, "csf.info") <- attr(result, "csf.info")
   ok <- !is.na(out)
@@ -19,29 +20,36 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
 }
 
 # ==== .inus() ====
-# Switch order of first 2 args to provide dispatching on x
-# identifies the asf that are INUS within some 1-sided formulas
-# Generic function
-.inus <- function(x, cond, ...) UseMethod(".inus")
+# Generic function .inus()
+# Identifies the asf that are INUS within some 1-sided formulas.
+# Switches order of first 2 args of is.inus() to allow dispatching on x.
+#   x         cti
+#   cond      character vector with the csf
+#   full      Logical: whether x can be considered to be complete.
+#             If full is FALSE, full.ct() will be applied to x
+# value: A logical vector of same length as cond
+.inus <- function(x, cond, full = FALSE, ...) UseMethod(".inus")
 
 
 # ==== Default Method (for matrix or data.frame) ====
-.inus.default  <- function(x, cond, ...){
-  if (is.null(x)){
+.inus.default  <- function(x, cond, full = FALSE, ...){
+  if (!full && is.null(x)){
     x <- auxConfigTable(cond, check = TRUE)
     if (attr(x, "type") == "mv") 
       message("is.inus() with cond of type \"mv\" usually requires explicit specification of x")
-  } else {
+  } else if (!full){
     x <- auxConfigTable(cond, x, check = TRUE)
+  } else if (!inherits(x, "configTable")){
+    x <- configTable(x, verbose = FALSE)
   }
-  .inus.configTable(x, cond, ...)
+  .inus.configTable(x, cond, full = full, ...)
 }
 
 # ==== Method for class 'configTable' ====
 #   x         configTable
 #   cond      character vector with the csf
 # value: A logical vector with same length as cond
-.inus.configTable <- function(x, cond, ...){
+.inus.configTable <- function(x, cond, full = FALSE, ...){
   cti <- ctInfo(x)
   qtypes <- .qcondType(cond, colnames(cti$scores), cti$type, 
                        stdComplex.multiple.only = FALSE) 
@@ -50,24 +58,20 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   if (all(!ok)) return(out)
   cond <- cond[ok]
   if (useCtiList(cti)) cti <- ctiList(cti, cond)
-  result <- .inus(cti, cond, ..., qtypes = qtypes[ok], full = FALSE) 
+  result <- .inus(cti, cond, full = full, ..., qtypes = qtypes[ok])
   out[ok] <- result
   attr(out, "csf.info") <- attr(result, "csf.info")
   out
 }
 
 # ==== Method for class 'cti' ====
-#   x         cti
-#   cond      character vector with the csf
-#   full      Logical: whether x can be considered to be complete.
-#             If not, full.ct() will be applied to x
-#   const.ok  If FALSE, the output will be FALSE for cond's evaluating to constant value
+# const.ok  If FALSE, the output will be FALSE for cond's evaluating to constant value
 # value: A logical vector of same length as cond
 # See examples
-.inus.cti <- function(x, cond, 
+.inus.cti <- function(x, cond, full = FALSE, 
                       qtypes = .qcondType(cond, colnames(x$scores), x$type,  
                                           stdComplex.multiple.only = FALSE), 
-                      full = FALSE, const.ok = FALSE, csf.info = FALSE, 
+                      const.ok = FALSE, csf.info = FALSE, 
                       def = "implication", ...){
   out <- rep(NA, length(cond))
 
@@ -97,7 +101,6 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
     out[selCond] <- out_csf
     attr(out, "csf.info") <- attr(out_csf, "csf.info")
   }
-
   out
 }
 
@@ -150,7 +153,6 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
       }
     }
   }
-  
   out
 }
 # Internal function for conds of type "stdAtomic" (asf)
@@ -197,7 +199,7 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   # structural redundancies?
   redund <- m_any(.redund.cti(cti, cond, simplify = FALSE)) 
   # partial structural redundancies?
-  redundInCsf <- partiallyRedundant(asfs, cti, def = def)
+  redundInCsf <- partiallyRedundant(asfs, cti, inusDef = def)
   # constant Factor?
   constFact <- constFact(cond, cti)
   # constant?
@@ -231,17 +233,17 @@ constantCols <- function(x){
 }
 
 # Aux function: partial redundancy
-partiallyRedundant <- function(x, cti, def = "implication"){
+partiallyRedundant <- function(x, cti, inusDef = "implication"){
   out <- logical(length(x))
   l1 <- lengths(x) == 1
   out[l1] <- FALSE
   for (i in which(!l1)){
-    if (def == "implication"){
+    if (inusDef == "implication"){
       sel <- as.vector(qcond_csf(C_concat(paste0("(", x[[i]], ")"), "*"), 
                                  cti$scores, force.bool = TRUE)) == 1L
     }
     for (j in seq_along(x[[i]])){
-      if (def == "equivalence"){
+      if (inusDef == "equivalence"){
         sel <- as.vector(qcond_csf(C_concat(paste0("(", x[[i]][-j], ")"), "*"), 
                                    cti$scores, force.bool = TRUE)) == 1L
       }

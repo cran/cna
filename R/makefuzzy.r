@@ -1,19 +1,4 @@
 
-# function allCombs: 
-# ==================
-# Generates a data frame of all possible combinations of length(x) multi-valued factors
-# the factors are labelled LETTERS[seq_along(x)] and x is taken as the number of levels of the factors
-# Arguments:
-#   x   integer vector with values >0
-# Value: A data frame
-allCombs <- function(x){    
-  stopifnot(x>0, x%%1 == 0)
-  out <- do.call(expand.grid, c(lapply(x, seq_len), KEEP.OUT.ATTRS = FALSE))
-  names(out) <- make.unique(rep(LETTERS, length.out = ncol(out)))
-  out
-}
-
-
 # function makeFuzzy:
 # ==================
 # Subsets a data frame x based on a condition cond

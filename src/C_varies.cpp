@@ -4,34 +4,44 @@
 // #include "headers.h"
 using namespace Rcpp;
 
-// round values in a matrix to 0 or 1
+// round values in a vector to 0 or 1
 // (auxiliary function used in C_Varies)
-NumericVector C_round(NumericVector x){
+NumericVector C_round(NumericVector x, NumericVector cutoff = 0.5, 
+                      std::string border = "up"){
   NumericVector out(x.size());
+  double borderVal;
+  if (border == "up"){
+    borderVal=1.0;
+  } else {
+    borderVal=0.0;
+  }
   for (int i=0; i<out.size(); i++){
-    if (x[i] == 0.5){
-      out[i] = 0;
+    if (x[i] > cutoff(0)){
+      out[i] = 1.0;
+    } else if (x[i] < cutoff(0)){
+      out[i] = 0.0;
     } else {
-      out[i] = round(x[i]);
+      out[i] = borderVal;
     }
   }
   return out;
 }
 
-// check if a numeric vector has more than 1 unique value
+// check if x varies within the cases where x==y ('concordant cases')
 // [[Rcpp::export]]
-bool C_varies(NumericVector x, NumericVector y, std::string asfSelection = "none"){
+bool C_varies(NumericVector x, NumericVector y, 
+              NumericVector cutoff = 0.5, std::string border = "up",
+              std::string asfSelection = "none"){
   if (asfSelection == "none") return(true);
-
   NumericVector xx = clone(x);
   NumericVector yy = clone(y);
   if (asfSelection == "cs"){
-    xx = C_round(x);
-    yy = C_round(y);
+    xx = C_round(x, cutoff, border);
+    yy = C_round(y, cutoff, border);
   }
   const int l=x.size();
   bool out=false;
-  double val0;
+  double val0=0.0;
   int i;
   for (i=0; i<l; ++i){
     if (xx(i) == yy(i)){

@@ -19,13 +19,13 @@ some(x, ...)
 }
 
 \arguments{
-  \item{x}{Data frame or \code{configTable}.}
+  \item{x}{Data frame or \code{\link{configTable}}.}
   \item{n}{Sample size.}
   \item{replace}{Logical; if \code{TRUE}, configurations are sampled with replacement.}
   \item{\dots}{Not used.}
 }
 
-\details{The function \code{some} randomly samples configurations from \code{x}, which is a data frame or \code{configTable}. Such samples can, for instance, be used to simulate data fragmentation (limited diversity), i.e. the failure to observe/measure all configurations that are compatible with a data generating causal structure. They can also be used to simulate large-N data featuring multiple cases instantiating each configuration.
+\details{The function \code{some} randomly samples configurations from \code{x}, which is a data frame or \code{\link{configTable}}. Such samples can, for instance, be used to simulate data fragmentation (limited diversity), i.e. the failure to observe/measure all configurations that are compatible with a data generating causal structure. They can also be used to simulate large-N data featuring multiple cases instantiating each configuration.
 }
 
 \value{

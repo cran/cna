@@ -9,7 +9,7 @@
 #' 
 #' If check = TRUE only valid names are returned (thus eliminating 
 #' entries as '(A' that can result in case on invalid cond structure).
-#' erwartet cond in dnf/msc/asf/csf Form
+#' expects cond in dnf/msc/asf/csf Form
 auxConfigTable  <- function(cond, x = NULL, check = TRUE){
   if (is.null(x)){
     type <- if (any(grepl("=[0-9]", cond))) "mv" else "cs"
@@ -28,7 +28,7 @@ auxConfigTable  <- function(cond, x = NULL, check = TRUE){
     if (inherits(x, "configTable")){
       type <- attr(x, "type")
     } else {
-      type <- ctType(x)
+      type <- type_from_data(x)
     }
     factors <- names(x)
     if (type %in% c("cs", "fs")){
@@ -45,7 +45,7 @@ auxConfigTable  <- function(cond, x = NULL, check = TRUE){
 }
 
 #' extractFactors
-#' Extracts factor names from a cond-Vekcor (globally, not individually for conds).
+#' Extracts factor names from a cond-Vector (globally, not individually for conds).
 #' Asuming a cond in some standard form (dnf/msc/asf, not csf!)
 #' Return char vector with factor names, 
 #' - if type is "mv": adds attr. 'values' (obsolete in cs-case)
@@ -77,17 +77,9 @@ extractFactors <- function(cond, type, check = FALSE,
       out <- unique(out)
   }
   if (check){
-    factor_ok <- checkFactorNames(out, warn = FALSE)
+    factor_ok <- checkFactorNames(out, stop_if_inadmissible = FALSE)
     out <- out[factor_ok]
   }
   if (type == "mv") attr(out, "values") <- valList[out]
   out
-}
-
-ctType <- function(x){
-  x <- unlist(x, recursive = FALSE, use.names = FALSE)
-  if (all(x %in% 0:1)) return("cs")
-  if (all(x<=1) && all(x>=0)) return("fs")
-  if (all(x>=0) && all(x%%1 == 0)) return("mv")
-  stop("Invalid data for a configTable")
 }

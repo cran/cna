@@ -94,7 +94,7 @@ getCond <- function(x, outcome = NULL, type = "auto", asf = TRUE){
   if (!is.null(outcome)){
     outcomeName <- sub("=.+", "", outcome)
     stopifnot(length(outcome) == 1, outcomeName %in% names(x))
-    outcomePositive <- condition(outcome, x)[[1]] == 1
+    outcomePositive <- condList(outcome, x)[[1]] == 1
     xx <- as.matrix(x)[outcomePositive, setdiff(colnames(x), outcomeName), drop = FALSE]
     xx <- unique(xx)
   } else {

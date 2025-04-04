@@ -8,9 +8,9 @@ Select the cases/configurations compatible with a data generating causal structu
 }
 
 \description{
-\code{selectCases} selects the cases/configurations that are compatible with a Boolean function, in particular (but not exclusively), a data generating causal structure, from a data frame or \code{configTable}.
+\code{selectCases} selects the cases/configurations that are compatible with a Boolean function, in particular (but not exclusively), a data generating causal structure, from a data frame or \code{\link{configTable}}.
 
-\code{selectCases1} allows for setting consistency (\code{con}) and coverage (\code{cov}) thresholds. It then selects cases/configurations that are compatible with the data generating structure to degrees \code{con} and \code{cov}.
+\code{selectCases1} allows for setting standard consistency (\code{con}) and coverage (\code{cov}) thresholds (i.e. none of the other \code{measures} can be used, see \code{\link{cna}}). It then selects cases/configurations that are compatible with the data generating structure to degrees \code{con} and \code{cov}.
 }
 
 \usage{
@@ -22,19 +22,19 @@ selectCases1(cond, x = full.ct(cond), type = "auto", con = 1, cov = 1,
 
 \arguments{
   \item{cond}{Character string specifying the Boolean function for which compatible cases are to be selected.}
-  \item{x}{Data frame or \code{configTable}; if not specified, \code{\link{full.ct}(cond)} is used.}
+  \item{x}{Data frame or \code{\link{configTable}}; if not specified, \code{\link{full.ct}(cond)} is used.}
   \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
-  \item{cutoff}{Cutoff value in case of \code{"fs"} data.}
+  \item{cutoff}{Cutoff value in case of \code{"fs"} data. Cases with a membership score equal to or greater than \code{cutoff} are selected.}
   \item{rm.dup.factors}{Logical; if \code{TRUE}, all but the first of a set of factors with identical value distributions are eliminated.}
   \item{rm.const.factors}{Logical; if \code{TRUE}, constant factors are eliminated.}
-  \item{con, cov}{Numeric scalars between 0 and 1 to set the minimum consistency and coverage thresholds.}
+  \item{con, cov}{Numeric scalars between 0 and 1 to set the minimum thresholds on standard consistency and coverage.}
 }
 
-\details{In combination with \code{allCombs}, \code{full.ct}, \code{randomConds} and \code{makeFuzzy}, \code{selectCases} is useful for simulating data, which are needed for inverse search trials benchmarking the output of the \code{cna} function. 
+\details{In combination with \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{randomConds}} and \code{\link{makeFuzzy}}, \code{selectCases} is useful for simulating data, which are needed for inverse search trials benchmarking the output of the \code{cna} function. 
 
-\code{selectCases} draws those cases/configurations from a data frame or \code{configTable} \code{x} that are compatible with a data generating causal structure (or any other Boolean or set-theoretic function), which is given to \code{selectCases} as a character string \code{cond}. If the argument \code{x} is not specified, configurations are drawn from \code{full.ct(cond)}. \code{cond} can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}). To illustrate, if the data generating structure is "A + B <-> C", then a case featuring A=1, B=0, and C=1 is selected by \code{selectCases}, whereas a case featuring A=1, B=0, and C=0 is not (because according to the data generating structure, A=1 must be associated with C=1, which is violated in the latter case). The type of the data frame is automatically detected by default, but can be manually specified by giving the argument \code{type} one of its non-default values: \code{"cs"} (crisp-set), \code{"mv"} (multi-value), and \code{"fs"} (fuzzy-set).
+\code{selectCases} draws those cases/configurations from a data frame or \code{configTable} \code{x} that are compatible with a data generating causal structure (or any other Boolean or set-theoretic function), which is given to \code{selectCases} as a character string \code{cond}. If the argument \code{x} is not specified, configurations are drawn from \code{full.ct(cond)}. \code{cond} can be a condition of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}). To illustrate, if the data generating structure is "\code{A + B <-> C}", then a case featuring A=1, B=0, and C=1 is selected by \code{selectCases}, whereas a case featuring A=1, B=0, and C=0 is not (because according to the data generating structure, A=1 must be associated with C=1, which is violated in the latter case). The type of the data is automatically detected by default, but can be manually specified by setting the argument \code{type} to one of its non-default values: \code{"cs"} (crisp-set), \code{"mv"} (multi-value), and \code{"fs"} (fuzzy-set).
 
-\code{selectCases1} allows for providing consistency (\code{con}) and coverage (\code{cov}) thresholds, such that some cases that are incompatible with \code{cond} are also drawn, as long as \code{con} and \code{cov} remain satisfied. The solution is identified by an algorithm aiming to find a subset of maximal size meeting the \code{con} and \code{cov} requirements. In contrast to  \code{selectCases}, \code{selectCases1} only accepts a condition of type \emph{atomic} as its \code{cond} argument, i.e. an atomic solution formula. Data drawn by \code{selectCases1} can only be modeled with consistency = \code{con} and coverage = \code{cov}. 
+\code{selectCases1} allows for providing thresholds on standard consistency (\code{con}) and coverage (\code{cov}), such that some cases that are incompatible with \code{cond} are also drawn, as long as \code{con} and \code{cov} remain satisfied. No other evaluation \code{measures} can be selected from \code{\link{showConCovMeasures}}. The solution is identified by an algorithm aiming to find a subset of maximal size meeting the \code{con} and \code{cov} requirements. In contrast to  \code{selectCases}, \code{selectCases1} only accepts a condition of type \emph{atomic} as its \code{cond} argument, i.e. an atomic solution formula. 
 
 }
 
@@ -42,7 +42,7 @@ selectCases1(cond, x = full.ct(cond), type = "auto", con = 1, cov = 1,
 A \code{configTable}.
 }
 
-\seealso{\code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{randomConds}}, \code{\link{makeFuzzy}}, \code{\link{configTable}}, \code{\link[cna]{condition}}, \code{\link{cna}}, \code{\link{d.jobsecurity}}}
+\seealso{\code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{randomConds}}, \code{\link{makeFuzzy}}, \code{\link{configTable}}, \code{\link[cna]{condition}}, \code{\link{cna}}, \code{\link{d.jobsecurity}}, \code{\link{showConCovMeasures}}}
 
 \examples{
 # Generate all configurations of 5 dichotomous factors that are compatible with the causal

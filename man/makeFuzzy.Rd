@@ -12,12 +12,12 @@ makeFuzzy(x, fuzzvalues = c(0, 0.05, 0.1), ...)
 }
 
 \arguments{
-  \item{x}{Data frame, matrix, or \code{configTable} featuring crisp-set (binary) factors with values 1 and 0 only.}
+  \item{x}{Data frame, matrix, or \code{\link{configTable}} featuring crisp-set (binary) factors with values 1 and 0 only.}
   \item{fuzzvalues}{Numeric vector of values from the interval [0,1].}
-  \item{\dots}{Additional arguments are passed to \code{\link{configTable}}.}
+  \item{\dots}{Additional arguments are passed to \code{configTable}.}
 }
 
-\details{In combination with \code{allCombs}, \code{full.ct} and \code{selectCases}, \code{makeFuzzy} is useful for simulating fuzzy-set data, which are needed for inverse search trials benchmarking the output of \code{cna}. \code{makeFuzzy} transforms a data frame or \code{configTable} \code{x} consisting of crisp-set (binary) factors into a fuzzy-set \code{configTable} by adding values selected at random from the argument \code{fuzzvalues} to the 0's and subtracting them from the 1's in \code{x}. \code{fuzzvalues} is a numeric vector of values from the interval [0,1].
+\details{In combination with \code{\link{allCombs}}, \code{\link{full.ct}} and \code{\link{selectCases}}, \code{makeFuzzy} is useful for simulating fuzzy-set data, which are needed for inverse search trials benchmarking the output of \code{\link{cna}}. \code{makeFuzzy} transforms a data frame or \code{configTable} \code{x} consisting of crisp-set (binary) factors into a fuzzy-set \code{configTable} by adding values selected at random from the argument \code{fuzzvalues} to the 0's and subtracting them from the 1's in \code{x}. \code{fuzzvalues} is a numeric vector of values from the interval [0,1].
 
 \code{selectCases} can be used before and \code{selectCases1} after the fuzzification to select those configurations that are compatible with a given data generating causal structure (see examples below).
 }

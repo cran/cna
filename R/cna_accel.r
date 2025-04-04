@@ -43,23 +43,11 @@ findAllSubsets <- function(x, k, cols = seq_len(ncol(x)), exclValues = integer(0
 #   f      Integer vector: frequencies of the rows of x
 # value  A matrix with 2 rows and length(cols) columns:
 #        consistencies and coverages of conjunctions of columns of x
-conj_conCov <- function(cols, x, y, f){
-  out <- apply(cols, 1, C_conj_conCov, x, y, f)
-  if (!is.matrix(out)) out <- matrix(out, nrow = 2L)
+conj_conCov <- function(cols, x, y, f, def = 1:2){
+  # out <- apply(cols, 1, C_conj_conCov, x, y, f, def = def)
+  out <- C_mconj_conCov(cols, x, y, f, def = def)
+  # if (!is.matrix(out)) out <- matrix(out, nrow = 2L)
   rownames(out) <- c("con", "cov")
   out
 }
 
-# disj_conCov: same as conj_conCov for disjunctions instead of conjunctions
-#   x      A "scores" matrix with numeric values between 0 and 1
-#   cols   Integer vector: selection of columns of x
-#   y      Numeric vector with values between 0 and 1: scores of outcome variable
-#   f      Integer vector: frequencies of the rows of x
-# value  A matrix with 2 rows and length(cols) columns:
-#        consistencies and coverages of conjunctions of columns of x
-disj_conCov <- function(cols, x, y, f){
-  out <- apply(cols, 1, C_disj_conCov, x, y, f)
-  if (!is.matrix(out)) out <- matrix(out, nrow = 2L)
-  rownames(out) <- c("con", "cov")
-  out
-}

@@ -34,7 +34,7 @@ List C_relist(const T& x, const IntegerVector l){
 
 // Exported "methods"
 // [[Rcpp::export]]
-List C_relist_Int(IntegerVector x, const IntegerVector l){
+List C_relist_Int(const IntegerVector x, const IntegerVector l){
   return C_relist(x, l);
 }
 // [[Rcpp::export]]

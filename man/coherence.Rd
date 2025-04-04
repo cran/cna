@@ -13,15 +13,14 @@ Calculates the coherence measure of complex solution formulas (csf).
 
 \usage{
 coherence(x, ...)
-\method{coherence}{default}(x, ct, type, ..., tt)
+\method{coherence}{default}(x, ct, type, ...)
 }
 
 \arguments{
   \item{x}{Character vector specifying an asf or csf.}
-  \item{ct}{Data frame or \code{configTable}.}
+  \item{ct}{Data frame or \code{\link{configTable}}.}
   \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
   \item{\dots}{Arguments passed to methods.}
-  \item{tt}{Argument \code{tt} is deprecated in \code{coherence()}; use \code{x} instead.}
 }
 
 \details{
@@ -32,7 +31,7 @@ Coherence is a measure for model fit that is custom-built for complex solution f
 Numeric vector of coherence values to which \code{cond} is appended as a "names" attribute. If \code{cond} is a \emph{csf} "asf1*asf2*asf3" composed of asf that do not have a factor in common, the \emph{csf} is rendered with commas in the "names" attribute: "asf1, asf2, asf3".
 }
 
-\seealso{\code{\link{cna}}, \code{\link[cna]{condition}}, \code{\link{selectCases}}, \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{condTbl}}}
+\seealso{\code{\link{cna}}, \code{\link[cna]{condition}}, \code{\link{selectCases}}, \code{\link{configTable}}, \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{condTbl}}}
 
 \examples{
 # Perfect coherence.

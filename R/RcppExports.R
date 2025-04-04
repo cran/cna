@@ -49,12 +49,8 @@ C_relist_List <- function(x, l) {
     .Call(`_cna_C_relist_List`, x, l)
 }
 
-C_varies <- function(x, y, asfSelection = "none") {
-    .Call(`_cna_C_varies`, x, y, asfSelection)
-}
-
-C_conCov <- function(x, y, f) {
-    .Call(`_cna_C_conCov`, x, y, f)
+C_varies <- function(x, y, cutoff = 0.5, border = "up", asfSelection = "none") {
+    .Call(`_cna_C_varies`, x, y, cutoff, border, asfSelection)
 }
 
 C_subsetMin <- function(x, sub) {
@@ -81,16 +77,88 @@ C_increment <- function(ii, nn, st, lim) {
     .Call(`_cna_C_increment`, ii, nn, st, lim)
 }
 
-C_find_asf <- function(conjlen, x, y, f, con, cov, maxSol) {
-    .Call(`_cna_C_find_asf`, conjlen, x, y, f, con, cov, maxSol)
+C_find_asf <- function(conjlen, x, y, f, con, cov, maxSol, def = as.integer( c(1, 2))) {
+    .Call(`_cna_C_find_asf`, conjlen, x, y, f, con, cov, maxSol, def)
 }
 
-C_conj_conCov <- function(cols, x, y, f) {
-    .Call(`_cna_C_conj_conCov`, cols, x, y, f)
+C_con <- function(x, y, f) {
+    .Call(`_cna_C_con`, x, y, f)
 }
 
-C_disj_conCov <- function(cols, x, y, f) {
-    .Call(`_cna_C_disj_conCov`, cols, x, y, f)
+C_cov <- function(x, y, f) {
+    .Call(`_cna_C_cov`, x, y, f)
+}
+
+C_ccon <- function(x, y, f) {
+    .Call(`_cna_C_ccon`, x, y, f)
+}
+
+C_ccov <- function(x, y, f) {
+    .Call(`_cna_C_ccov`, x, y, f)
+}
+
+C_wcon <- function(x, y, f) {
+    .Call(`_cna_C_wcon`, x, y, f)
+}
+
+C_wcov <- function(x, y, f) {
+    .Call(`_cna_C_wcov`, x, y, f)
+}
+
+C_wccov <- function(x, y, f) {
+    .Call(`_cna_C_wccov`, x, y, f)
+}
+
+C_wccon <- function(x, y, f) {
+    .Call(`_cna_C_wccon`, x, y, f)
+}
+
+C_mconj_conCov <- function(cols, x, y, f, def) {
+    .Call(`_cna_C_mconj_conCov`, cols, x, y, f, def)
+}
+
+C_conCovFromArray <- function(x, dim, f, def) {
+    .Call(`_cna_C_conCovFromArray`, x, dim, f, def)
+}
+
+C_severalMeasures <- function(x, dim, f, def) {
+    .Call(`_cna_C_severalMeasures`, x, dim, f, def)
+}
+
+C_con_det <- function(x, y, f) {
+    .Call(`_cna_C_con_det`, x, y, f)
+}
+
+C_cov_det <- function(x, y, f) {
+    .Call(`_cna_C_cov_det`, x, y, f)
+}
+
+C_ccon_det <- function(x, y, f) {
+    .Call(`_cna_C_ccon_det`, x, y, f)
+}
+
+C_ccov_det <- function(x, y, f) {
+    .Call(`_cna_C_ccov_det`, x, y, f)
+}
+
+C_wcon_det <- function(x, y, f) {
+    .Call(`_cna_C_wcon_det`, x, y, f)
+}
+
+C_wcov_det <- function(x, y, f) {
+    .Call(`_cna_C_wcov_det`, x, y, f)
+}
+
+C_wccov_det <- function(x, y, f) {
+    .Call(`_cna_C_wccov_det`, x, y, f)
+}
+
+C_wccon_det <- function(x, y, f) {
+    .Call(`_cna_C_wccon_det`, x, y, f)
+}
+
+C_conCovFromArrayDetailed <- function(x, dim, f, def) {
+    .Call(`_cna_C_conCovFromArrayDetailed`, x, dim, f, def)
 }
 
 C_disj_contained <- function(x, y, shortcut) {
@@ -167,5 +235,9 @@ C_hasSubsetInM <- function(y, x) {
 
 C_append_intList <- function(x, y) {
     .Call(`_cna_C_append_intList`, x, y)
+}
+
+gmins <- function(x, gr) {
+    .Call(`_cna_gmins`, x, gr)
 }
 

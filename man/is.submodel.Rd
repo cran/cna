@@ -6,7 +6,7 @@
 Identify correctness-preserving submodel relations
 }
 \description{
-The function \code{is.submodel} checks for each element of a vector of \code{\link{cna}} solution formulas whether it is a submodel of a specified target model \code{y}. If \code{y} is the true model in an inverse search (i.e. the ground truth), \code{is.submodel} identifies correct models in the \code{\link{cna}} output (see Baumgartner and Thiem 2020, Baumgartner and Ambuehl 2020).
+The function \code{is.submodel} checks for each element of a vector of \code{\link{cna}} solution formulas whether it is a submodel of a specified target model \code{y}. If \code{y} is the true model in an inverse search (i.e. the ground truth), \code{is.submodel} identifies correct models in the \code{cna} output.
 }
 
 \usage{
@@ -21,13 +21,14 @@ identical.model(x, y)
 }
 \details{
 
-To benchmark the reliability of a method of causal inference it must be tested to what degree the method recovers the true data generating structure \eqn{\Delta} or proper substructures of \eqn{\Delta} from data of varying quality. Reliability benchmarking is done in so-called \emph{inverse searches}, which reverse the order of causal discovery as normally conducted in scientific practice. An inverse search comprises three steps: (1) a causal structure \eqn{\Delta} is drawn/presupposed (as ground truth), (2) artificial data \eqn{\delta} is simulated from \eqn{\Delta}, possibly featuring various deficiencies (e.g. noise, fragmentation, measurement error etc.), and (3) \eqn{\delta} is processed by the benchmarked method in order to check whether its output meets the tested reliability benchmark (e.g. whether the output is true of or identical to \eqn{\Delta}). 
+To benchmark the reliability of a method of causal learning it must be tested to what degree the method recovers the true data generating structure \eqn{\Delta} or proper substructures of \eqn{\Delta} from data of varying quality. Reliability benchmarking is done in so-called \emph{inverse searches}, which reverse the order of causal discovery as normally conducted in scientific practice. An inverse search comprises three steps: (1) a causal structure \eqn{\Delta} is drawn/presupposed (as ground truth), (2) artificial data \eqn{\delta} is simulated from \eqn{\Delta}, possibly featuring various deficiencies (e.g. noise, fragmentation, etc.), and (3) \eqn{\delta} is processed by the benchmarked method in order to check whether its output meets the tested reliability benchmark (e.g. whether the output is true of or identical to \eqn{\Delta}). 
 
-The main purpose of \code{is.submodel} is to execute step (3) of an inverse search that is tailor-made to test the reliability of \code{\link{cna}} [with \code{\link{randomConds}} and \code{\link{selectCases}} designed for steps (1) and (2), respectively]. A solution formula \code{x} being a submodel of a target formula \code{y} means that all the causal claims entailed by \code{x} are true of \code{y}, which is the case if a causal interpretation of \code{x} entails conjunctive and disjunctive causal relevance relations that are all likewise entailed by a causal interpretation of \code{y}. More specifically, \code{x} is a submodel of \code{y} if, and only if, the following conditions are satisfied: (i) all factor values causally relevant according to \code{x} are also causally relevant according to \code{y}, (ii) all factor values contained in two different disjuncts in \code{x} are also contained in two different disjuncts in \code{y}, (iii) all factor values contained in the same conjunct in \code{x} are also contained in the same conjunct in \code{y}, and (iv) if \code{x} is a csf with more than one asf, (i) to (iii) are satisfied for all asfs in \code{x}. For more details see Baumgartner and Thiem (2020) or Baumgartner and Ambuehl (2020, online appendix).
+The main purpose of \code{is.submodel} is to execute step (3) of an inverse search that is tailor-made to test the reliability of \code{\link{cna}} [with \code{\link{randomConds}} and \code{\link{selectCases}} designed for steps (1) and (2), respectively]. A solution formula \code{x} being a submodel of a target formula \code{y} means that all the causal claims entailed by \code{x} are true of \code{y}, which is the case if a causal interpretation of \code{x} entails conjunctive and disjunctive causal relevance relations that are all likewise entailed by a causal interpretation of \code{y}. More specifically, \code{x} is a submodel of \code{y} if, and only if, the following conditions are satisfied: (i) all factor values causally relevant according to \code{x} are also causally relevant according to \code{y}, (ii) all factor values contained in two different disjuncts in \code{x} are also contained in two different disjuncts in \code{y}, (iii) all factor values contained in the same conjunct in \code{x} are also contained in the same conjunct in \code{y}, and (iv) if \code{x} is a csf with more than one asf, (i) to (iii) are satisfied for all asfs in \code{x}. For more details see Baumgartner and Thiem (2020). 
+
+If the target formula \code{y} is a csf, all solutions that \code{is.submodel} identifies as submodels of \code{y} make only causal claims that are true of \code{y}, but there may be more of these correctness-preserving solutions, which are not identified as such by \code{is.submodel}. See Baumgartner and Falk (2024) for details; see also the function \code{causal_submodel} in the \CRANpkg{frscore} package. 
 
 
-
-\code{is.submodel} requires two inputs \code{x} and \code{y}, where \code{x} is a character vector of \code{\link{cna}} solution formulas (asf or csf) and \code{y} is one asf or csf (i.e. a character string of length 1), viz. the target structure or ground truth. The function returns \code{TRUE} for elements of \code{x} that are a submodel of \code{y} according to the definition of submodel-hood given in the previous paragraph. If \code{strict = TRUE}, \code{x} counts as a submodel of \code{y} only if \code{x} is a proper part of \code{y} (i.e. \code{x} is not identical to \code{y}).
+\code{is.submodel} requires two inputs: \code{x} and \code{y}. \code{x} is a character vector of \code{cna} solution formulas (asf or csf), and \code{y} is one asf or csf (i.e. a character string of length 1), viz. the target structure or ground truth. The function returns \code{TRUE} for elements of \code{x} that are submodels of \code{y} according to the definition provided in the previous paragraph. If \code{strict = TRUE}, \code{x} counts as a submodel of \code{y} only if \code{x} is a proper part of \code{y} (i.e. \code{x} is not identical to \code{y}).
 
 The function \code{identical.model} returns \code{TRUE} only if \code{x} (which must be of length 1) and \code{y} are identical. It can be used to test whether \code{y} is completely recovered in an inverse search.
 }
@@ -35,14 +36,16 @@ The function \code{identical.model} returns \code{TRUE} only if \code{x} (which 
 \value{Logical vector of the same length as \code{x}.}
 
 \references{
-Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.
+%Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.
 
 Baumgartner, Michael and Alrik Thiem. 2020. \dQuote{Often Trusted But Never (Properly) Tested: Evaluating Qualitative Comparative Analysis}. \emph{Sociological Methods & Research} 49:279-311.
+
+Baumgartner, Michael and Christoph Falk. 2024. \dQuote{Quantifying the Quality of Configurational Causal Models}, \emph{Journal of Causal Inference} 60(1):20230032. doi: 10.1515/jci-2023-0032.
 
 }
 
 \seealso{
-\code{\link{randomConds}}, \code{\link{selectCases}}, \code{\link{cna}}.
+\code{\link{randomConds}}, \code{\link{selectCases}}, \code{\link{cna}}, \CRANpkg{frscore}.
 }
 
 \examples{

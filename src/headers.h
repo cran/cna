@@ -16,14 +16,14 @@ intList C_append_intList(const intList x, const intList y);
 // C_character.cpp
 std::string concat2(const std::string x, const std::string y, const std::string sep);
 std::string C_concat(const CharacterVector x, const std::string sep);
-CharacterVector C_mconcat(const charList x, const std::string sep, const bool sorted = false);
-std::string C_charList2string(const charList x, const std::string disj = "+", 
-                              const std::string conj = "*", const bool sorted = false);
-CharacterVector C_recCharList2char(const recCharList x, const std::string disj = "+",
-                                   const std::string conj = "*", const bool sorted = false);
+CharacterVector C_mconcat(const charList x, const std::string sep, const bool sorted);
+std::string C_charList2string(const charList x, const std::string disj, 
+                              const std::string conj, const bool sorted);
+CharacterVector C_recCharList2char(const recCharList x, const std::string disj,
+                                   const std::string conj, const bool sorted);
   
 // C_relist.cpp
-List C_relist_Int(IntegerVector x, const IntegerVector l);
+List C_relist_Int(const IntegerVector x, const IntegerVector l);
 List C_relist_Num(const NumericVector x, const IntegerVector l);
 List C_relist_Log(const LogicalVector x, const IntegerVector l);
 List C_relist_Char(const CharacterVector x, const IntegerVector l);
@@ -32,7 +32,7 @@ List C_relist_List(const List x, const IntegerVector l);
 // minimal_submodel.cpp
 LogicalMatrix C_disj_contained(const intList x, const intList y, const bool shortcut);
 LogicalVector C_is_submodel(const recIntList x, const intList ref, const bool strict);
-LogicalVector C_minimal(const recIntList x, const recIntList ref, bool strict);
+LogicalVector C_minimal(const recIntList x, const recIntList ref, const bool strict);
 bool C_intList_minimal_old(const intList x, const recIntList ref, const bool ignore_equals);
 LogicalVector C_minimal_old(const recIntList x, const recIntList ref, const bool ignore_equals);
 IntegerVector initComb(const int k);
@@ -54,7 +54,7 @@ IntegerVector C_increment(IntegerVector ii, const IntegerVector nn,
 IntegerMatrix C_find_asf(const IntegerVector conjlen, const numMatList x, 
                          const NumericVector y, const IntegerVector f,
                          const double con, const double cov, 
-                         const int maxSol);
+                         const int maxSol, const IntegerVector def);
 
 // C_redundant.cpp
 int C_find_first_false(const LogicalVector x);
@@ -62,11 +62,46 @@ LogicalVector C_redund(const LogicalMatrix x);
 List C_mredund(const LogicalMatrix x, const IntegerVector l);
 
 // conCov.cpp
-NumericVector C_conj_conCov(const IntegerVector cols, const NumericMatrix x, 
-                            const NumericVector y, const IntegerVector f);
-NumericVector C_disj_conCov(const IntegerVector cols, const NumericMatrix x, 
-                            const NumericVector y, const IntegerVector f);
-  
+double C_con(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_cov(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_ccon(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_ccov(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_wcon(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_wcov(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_wccov(const NumericVector x, const NumericVector y, const IntegerVector f);
+double C_wccon(const NumericVector x, const NumericVector y, const IntegerVector f);
+
+ccFun pickCCFn(const int ccDef);
+NumericVector C_conCov(const NumericVector x, const NumericVector y, const IntegerVector f, 
+                       const ccFun conFn, const ccFun covFn);
+NumericVector C_conj_conCov(const IntegerVector cols, const NumericMatrix x,
+                            const NumericVector y, const IntegerVector f,
+                            const ccFun conFn, const ccFun covFn);
+NumericMatrix C_mconj_conCov(const IntegerMatrix cols, const NumericMatrix x,
+                             const NumericVector y, const IntegerVector f,
+                             const IntegerVector def);
+NumericMatrix C_conCovFromArray(
+    const NumericVector x, const IntegerVector dim, const IntegerVector f, 
+    const IntegerVector def);
+
+// conCovDet.cpp
+NumericVector C_con_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_cov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_ccon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_ccov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_wcon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_wcov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_wccov_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+NumericVector C_wccon_det(const NumericVector x, const NumericVector y, const IntegerVector f);
+
+ccFunDet pickCCFnDet(const int ccDef);
+NumericVector conCovDetailed(
+  const NumericVector x, const NumericVector y, const IntegerVector f, 
+  const ccFunDet conFn, const ccFunDet covFn);
+NumericMatrix C_conCovFromArrayDetailed(
+    const NumericVector x, const IntegerVector dim, const IntegerVector f, 
+    const IntegerVector def);
+
 // uniqueCombs.cpp
 IntegerVector C_countUniques(const IntegerMatrix x);
 LogicalVector C_duplicatedMat(const IntegerMatrix x);

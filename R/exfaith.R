@@ -1,24 +1,24 @@
 
 exfaith <- function(cond, x, ...){
-  exff(x, noblanks(cond), ...)
+  .exff(x, noblanks(cond), ...)
 }
 
-# ==== exff() ====
+# ==== .exff() ====
 # calcuate exhaustiveness/Faithfulness of a cond
 
 # Generic function
 # Switch order of first 2 args to provide dispatching on x
-exff <- function(x, cond, ...) UseMethod("exff")
+.exff <- function(x, cond, ...) UseMethod(".exff")
 
 
 # ==== Default Method (for matrix or data.frame) ====
 # builds 
 #   x       configTable
 # value:    configTable, mv if original is mv, cs else
-exff.default  <- function(x, cond, ...){
+.exff.default  <- function(x, cond, ...){
   if (is.matrix(x) || is.data.frame(x)){
     x <- configTable(x, rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
-    exff.configTable(x, cond, ...)
+    .exff.configTable(x, cond, ...)
   } else {
     stop("Invalid specification of arguments")
   }
@@ -27,7 +27,7 @@ exff.default  <- function(x, cond, ...){
 
 # ==== Method for class 'configTable' ====
 # Function suited for interactive use
-exff.configTable <- function(x, cond, ...){
+.exff.configTable <- function(x, cond, ...){
   cti <- ctInfo(x)
   qtypes <- .qcondType(cond, colnames(cti$scores), cti$type,
                         stdComplex.multiple.only = FALSE) 
@@ -40,7 +40,7 @@ exff.configTable <- function(x, cond, ...){
   }
   # Always ctiList!
   cti <- ctiList(unique_cti_cs(cti), cond)
-  exff(cti, cond, ...)
+  .exff(cti, cond, ...)
 }
 
 # Aux fun unique_cti_cs(): 

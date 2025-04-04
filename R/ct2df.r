@@ -1,13 +1,5 @@
 
-ct2df <- function(ct, tt){
-  
-    # Ensure backward compatibility of argument tt
-    if (!missing(tt)){
-      warning("Argument tt is deprecated in ct2df(); use ct instead.", 
-              call. = FALSE)
-      if (missing(ct)) ct <- tt
-    }
-  
+ct2df <- function(ct){
   if (is.null(attr(ct, "n", exact = TRUE))) return(as.data.frame(ct, warn = FALSE))
   n <- nrow(ct)
   df <- as.data.frame(ct, warn = FALSE)[rep(seq_len(n), attr(ct, "n")), , drop = FALSE]

@@ -1,4 +1,4 @@
-# ==== auxiliary functions used in condition() ====
+# ==== auxiliary functions used in condList()/condition() ====
 # and other stuff used for switching between expressions and strings
 
 
@@ -159,10 +159,10 @@ getInfo_bool <- function(x, freqs){
   } else {
     sumf <- sum(freqs)
   }
-  sy <- colSums(x * freqs)
-  data.frame(sy, freq = sy/sumf, sumf, row.names = NULL)
+  sumSc <- colSums(x * freqs)
+  data.frame(freq = sumSc/sumf, sumf, sumSc, row.names = NULL)
 }
-getInfo_asf <- function(x, freqs){
+getInfo_asf <- function(x, freqs, conCovDef){
   resp <- attr(x, "response")
   if (is.list(x)){
     if (missing(freqs)) freqs <- attr(x, "n")
@@ -172,43 +172,32 @@ getInfo_asf <- function(x, freqs){
   } else {
     sumf <- sum(freqs)
   }
-  left <- matrix(x[, 1, , drop = TRUE], dim(x)[[1]])
-  right <- matrix(x[, 2, , drop = TRUE], dim(x)[[1]])
-  lrmin <- left
-  lrmin[right<left] <- right[right<left]
-  sx <- colSums(left * freqs)
-  sy <- colSums(right * freqs)
-  sxy <- colSums(lrmin * freqs)
-  if (nrow(x) == 0){
-    consistency <- coverage <- NA_real_
-  } else {
-    consistency <- sxy/sx
-    coverage <- sxy/sy
-  }
-  data.frame(sx, sy, sxy, consistency, coverage, sumf, 
-             outcome = resp, 
+  coco <- conCovFromArray(x, freqs, def = conCovDef, detailed = TRUE)  # detailed!
+  data.frame(conNum = coco[2, ], conDenom = coco[3, ], con = coco[1, ], 
+             covNum = coco[5, ], covDenom = coco[6, ], cov = coco[4, ], 
+             sumf = sumf, outcome = resp, 
              row.names = NULL,
              stringsAsFactors = FALSE)
 }
 getInfo_csf <- function(x){
   attr(x, "conCov")
 }
-getInfo_customCsf <- function(x, lengths, freqs){
+getInfo_customCsf <- function(x, lengths, freqs, conCovDef){
   resp <- happly(lapply(x, "names"), rhs, relist = FALSE)
   l <- length(x)
   structs <- lapply(x, attr, "complStruct")
   x <- array(unlist(x, recursive = TRUE, use.names = FALSE),
              c(length(freqs), 2, sum(lengths(x))))
   attr(x, "response") <- resp
-  asfInf <- getInfo_asf(x, freqs)
-  asfCons <- C_relist_Num(asfInf$consistency, lengths)
-  asfCovs<- C_relist_Num(asfInf$coverage, lengths)
+  asfInf <- getInfo_asf(x, freqs, conCovDef = conCovDef)
+  asfCons <- C_relist_Num(asfInf$con, lengths)
+  asfCovs<- C_relist_Num(asfInf$cov, lengths)
 
   conCov <- data.frame(matrix(NA_real_, l, 2))
-  colnames(conCov) <- c("consistency", "coverage")
+  colnames(conCov) <- c("con", "cov")
   for (i in seq_along(structs)){
     asfConCov <- data.frame(rbind(asfCons[[i]], asfCovs[[i]]))
-    rownames(asfConCov) <- c("consistency", "coverage")
+    rownames(asfConCov) <- c("con", "cov")
     names(asfConCov) <- paste0("atomicCond..", seq_along(asfConCov))
     conCov[i, ] <- eval(structs[[i]], asfConCov, enclos = logicalOperators)
   }
@@ -218,6 +207,16 @@ getInfo_customCsf <- function(x, lengths, freqs){
   conCov
 }
 
+conCovFromArray <- function(x, f, def = 1:2, detailed = FALSE, 
+                            imposeLength2 = TRUE){
+  if (detailed){
+    C_conCovFromArrayDetailed(x, dim(x), f, def = def)
+  } else if (!imposeLength2){
+    C_severalMeasures(x, dim(x), f, def = def)
+  } else {
+    C_conCovFromArray(x, dim(x), f, def = def)
+  }
+}
 
 initializeInfo <- function(...){
   cl <- match.call()
@@ -225,8 +224,9 @@ initializeInfo <- function(...){
   cl$stringsAsFactors <- FALSE
   x <- eval.parent(cl)
   n <- nrow(x)
-  x$sumf <- x$sxy <- x$sy <- x$sx <- x$complexity <- x$freq <- 
-    x$coverage <- x$consistency <- emptyVector("double", n)
+  x$covDenom <- x$covNum <- x$conDenom <- x$conNum <- 
+    x$sumSc <- x$sumf <- x$freq <- x$cov <- x$con <- x$complexity <- 
+    emptyVector("double", n)
   x$outcome <- emptyVector("character", n)
   x$asfCovs <- x$asfCons <- emptyVector("list", n)
   x
@@ -243,7 +243,7 @@ emptyVector <- function(type, length){
 
 updateInfo <- function(info, which, x){
   if (!any(which)) return(info)
-  which <- which(which) # logigal index -> integer index
+  which <- which(which) # logical index -> integer index
   stopifnot(length(which) == nrow(x), names(x) %in% names(info))
   info[which, names(x)] <- x
   info

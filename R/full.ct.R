@@ -70,7 +70,10 @@ full.ct.cti <- function(x, cond = NULL, nmax = NULL, ...){
     x <- selectFactors(x, varsInCond)
   }
   expanded <- .expandUniqvals(x$uniqueValues, nmax = nmax)
-  if (x$type == "fs") x$type <- "cs"
+  if (x$type == "fs"){
+    x$type <- "cs"
+    x$fsInfo <- NULL
+  }
   scoresColnms <- colnames(x$score)
   x$scores <- do.call(cbind, 
                       mapply(outer, expanded, x$uniqueValues, 
@@ -117,6 +120,15 @@ full.ct.configTable <- function(x, cond = NULL, nmax = NULL, ...){
               rm.dup.factors = FALSE, rm.const.factors = FALSE, verbose = FALSE)
 }
 
+
+# ==== Method for class 'condTbl' ====
+# Expand config table of all variables & values appearing in x$condition
+full.ct.condTbl <- function(x, nmax = NULL, ...){
+  if (!("condition" %in% names(x)))
+    stop("Required column ", dQuote("condition"), " is missing.")
+  full.ct(x$condition, nmax = nmax, ...)
+}
+
 # ==== Default Method (for matrix or data.frame) ====
 # builds full.ct
 # cases: character, list, matrix/data.frame
@@ -129,6 +141,7 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, nmax = NULL, ...){
     }
   }
   if (is.character(x)){
+    x <- noblanks(x)
     type <- if (any(grepl("=", x))) "mv" else "cs"
     px <- lapply(x, tryparse)
     if (!all(ok <- !vapply(px, is.null, logical(1))))
@@ -176,6 +189,15 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, nmax = NULL, ...){
                   verbose = FALSE, ...), 
       cond = cond, nmax = nmax))
   }
-  stop("Don't know how to apply 'full.ct' to this input.")
+  stop("Don't know how to apply full.ct() to this input.")
 }
   
+
+# ------------------------------------------------------------------------------
+
+# function allCombs(): 
+allCombs <- function(nvals){    
+  stopifnot(is.numeric(nvals), nvals > 0, nvals%%1 == 0)
+  full.ct(lapply(nvals, seq_len), type = "mv")
+}
+

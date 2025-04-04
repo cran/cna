@@ -59,8 +59,9 @@ randomAsf <- function(x, outcome = NULL, positive = TRUE,
   if (length(compl[[2]]) == 0) compl[[2]] <- length(x)
   compl_ok <- is.list(compl) &&
                 (length(compl) == 2) &&
-                all(sapply(compl, is.numeric)) &&
-                all(sapply(compl, function(.c) all(.c %in% 1:length(x))))
+                all(vapply(compl, is.numeric, FUN.VALUE = logical(1))) &&
+                all(vapply(compl, function(.c) all(.c %in% 1:length(x)), 
+                           FUN.VALUE = logical(1)))
   if(!compl_ok) stop("Invalid specification of compl")
 
   # number of msc's

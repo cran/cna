@@ -2,10 +2,10 @@
 \alias{configTable}
 \alias{print.configTable}
 
-\title{Assemble cases with identical configurations in a configuration table}
+\title{Assemble cases with identical configurations into a configuration table}
 
 \description{
-The \code{configTable} function assembles cases with identical configurations from a crisp-set, multi-value, or fuzzy-set data frame in a table called a \emph{configuration table}.
+The \code{configTable} function assembles cases with identical configurations from a crisp-set, multi-value, or fuzzy-set data frame into a table called a \emph{configuration table}.
 }
 
 \usage{
@@ -58,7 +58,7 @@ The \code{row.names} argument of the \code{print} function determines whether th
 
 
 \value{
-An object of type \dQuote{configTable}, i.e. a data.frame with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
+An object of type \dQuote{configTable}, i.e. a \code{data.frame} with additional attributes \dQuote{type}, \dQuote{n} and \dQuote{cases}.
 }
 
 \note{For those users of \pkg{cna} that are familiar with Qualitative Comparative Analysis (QCA), it must be emphasized that a \emph{configuration table} is a different type of object than a QCA \emph{truth table}. While a truth table indicates whether a minterm (i.e. a configuration of all exogenous factors) is sufficient for the outcome or not, a configuration table is simply an integrated representation of the input data that lists all configurations in the data exactly once. A configuration table does not express relations of sufficiency.
@@ -156,8 +156,10 @@ cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cu
     ordering = "SP", con = .75, cov = .6)
 cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 10),
     ordering = "SP", con = .75, cov = .6)
+cna(configTable(d.performance[1:8], frequency = d.performance$frequency, case.cutoff = 10),
+    ordering = "SP", con = .75, cov = .75, measures = c("PAcon", "PACcov"))
 print(cna(configTable(d.performance[1:8], frequency = d.performance$frequency, 
-    case.cutoff = 15), ordering = "SP", con = .75, cov = .6, what = "a"), 
-    nsolutions = "all")
+    case.cutoff = 15), ordering = "SP", con = .75, cov = .75, what = "a", 
+    measures = c("PAcon", "PACcov")), nsolutions = "all")
 }
 }
