@@ -29,8 +29,8 @@ There exist three additional R packages for data analysis with CNA: \CRANpkg{frs
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 4.0.0\cr
-Date:    \tab 2025-04-04\cr
+Version: \tab 4.0.3\cr
+Date:    \tab 2025-06-02\cr
 License: \tab GPL (>= 2)\cr
     }
 }

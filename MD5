@@ -1,4 +1,4 @@
-32f5f0a01306e0149ef1da0b1ff4e70f *DESCRIPTION
+8c96e22e5f9a105f7a76f85baec851c7 *DESCRIPTION
 bc2397399bec8d449802e20cb6758959 *NAMESPACE
 7793307fde2240c0788114c1f557c835 *R/RcppExports.R
 0b128bfe70e862f6ea0b5c12c474dcd0 *R/auxConfigTable.R
@@ -8,11 +8,11 @@ faf85ab6a3b92383e41d353eb475cca4 *R/cnaControl.R
 4a766a2a3b8050836829e8baf9cfcb55 *R/cna_accel.r
 584b136173f16542e11079885afba7c9 *R/cna_aux.r
 c952fd9d8c7f1d4da113af0ad6090a5b *R/coherence.r
-f1945a16154bb8e9ab4942e977efb241 *R/condTbl.r
+da4e85d83629798c498534d8c5d3201a *R/condTbl.r
 885315fc4a0a8bf7e8ba8e1ca0dd0b43 *R/cond_manip.R
 7be05435b19a5c73c0fdd322f1daab51 *R/condition.r
 d4133305417ea85d9b1713074ab7ea68 *R/condition_aux.R
-b5f2b42e8325028dbcefe099f618ad9b *R/configTable.R
+5eee15475d8fa02d1f8bcb91089c569e *R/configTable.R
 e8abdac4b639b92b5d31d11b281568b8 *R/csf.R
 7bd7d68e9b4e52874fa7454e2117a77d *R/ct2df.r
 14e808782b9822217c695377b297e2ce *R/ctiList.R
@@ -57,13 +57,13 @@ dfa181b6390a1df889aae8a33f9d301c *data/d.pban.tab.gz
 8c018ee8a696fd2ce0b20b1576bf07ed *data/d.performance.tab.gz
 f3c182239eb56859a6d3e525b976c0ff *data/d.volatile.tab.gz
 94ec9858412808eaafcec4a979cc8454 *data/d.women.tab.gz
-861948cdd61f647a17ae5940daf1ecb8 *inst/NEWS
+4c1e50a2daeb0373defd8b9b5e11d9a5 *inst/NEWS
 7e0a4589a1de8299d5118e66210b0d8a *inst/doc/cna.R
 136468a493cfc810434f67a3f803c913 *inst/doc/cna.Rnw
-8f0206f854d958f850623d34f4f200ec *inst/doc/cna.pdf
+32de04305efb77840ebb8fcb477de678 *inst/doc/cna.pdf
 e0b23a602b3d56375de463a0c818a784 *man/cna-deprecated.Rd
 0691b90111cc58e8c28cd024ff6155c3 *man/cna-internals.Rd
-ba456fdbb99fb8d904a8b6ae37081efb *man/cna-package.Rd
+5a47c6ae68f76520772ab16a8889e959 *man/cna-package.Rd
 1c649ef7936931196c1e86c59f47ed95 *man/cna-solutions.Rd
 5e15376154cf5a468570a90ac3f84f9b *man/cna.Rd
 fb3995ac0c8931b1ce869cc0c3f28bd5 *man/cnaControl.Rd

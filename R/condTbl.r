@@ -259,24 +259,39 @@ as.data.frame.condTbl <- function(x, ...){
 
 # `[` method for class condTbl - keeps measures attributes if 'condition', 
 # 'con' and  'cov' are still present as columns in the output
-`[.condTbl` <- function(x, ...){
-   out <- NextMethod()
-   nms <- colnames(out)
-   cnaClasses <- c("condString", "outcomeString", "stdAtomic", "stdBoolean", "stdComplex")
-   keepClass <- any(vapply(out, inherits, cnaClasses, FUN.VALUE = logical(1)))
-   conCovRelevant <- if (keepClass){
-     all(c("con", "cov") %in% colnames(out)) &&
-       any(rowAlls(!is.na(out[c("con", "cov")])))
-     } else FALSE
-   if (keepClass){
-     attr(out, "measures") <- if (conCovRelevant){
-       attr(x, "measures")
-     } else NULL
-   } else {
-     out[] <- lapply(out, as.vector)
-     class(out) <- setdiff(class(out), "condTbl")
-     attr(out, "measures") <- NULL
-   }
-   out
+`[.condTbl` <- function(x, i, j, drop = FALSE){
+  nargs_ij <- nargs() - 1L - !missing(drop)
+  if (nargs_ij == 1){
+    if (!nzchar(deparse(substitute(i), nlines = 1))) i <- rep(TRUE, nrow(x))
+    if (missing(j)){
+      j <- i
+      i <- rep(TRUE, nrow(x))
+    } else i <- rep(TRUE, nrow(x))
+  } else {
+    if (!nzchar(deparse(substitute(i), nlines = 1))) i <- rep(TRUE, nrow(x))
+    if (!nzchar(deparse(substitute(j), nlines = 1))) j <- rep(TRUE, ncol(x))
+  }
+  out <- `[.data.frame`(x, i, j, drop = FALSE)
+  nms <- colnames(out)
+  cnaClasses <- c("condString", "outcomeString", "stdAtomic", "stdBoolean", "stdComplex")
+  keepClass <- any(vapply(out, inherits, cnaClasses, FUN.VALUE = logical(1)))
+  conCovRelevant <- if (keepClass){
+    all(c("con", "cov") %in% colnames(out)) &&
+      any(!vapply(c("con", "cov"), function(nm) all(is.na(out[[nm]])), 
+                  FUN.VALUE = logical(1)))
+    } else FALSE
+  if (keepClass){
+    attr(out, "measures") <- if (conCovRelevant){
+      attr(x, "measures")
+    } else NULL
+  } else {
+    out[] <- lapply(out, as.vector)
+    class(out) <- setdiff(class(out), "condTbl")
+    attr(out, "measures") <- NULL
+  }
+  if (drop && length(out) == 1){
+    out <- out[[1]]
+  }
+  out
 }
 

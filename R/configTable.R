@@ -9,6 +9,7 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
                         .cases = NULL, verbose = TRUE){
   nm.x <- deparse(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x), length(case.cutoff) == 1)
+  if (anyNA(x)) stop("NA values are not allowed in a configuration table.")
   if (is.matrix(x)) {
     if (is.null(colnames(x)))
       colnames(x) <- make.unique(rep(LETTERS, length.out = ncol(x)))
@@ -212,10 +213,12 @@ print.configTable <- function(x, show.cases = NULL, ...){
   cl$rm.dup.factors <- cl$rm.const.factors <- NULL
   len <- length(cl)
   nms <- names(cl)
-  if ("drop" %in% nms && !isFALSE(drop)){
-    warning("'drop=TRUE' is ignored")
-    cl$drop <- NULL
-    len <- len - 1L
+  if ("drop" %in% nms){
+    if (!isFALSE(drop)){
+      warning("'drop=TRUE' is ignored")
+    }
+  cl$drop <- NULL
+  len <- len - 1L
   }
   noRowPos <- len == 3
   cl1 <- quote(`[.data.frame`(x, , , drop = FALSE))

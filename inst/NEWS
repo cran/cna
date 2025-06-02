@@ -1,3 +1,5 @@
+Changes in version 4.0.3 (2025-06-20)
+  * Fixed a bug in the method [.configTable.
 
 Changes in version 4.0.0 (2025-04-04)
   * cna() accepts alternative definitions of consistency and coverage. Users can change their selection of definitions and specify their choice in the new argument measure.
