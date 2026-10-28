@@ -4,7 +4,8 @@ cnaControl <- function(
    type = "auto", con.msc = NULL, 
    rm.const.factors = FALSE, rm.dup.factors = FALSE, 
    cutoff = 0.5, border = "up", asf.selection = c("cs", "fs", "none"),
-   only.minimal.msc = TRUE, only.minimal.asf = TRUE, maxSol = 1e6){
+   func.minimal.only = FALSE, only.minimal.msc = TRUE, only.minimal.asf = TRUE, 
+   maxSol = 1e6){
   # Select inus.def (choices: "implication", "equivalence")
   inus.def <- match.arg(inus.def)
   # Select asf.selection (choices: "none", "cs", "fs")
@@ -16,8 +17,9 @@ cnaControl <- function(
     list(inus.only = inus.only, inus.def = inus.def, type = type, 
          con.msc = con.msc, rm.const.factors = rm.const.factors, 
          rm.dup.factors = rm.dup.factors, cutoff = cutoff, border = border,
-         asf.selection = asf.selection, only.minimal.msc = only.minimal.msc, 
-         only.minimal.asf = only.minimal.asf, maxSol = maxSol)
+         asf.selection = asf.selection, func.minimal.only = func.minimal.only, 
+         only.minimal.msc = only.minimal.msc, only.minimal.asf = only.minimal.asf, 
+         maxSol = maxSol)
   class(out) <- "cnaControl"
   out
 }
@@ -60,7 +62,7 @@ checkCnaParams <- function(env = parent.frame()){
   logParams <- c(
     mget(c("strict", "acyclic.only", "verbose"), env, inherits = FALSE),
     env$control[c("inus.only", "rm.const.factors", "rm.dup.factors", 
-                  "only.minimal.msc", "only.minimal.asf")])
+                  "func.minimal.only", "only.minimal.msc", "only.minimal.asf")])
   # numeric scalars
   numParams <- c(mget(c("con", "cov"), env, inherits = FALSE),
                  env$control[c("con.msc", "cutoff")])

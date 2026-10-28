@@ -21,7 +21,7 @@ group.by.outcome(object, cases = TRUE)
 \arguments{
   \item{object,x}{Object of class \dQuote{condList} as output by the \code{\link[cna]{condition}} function.}
   \item{n}{Positive integer: the maximal number of conditions to be printed.}
-  \item{\dots}{Not used.}
+  \item{\dots}{In \code{summary}, passed on to \code{\link[cna]{print.condList}}; not used in the other functions.}
   \item{row.names,optional}{As in \code{\link[base]{as.data.frame}}.}
   \item{nobs}{Logical; if \code{TRUE}, the returned data frame has a 
         column named \dQuote{n.obs} indicating how many cases instantiate a given configuration in the data.}

@@ -4,7 +4,7 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
                  inus.only = x$control$inus.only, inus.def = x$control$inus.def,  
                  minimalizeCsf = inus.only,
                  acyclic.only = x$acyclic.only, cycle.type = x$cycle.type, 
-                 verbose = FALSE){
+                 func.minimal.only = x$control$func.minimal.only, verbose = FALSE){
 
   # resolve inus.only in case it contains an inus definition
   if (is.character(inus.only)){
@@ -19,23 +19,34 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
   }
   
   # details
+  miss_details <- missing(details)
   details <- resolveDetails(details)
   if (inus.only && isFALSE(x$control$inus.only)){
     stop("Calling csf() with inus.only=TRUE on a cna-object generated as cna(..., inus.only = FALSE) is not meaningful.")
+  }
+  # remove "cyclic" from details if it is present because cna() was run with acyclic.only=F
+  # and csf() with acyclic.only=T
+  if (miss_details && "cyclic" %in% details$detailMeasures && acyclic.only){
+    details <- removeDetailMeasure(details, "cyclic")
+  }
+  # similar for func.minim:
+  if (miss_details && "fm_empirical" %in% details$detailMeasures && func.minimal.only){
+    details <- removeDetailMeasure(details, "fm_empirical")
   }
   # Checking/enforcing compatibility of inus.only and minimalizeCsf
   if (inus.only && !minimalizeCsf){
     minimalizeCsf <- TRUE
     message("Calling csf() with inus.only=TRUE and minimalizeCsf=FALSE is not meaningful - setting minimalizeCsf=TRUE")
   }
-  if (inus.only){ 
-    details_out <- details
-    details <- addDetailMeasure(details, c("inus", if (acyclic.only) "cyclic"))
-  } else {
-    details <- details_out <- addDetailMeasure(details, "inus")
-    if (acyclic.only) details <- addDetailMeasure(details_out, "cyclic")
-  }
-  
+  details_out <- details
+  # Add inus/cyclic/fm to details_out if they are (potentially) informative
+  addToDetails <- c(character(0),  
+                    if (!inus.only) "inus", 
+                    if (!acyclic.only) "cyclic", 
+                    if (!func.minimal.only) "fm_empirical")
+  details_out <- addDetailMeasure(details_out, addToDetails, where = "front")
+  # they are required in details anyway
+  details <- addDetailMeasure(details, c("inus", "cyclic", "fm_empirical"))
   if ("cyclic" %in% details$detailMeasures) cycle.type <- match.arg(cycle.type)
 
   # Output if no asf
@@ -44,6 +55,7 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
   }
   if (nrow(asfx) == 0 || n.init <= 0) {
     out <- emptyCondTbl("stdComplex", measures = x$measures, 
+                        fm = !func.minimal.only, 
                         details = getDetailCols(details_out))
     return(out)
   }
@@ -84,16 +96,19 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
   }
   
   # ---- Calculate required details if not done in the previous step ----
-  details_without_cyclic <- removeDetailMeasure(details, "cyclic")
-  # Note: inus is always part of details_without_cyclic
+  details_reduced <- removeDetailMeasure(details, c("cyclic", "fm_empirical")) 
+  # inus is always part of details_reduced
+  # cyclic and fm_empirical are treated later
+  # fm_empirical depends on which solutions are kept in subsequent steps
   
   inus_from_asfs <- if ("inus" %in% names(out)) out$inus else TRUE
   if (useCtiList(cti)){
     cti1 <- ctiList(cti, out$condition)
   } else cti1 <- cti
-  detTable <- .det(cti1, out$condition, what = details_without_cyclic$detailMeasures, 
+  detTable <- .det(cti1, out$condition, what = details_reduced$detailMeasures, 
                    conCovMeasures = getDetailCols(details, "conCov"),
-                   cycle.type = cycle.type, in.csf = TRUE, inus.def = inus.def)
+                   cycle.type = cycle.type, in.csf = TRUE, inus.def = inus.def, 
+                   inus.func.minim = FALSE, condType = "stdComplex")
   out[names(detTable)] <- detTable
   out$inus <- out$inus & inus_from_asfs
 
@@ -107,6 +122,7 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
   }
   
   # ---- Remove cyclic solutions if acyclic.only=TRUE ----
+  # note cyclic() must be executed _after_ 
   if (nrow(out) && "cyclic" %in% details$detailMeasures){
     out$cyclic <- cyclic(out$condition, cycle.type = cycle.type, use.names = FALSE)
     if (acyclic.only){
@@ -126,6 +142,19 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
       cat("Elimination of solutions that are a submodel of another (as removeSubCsf=TRUE): no. of csf: ", 
           n.out, "->", n.out <- nrow(out), "\n", sep = "")
     }
+  }
+  
+  #----  functional minimality ----
+  fm_empirical <- if (nrow(out)) .fm_emp(out$condition) else logical(0)
+  if (nrow(out) && func.minimal.only){
+    out <- out[fm_empirical, ]
+    if (verbose){
+      cat("Elimination of solutions that are not functionally minimal: (as func.minimal.only=TRUE) no. of csf: ",
+          n.out, "->", n.out <- nrow(out), "\n", sep = "")
+    }
+  }
+  if ("fm_empirical" %in% details_out$detailMeasures){
+    out$fm_empirical <- if (func.minimal.only) TRUE else fm_empirical
   }
   
   # --- Adjustments in table of csf's, if required --- 
@@ -154,7 +183,7 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
       }
     }
   }
-  
+
   # --- re-order csf ---
   if (nrow(out)){
     ord <- with(out, order(complexity, -con*cov, 
@@ -164,9 +193,15 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
 
   if (nrow(out) == 0 && nrow(asfx)>0){
     out <- asfx
+    class(out$condition) <- c("stdComplex", "character")
+    fm_empirical <- .fm_emp(out$condition)
+    if (func.minimal.only){
+      out <- out[fm_empirical, ]
+    }
     detTable <- .det(cti, out$condition, what = details$detailMeasures, 
                      conCovMeasures = getDetailCols(details, "conCov"),
-                     cycle.type = cycle.type, inus.def = inus.def)
+                     cycle.type = cycle.type, inus.def = inus.def, 
+                     condType = "stdComplex")
     out[names(detTable)] <- detTable
     message("The asfs could not be combined to csfs. They are returned separately.")
   }
@@ -174,13 +209,14 @@ csf <- function (x, n.init = 1000, details = x$details, asfx = NULL,
   # --- Remove paranthesis from csf consisting of a simple asf:
   csf_length1 <- !grepl(")*(", out$condition, fixed = TRUE)
   out$condition[csf_length1] <- sub("^\\((.+)\\)$", "\\1", out$condition[csf_length1])
-  out <- out[c("outcome", "condition", "con", "cov", "complexity", 
-               getDetailCols(details_out))]
+  out <- out[union(c("outcome", "condition", "con", "cov", "complexity"), 
+                   getDetailCols(details_out))]
   rownames(out) <- NULL
-  as.condTbl(out, measures = x$measures, condClass = "stdComplex")
+  out <- as.condTbl(out, measures = x$measures, condClass = "stdComplex")
+  out
 }
 
-# Combine asf into csf's
+# Combine asfs into csfs
 combineAsf <- function(csflist, n){  
   n.asf <- vapply(csflist, nrow, integer(1))
   n.asfCombs <- prod(n.asf)

@@ -11,14 +11,13 @@ coherence <- function(x, ...){
 # x      character vector
 # ct     configTable or data frame
 # type   type of configTable
-coherence.default <- function(x, ct, type, ...){
+coherence.default <- function(x, ct, type = "auto", ...){
   if (length(x) == 0L) return(numeric(0))
   x <- noblanks(x)
   if (inherits(ct, "configTable")){
     type <- attr(ct, "type")
   } else {
-    if (missing(type)) type <- "auto"
-    ct <- configTable(ct, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE)
+    ct <- configTable(ct, type = type, verbose = FALSE)
   }
   cti <- ctInfo(ct)
   qtypes <- .qcondType(x, colnames(cti$scores), cti$type, 

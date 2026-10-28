@@ -7,8 +7,8 @@ msc <- function(x, details = x$details, cases = FALSE){
   basicCols <- intersect(
     c("outcome", "condition", "con", "cov", "complexity", "minimal"),
     names(all.msc))
-  details <- resolveDetails(details)
-  details <- removeDetailMeasure(details, c("inus", "coherence", "redundant", "cyclic"))
+  details <- resolveDetails(details, asfOnly = TRUE)
+  details <- removeDetailMeasure(details, c("inus", "cyclic"))
   detailCols <- getDetailCols(details)
   if (NROW(all.msc) == 0L) 
     return(emptyCondTbl("stdAtomic", measures = x$measures, 
@@ -23,7 +23,8 @@ msc <- function(x, details = x$details, cases = FALSE){
     add_det <- .det(ctInfo(x$configTable), out$condition, # cutoff / border  
                     what = intersect(getDetailCols(details, "details"), computeCols),
                     conCovMeasures = 
-                      intersect(getDetailCols(details, "conCov"), computeCols))
+                      intersect(getDetailCols(details, "conCov"), computeCols), 
+                    condType = "stdAtomic")
     out[names(add_det)] <- add_det
   }
   if (cases){
@@ -52,8 +53,8 @@ asf <- function(x, details = x$details){
   basicCols <- intersect(
     c("outcome", "condition", "con", "cov", "complexity", "minimal"),
     names(all.asf))
-  details <- resolveDetails(details) 
-  details <- removeDetailMeasure(details, c("coherence", "redundant", "cyclic"))
+  details <- resolveDetails(details, asfOnly = TRUE) 
+  details <- removeDetailMeasure(details, "cyclic")
   detailCols <- getDetailCols(details)
   if (NROW(all.asf) == 0L) 
     return(emptyCondTbl("stdAtomic", measures = x$measures, 
@@ -69,7 +70,8 @@ asf <- function(x, details = x$details){
     add_det <- .det(ctInfo(x$configTable), out$condition, # cutoff / border  
                     what = intersect(getDetailCols(details, "details"), computeCols),
                     conCovMeasures = 
-                      intersect(getDetailCols(details, "conCov"), computeCols))
+                      intersect(getDetailCols(details, "conCov"), computeCols), 
+                    condType = "stdAtomic")
     out[names(add_det)] <- add_det
   }
   as.condTbl(out[c(basicCols, detailCols)], 
@@ -151,7 +153,7 @@ as.condTbl.data.frame <- function(x, condClass = "condString", measures = NULL,
             class = c("condTbl", "data.frame"))
 }
 emptyCondTbl <- function(condClass = "condString", details = character(0), 
-                         minimal = FALSE, ...){
+                         minimal = FALSE, fm = FALSE, ...){
   stopifnot(is.character(details))   # 'details' must be either default/empty or output of getDetailCols!!
   out <- data.frame(outcome = structure(character(0), 
                                         class = c("outcomeString", "character")),
@@ -162,6 +164,9 @@ emptyCondTbl <- function(condClass = "condString", details = character(0),
                     complexity = integer(0))
   if (minimal){
     out$minimal <- logical(0)
+  }
+  if (fm){
+    out$fm_empirical <- logical(0)
   }
   for (d in details){
     out[[d]] <- if (d %in% c("inus", "redundant", "cyclic")){
@@ -239,7 +244,7 @@ formatCases <- function(x, maxlen){
 # condTbl
 condTbl <- function(x, ...){
   cl <- match.call()
-  cl[[1]] <- as.name("condition")
+  cl[[1]] <- as.name("condList")
   as.condTbl(eval.parent(cl))
 }
 # as.data.frame method for class condTbl - removes all class attributes and 

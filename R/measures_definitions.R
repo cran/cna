@@ -70,7 +70,7 @@ resolveMeasures <- function(m, imposeLength2 = TRUE){
 #' cna:::resolveMeasures(c("ccon", "ccov"))
 #' cna:::resolveMeasures(c("standard con", "standard cov")) # incomplete matching
 #' cna:::resolveMeasures(c(7, 8))
-#' cna:::resolveMeasures(c("a", "b")); resolveMeasures(0:1)
+#' cna:::resolveMeasures(c("a", "b")) # Error
 #' cna:::resolveMeasures(1:8, imposeLength2 = FALSE)
 #' cna:::resolveMeasures(1:9, imposeLength2 = FALSE)
 
@@ -103,3 +103,5 @@ showMeasures <- function(conCov = TRUE, details = TRUE){
   }
 }
 
+.detailsCsfOnly <- setdiff(resolveDetails(TRUE)$detailMeasures, 
+                           resolveDetails(TRUE, asfOnly = TRUE)$detailMeasures)

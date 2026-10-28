@@ -9,19 +9,19 @@ cna: A Package for Causal Modeling with Coincidence Analysis
 }
 
 \description{
-\dfn{Coincidence Analysis} (CNA) is a configurational comparative method of causal data analysis that was first introduced for crisp-set (i.e. binary) data in Baumgartner (2009a, 2009b, 2013) and generalized for multi-value and fuzzy-set data in Baumgartner and Ambuehl (2020). The \pkg{cna} package implements the method's latest stage of development. 
+\dfn{Coincidence Analysis} (CNA) is a configurational comparative method of causal data analysis that was first introduced for crisp-set (i.e. binary) data in Baumgartner (2009a, 2009b, 2013) and generalized for multi-value and fuzzy-set data in Baumgartner and Ambuehl (2020). The \pkg{cna} package implements the method's latest stage of development.
 
-CNA infers causal structures as defined by modern variants of the so-called \emph{INUS-theory} (Mackie 1974; Grasshoff and May 2001; Baumgartner and Falk 2023a) from empirical data. The INUS-theory is a type-level difference-making theory that spells out causation in terms of redundancy-free Boolean dependency structures. It is optimally suited for the analysis of causal structures with the following features: \emph{conjunctivity}---causes are arranged in complex bundles 
-that only become operative when all of their components are properly co-instantiated, each of which in isolation is ineffective or leads to different outcomes---and \emph{disjunctivity}---effects can be brought about along alternative causal routes such that, when suppressing one route, the effect may still be produced via another one. 
+CNA infers causal structures as defined by modern variants of the so-called \emph{INUS-theory} (Mackie 1974; Grasshoff and May 2001; Baumgartner and Falk 2023a) from empirical data. The INUS-theory is a type-level difference-making theory that spells out causation in terms of redundancy-free Boolean dependency structures. It is optimally suited for the analysis of causal structures with the following features: \emph{conjunctivity}---causes are arranged in complex bundles
+that only become operative when all of their components are properly co-instantiated, each of which in isolation is ineffective or leads to different outcomes---and \emph{disjunctivity}---effects can be brought about along alternative causal routes such that, when suppressing one route, the effect may still be produced via another one.
 
 
-Causal structures featuring conjunctivity and disjunctivity pose challenges for 
-methods of causal data analysis. As many theories of causation (other than the INUS-theory) entail that it is necessary (though not sufficient) for X to be a cause of Y that there be some kind of dependence (e.g. probabilistic or counterfactual) between X and Y, standard methods (e.g. Spirtes et al. 2000) infer that X is \emph{not} a cause of Y if X and Y are \emph{not} pairwise dependent. 
-However, there often are no dependencies between an individual component X of a conjunctive cause and the corresponding effect Y (for concrete examples see the package vignette (accessed from R by typing \code{vignette("cna")}). In the absence of pairwise dependencies, X can only be identified as a cause of Y if it is embedded in a complex Boolean structure over many factors and that structure is fitted to the data as a whole. But the space of Boolean functions over even a handful of factors is vast. So, a method for INUS-discovery must find ways to efficiently navigate in that vast space of possibilities. That is the purpose of CNA. 
+Causal structures featuring conjunctivity and disjunctivity pose challenges for
+methods of causal data analysis. As many theories of causation (other than the INUS-theory) entail that it is necessary (though not sufficient) for X to be a cause of Y that there be some kind of dependence (e.g. probabilistic or counterfactual) between X and Y, standard methods (e.g. Spirtes et al. 2000) infer that X is \emph{not} a cause of Y if X and Y are \emph{not} pairwise dependent.
+However, there often are no dependencies between an individual component X of a conjunctive cause and the corresponding effect Y (for concrete examples see the package vignette, accessed from R by typing \code{vignette("cna")}). In the absence of pairwise dependencies, X can only be identified as a cause of Y if it is embedded in a complex Boolean structure over many factors and that structure is fitted to the data as a whole. But the space of Boolean functions over even a handful of factors is vast. So, a method for INUS-discovery must find ways to efficiently navigate in that vast space of possibilities. That is the purpose of CNA.
 
-CNA is not the only method for the discovery of INUS structures. Other methods that can be used for that purpose are Logic Regression (Ruczinski et al. 2003, Kooperberg and Ruczinski 2005), which is implemented in the \proglang{R} package \href{https://cran.r-project.org/package=LogicReg}{\pkg{LogicReg}}, and Qualitative Comparative Analysis (Ragin 1987; 2008; Cronqvist and Berg-Schlosser 2009), whose most powerful implementations are provided by the \proglang{R} packages \href{https://cran.r-project.org/package=QCApro}{\pkg{QCApro}} and \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}. But CNA is the only method for INUS-discovery that can process data generated by causal structures with more than one outcome and, hence, can analyze common-cause and causal chain structures as well as causal cycles and feedbacks. Moreover, as of version 4.0 of the \pkg{cna} package, it is the only method of its kind that offers measures for model evaluation and selection that are custom-made for the problem of INUS-discovery. Finally, unlike the models produced by Logic Regression or Qualitative Comparative Analysis, CNA's models are guaranteed to be redundancy-free, which makes them directly causally interpretable in terms of the INUS-theory; and CNA is more successful than any other method at exhaustively uncovering all INUS models that fit the data equally well. For comparisons of CNA with Qualitative Comparative Analysis and Logic Regression see (Baumgartner and Ambuehl 2020; Swiatczak 2022) and (Baumgartner and Falk 2023b), respectively.  
+CNA is not the only method for the discovery of INUS structures. Other methods that can be used for that purpose are Logic Regression (Ruczinski et al. 2003, Kooperberg and Ruczinski 2005), which is implemented in the \proglang{R} package \href{https://cran.r-project.org/package=LogicReg}{\pkg{LogicReg}}, and Qualitative Comparative Analysis (Ragin 1987; 2008; Cronqvist and Berg-Schlosser 2009), implemented in the \proglang{R} package \href{https://cran.r-project.org/package=QCA}{\pkg{QCA}}. But CNA is the only method for INUS-discovery that can process data generated by causal structures with more than one outcome and, hence, can analyze common-cause and causal chain structures as well as causal cycles and feedbacks. It is the only method of its kind that offers measures for model evaluation and selection that are custom-made for the problem of INUS-discovery (De Souter & Baumgartner 2025). Moreover, unlike the models produced by Logic Regression or Qualitative Comparative Analysis, CNA's models are guaranteed to be redundancy-free, which makes them directly causally interpretable in terms of the INUS-theory, and CNA alone provides the option to eliminate functional redundancies from causal models (Zhang and Zhang 2023). Finally, CNA is more successful than any other method at exhaustively uncovering all INUS models that fit the data equally well. For comparisons of CNA with Qualitative Comparative Analysis see (Baumgartner and Ambuehl 2020; Swiatczak 2022) and with Logic Regression see (Baumgartner and Falk 2023b).
 
-There exist three additional R packages for data analysis with CNA: \CRANpkg{frscore}, which automatizes robustness scoring of CNA models, \CRANpkg{causalHyperGraph}, which visualizes CNA models as causal graphs, and \CRANpkg{cnaOpt}, which systematizes the search for optimally fitting CNA models.
+There are three additional \proglang{R} packages for data analysis with CNA: \CRANpkg{frscore}, which automates robustness scoring of CNA models, \CRANpkg{causalHyperGraph}, which visualizes CNA models as causal graphs, and \CRANpkg{cnaOpt}, which systematizes the search for optimally fitting CNA models.
 
 }
 
@@ -29,8 +29,8 @@ There exist three additional R packages for data analysis with CNA: \CRANpkg{frs
     \tabular{ll}{
 Package: \tab cna\cr
 Type:    \tab Package\cr
-Version: \tab 4.0.3\cr
-Date:    \tab 2025-06-02\cr
+Version: \tab 4.1.0\cr
+Date:    \tab 2026-10-28\cr
 License: \tab GPL (>= 2)\cr
     }
 }
@@ -46,50 +46,54 @@ University of Bergen\cr
 
 
 \bold{Maintainer}:\cr
-Mathias Ambuehl
+Mathias Ambuehl 
 }
 
 \references{
 Baumgartner, Michael. 2009a. \dQuote{Inferring Causal Complexity.}
-\emph{Sociological Methods & Research} 38(1):71-101. \doi{doi:10.1177/0049124109339369}
+\emph{Sociological Methods & Research} 38(1):71-101. \doi{10.1177/0049124109339369}
 
 Baumgartner, Michael. 2009b. \dQuote{Uncovering Deterministic Causal Structures:
-A Boolean Approach.} \emph{Synthese} 170(1):71-96.
+A Boolean Approach.} \emph{Synthese} 170(1):71-96. \doi{10.1007/s11229-008-9348-0}
 
 Baumgartner, Michael. 2013. \dQuote{Detecting Causal Chains in Small-n Data.}
-\emph{Field Methods} 25 (1):3-24. \doi{doi:10.1177/1525822X12462527}
+\emph{Field Methods} 25 (1):3-24. \doi{10.1177/1525822X12462527}
 
-Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526-542. \doi{doi:10.1017/psrm.2018.45}
+Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods} 8:526-542. \doi{10.1017/psrm.2018.45}
 
-Baumgartner, Michael and Christoph Falk. 2023a. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation.} \emph{The British Journal for the Philosophy of Science}, 74(1), 171-197. \doi{doi:10.1093/bjps/axz047}
+Baumgartner, Michael and Christoph Falk. 2023a. \dQuote{Boolean Difference-Making: A Modern Regularity Theory of Causation.} \emph{The British Journal for the Philosophy of Science} 74(1):171-197. \doi{10.1093/bjps/axz047}
 
-Baumgartner Michael and Christoph Falk. 2023b. \dQuote{Configurational Causal Modeling and Logic Regression.} \emph{Multivariate Behavioral Research}, 58:2, 292-310. \doi{doi:10.1080/00273171.2021.1971510}
+Baumgartner, Michael and Christoph Falk. 2023b. \dQuote{Configurational Causal Modeling and Logic Regression.} \emph{Multivariate Behavioral Research} 58(2):292-310.\cr \doi{10.1080/00273171.2021.1971510}
 
 %Baumgartner, Michael and Alrik Thiem. 2015. \dQuote{Identifying Complex Causal Dependencies in Configurational Data with Coincidence Analysis}, \emph{The R Journal} 7:176-184.
 
-Cronqvist, Lasse, Dirk Berg-Schlosser. 2009. \dQuote{Multi-Value QCA (mvQCA).} In B Rihoux, CC Ragin (eds.), \emph{Configurational Comparative Methods: Qualitative Comparative Analysis (QCA) and Related Techniques}, pp. 69-86. Sage Publications, London.
+Cronqvist, Lasse and Dirk Berg-Schlosser. 2009. \dQuote{Multi-Value QCA (mvQCA).} In B Rihoux, CC Ragin (eds.), \emph{Configurational Comparative Methods: Qualitative Comparative Analysis (QCA) and Related Techniques}, pp. 69-86. Sage Publications, London. \doi{10.4135/9781452226569.n4}
+
+De Souter, Luna and Michael Baumgartner. 2025. \dQuote{New sufficiency and necessity measures for model building with Coincidence Analysis.} \emph{Zenodo}. \doi{10.5281/zenodo.13619580}
 
 %Dusa, Adrian. 2021.\dQuote{QCA: A Package for Qualitative Comparative Analysis.} R Package Version 3.11. https://cran.r-project.org/package=QCA
 
 Grasshoff, Gerd and Michael May. 2001. \dQuote{Causal Regularities.} In W. Spohn, M. Ledwig, and
 M. Esfeld (Eds.). \emph{Current Issues in Causation}, pp. 85-114. Paderborn: Mentis.
 
-Mackie, John L. 1974. \emph{The Cement of the Universe: A Study of Causation}. Oxford: Oxford University Press.
+Kooperberg, Charles and Ingo Ruczinski. 2005. \dQuote{Identifying Interacting SNPs Using Monte Carlo Logic Regression.} \emph{Genetic Epidemiology} 28(2):157-170. \doi{10.1002/gepi.20042}
 
-Kooperberg, Charles and Ingo Ruczinski. 2005. \dQuote{Identifying Interacting SNPs Using Monte Carlo Logic Regression.} Genetic Epidemiology, 28(2):157-170.\doi{doi:10.1002/gepi.20042}
+Mackie, John L. 1974. \emph{The Cement of the Universe: A Study of Causation}. Oxford: Oxford University Press. \doi{10.1093/0198246420.001.0001}
 
-Ragin, Charles C. 1987. \emph{The Comparative Method}. Berkeley: University of California Press.
+Ragin, Charles C. 1987. \emph{The Comparative Method}. Berkeley: University of California Press. \doi{10.1525/9780520957350}
 
 %Ragin, Charles C. 2006. \dQuote{Set Relations in Social Research: Evaluating Their Consistency and Coverage}. \emph{Political Analysis} 14(3):291-310.
 
 Ragin, Charles C. 2008. \emph{Redesigning Social Inquiry: Fuzzy Sets and Beyond}. Chicago:
-University of Chicago Press.
+University of Chicago Press. \doi{10.7208/chicago/9780226702797.001.0001}
 
-Ruczinski, Ingo, Charles Kooperberg, and Michael LeBlanc. 2003. \dQuote{Logic Regression.} \emph{Journal of Computational and Graphical Statistics} 12:475-511. \doi{doi:10.1198/1061860032238}
+Ruczinski, Ingo, Charles Kooperberg, and Michael LeBlanc. 2003. \dQuote{Logic Regression.} \emph{Journal of Computational and Graphical Statistics} 12:475-511. \doi{10.1198/1061860032238}
 
-Spirtes, Peter, Clark Glymour, and Richard Scheines. 2000. \dQuote{Causation, Prediction, and Search.} 2 edition. MIT Press, Cambridge.
+Spirtes, Peter, Clark Glymour, and Richard Scheines. 2000. \dQuote{Causation, Prediction, and Search.} (second ed.). Cambridge MA: MIT Press. \doi{10.7551/mitpress/1754.001.0001}
 
-Swiatczak, Martyna. 2022. \dQuote{Different Algorithms, Different Models.} \emph{Quality & Quantity} 56:1913-1937.
+Swiatczak, Martyna. 2022. \dQuote{Different Algorithms, Different Models.} \emph{Quality & Quantity} 56:1913-1937. \doi{10.1007/s11135-021-01193-9}
+
+Zhang, Jiji and Kun Zhang. 2023. \dQuote{A New Minimality Condition for Boolean Accounts of Causal Regularities.} \emph{Erkenntnis} 90(1):67-86. \doi{10.1007/s10670-023-00685-4}
 }
 
 \keyword{package}

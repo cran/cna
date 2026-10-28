@@ -688,14 +688,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_isSubsetOf
-bool C_isSubsetOf(const IntegerVector x, const IntegerVector y);
-RcppExport SEXP _cna_C_isSubsetOf(SEXP xSEXP, SEXP ySEXP) {
+bool C_isSubsetOf(const IntegerVector x, const IntegerVector y, const bool strict);
+RcppExport SEXP _cna_C_isSubsetOf(SEXP xSEXP, SEXP ySEXP, SEXP strictSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const IntegerVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const IntegerVector >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(C_isSubsetOf(x, y));
+    Rcpp::traits::input_parameter< const bool >::type strict(strictSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_isSubsetOf(x, y, strict));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -712,14 +713,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_hasSubsetIn
-LogicalVector C_hasSubsetIn(const intList y, const intList x);
-RcppExport SEXP _cna_C_hasSubsetIn(SEXP ySEXP, SEXP xSEXP) {
+LogicalVector C_hasSubsetIn(const intList y, const intList x, const bool strict);
+RcppExport SEXP _cna_C_hasSubsetIn(SEXP ySEXP, SEXP xSEXP, SEXP strictSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const intList >::type y(ySEXP);
     Rcpp::traits::input_parameter< const intList >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_hasSubsetIn(y, x));
+    Rcpp::traits::input_parameter< const bool >::type strict(strictSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_hasSubsetIn(y, x, strict));
     return rcpp_result_gen;
 END_RCPP
 }

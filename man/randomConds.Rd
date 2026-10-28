@@ -6,7 +6,7 @@
 \title{Generate random solution formulas}
 
 \description{
-Based on a set of factors---given as a data frame or \code{configTable}---, \code{randomAsf} generates a random atomic solution formula (asf) and \code{randomCsf} a random (acyclic) complex solution formula (csf).
+Based on a set of factors---given as a data frame or \code{configTable}---, \code{randomAsf} generates a random atomic solution formula (asf) and \code{randomCsf} a random, acyclic complex solution formula (csf).
 }
 
 \usage{
@@ -17,25 +17,25 @@ randomCsf(x, outcome = NULL, positive = TRUE,
           n.asf = NULL, compl = NULL, maxVarNum = if (type == "mv") 8 else 16)
 }
 
-\arguments{
-  \item{x}{Data frame or \code{\link{configTable}}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns, in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
+\arguments{ 
+  \item{x}{Data frame or \code{\link{configTable}}; determines the number of factors, their names and their possible values. In \code{randomAsf}, \code{x} must have >=3 columns; in \code{randomCsf}, \code{x} must have >=4 columns. As a shorthand, \code{x} can also be an integer, in which case \code{\link{full.ct}(x)} is executed first.}
   \item{outcome}{Optional character vector (of length 1 in \code{randomAsf}) specifying the outcome factor value(s) in the solution formula. Must be factor values, e.g. \code{"A"} or \code{"b"} in case of binary data or \code{"A=1"} in case of multi-value data. With multi-value data, factor \emph{names} are also allowed; a value of that factor will then be chosen at random. \code{outcome} overrides \code{positive} and \code{n.asf}.
 }
   \item{positive}{Logical; if TRUE (default), the outcomes all have positive values. If \code{FALSE}, a value (positive or negative in case of binary data) will be picked at random. \code{positive} has no effect if the \code{outcome} argument is not \code{NULL} or if \code{x} contains multi-value data.}
   \item{maxVarNum}{Maximal number of factors in \code{x} that can appear in the generated asf or csf. The default depends on the type of the data contained in \code{x}.
 }
-  \item{compl}{Integer vector specifying the maximal complexity of the formula (i.e. number of factors in msc; number of msc in asf). Alternatively, \code{compl} can be a list of two integer vectors; then the first vector is used for the initial complexity of the msc and the second for that of the asf.}
+  \item{compl}{Integer vector specifying the initial complexity of the formula (i.e. number of factors in msc; number of msc in asf). Alternatively, \code{compl} can be a list of two integer vectors; then the first vector is used for the initial complexity of the msc and the second for that of the asf.}
   \item{how}{Character string, either \code{"inus"} or \code{"minimal"}, specifying whether the generated solution formula is redundancy-free relative to \code{full.ct(x)} or relative to \code{x} (see Details below).}
-  \item{n.asf}{Integer scalar specifying the number of asf in the csf. Is overridden by\cr \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \cr \code{ncol(x)-2}.}
+  \item{n.asf}{Integer scalar specifying the number of asf in the csf.\cr Is overridden by \code{length(outcome)} if \code{outcome} is not \code{NULL}. Note that \code{n.asf} is limited to \code{ncol(x)-2}.}
 }
 
 
 \details{
-\code{randomAsf} and \code{randomCsf} can be used to randomly draw data generating structures (ground truths) in inverse search trials benchmarking the output of \code{\link{cna}}. In the regularity theoretic context in which the CNA method is embedded, a causal structure is a redundancy-free Boolean dependency structure. Hence, \code{randomAsf} and \code{randomCsf} both produce redundancy-free Boolean dependency structures. \code{randomAsf} generates structures with one outcome, i.e. atomic solution formulas (asf), \code{randomCsf} generates structures with multiple outcomes, i.e. complex solution formulas (csf), that are free of cyclic substructures. In a nutshell, \code{randomAsf} proceeds by, first, randomly drawing disjunctive normal forms (DNFs) and by, second, eliminating redundancies from these DNFs. \code{randomCsf} essentially consists in repeated executions of \code{randomAsf}.
+\code{randomAsf} and \code{randomCsf} can be used to randomly draw data generating structures (ground truths) in inverse search trials benchmarking the output of \code{\link{cna}}. In the regularity theoretic context in which the CNA method is embedded, a causal structure is a redundancy-free Boolean dependency structure. Hence, \code{randomAsf} and \code{randomCsf} both produce redundancy-free Boolean dependency structures. \code{randomAsf} generates structures with one outcome, i.e. atomic solution formulas (asf), \code{randomCsf} generates structures with multiple outcomes, i.e. complex solution formulas (csf), that are free of cyclic substructures and that satisfy functional minimality in the sense of \code{\link{fm_structural}} (asf are automatically structurally minimal). In a nutshell, \code{randomAsf} proceeds by first randomly drawing disjunctive normal forms (DNFs) and then eliminating redundancies from these DNFs. \code{randomCsf} essentially consists in repeated executions of \code{randomAsf}. 
 
-The only mandatory argument of \code{randomAsf} and \code{randomCsf} is a data frame or a \code{\link{configTable}} \code{x} defining the factors (with their possible values) from which the generated asf and csf shall be drawn. %If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
+The only mandatory argument of \code{randomAsf} and \code{randomCsf} is \code{x}---a data frame, a \code{\link{configTable}}, or an integer (see above)---defining the factors (with their possible values) from which the generated asf and csf shall be drawn. %If asf and csf are built from multi-value or fuzzy-set factors, \code{x} must be a \code{configTable}.
 
-The optional argument \code{outcome} determines which values of which factors in \code{x} shall be treated as outcomes. If \code{outcome = NULL} (default), \code{randomAsf} and \code{randomCsf} randomly draw factor values from \code{x} to be treated as outcome(s). If \code{positive = TRUE} (default), only positive outcome values are chosen in case of crisp-set data; if \code{positive = FALSE}, outcome values are drawn from the set \{1,0\} at random. \code{positive} only has an effect if \code{x} contains crisp-set data and \code{outcome = NULL}.
+The optional argument \code{outcome} determines which values of which factors in \code{x} shall be treated as outcomes. If \code{outcome = NULL} (default), \code{randomAsf} and \code{randomCsf} randomly draw factor values from \code{x} to be treated as outcome(s). If \code{positive = TRUE} (default), only positive outcome values are chosen in case of crisp-set data; if \code{positive = FALSE}, outcome values are drawn from the set \{1,0\} at random. \code{positive} only has an effect if \code{outcome = NULL} and \code{x} does not contain multi-value data.
 
 %\code{type} is \code{"mv"}, then values of distinct factors are chosen as outcomes.
 
@@ -51,10 +51,10 @@ The argument \code{compl} controls the complexity of the generated asf and csf. 
 The argument \code{n.asf} controls the number of asf in the generated csf. Its value is limited to \code{ncol(x)-2} and overridden by \code{length(outcome)}, if \code{outcome} is not \code{NULL}. Analogously to \code{compl}, \code{n.asf} specifies the number of asf prior to redundancy elimination, which, in turn, may further reduce these numbers. That is, \code{n.asf} provides an upper bound for the number of asf in the resulting csf.
 }
 
-\value{The randomly generated formula, a character string.}
+\value{The generated formula as a character string of class \code{c("stdAtomic", "character")} (\code{randomAsf}) or \code{c("stdComplex", "character")} (\code{randomCsf}).}
 
 \seealso{
-\code{\link{is.submodel}}, \code{\link{selectCases}}, \code{\link{full.ct}}, \code{\link{configTable}}, \code{\link{cna}}.
+\code{\link{is.submodel}}, \code{\link{selectCases}}, \code{\link{full.ct}}, \code{\link{configTable}}, \code{\link{cna}}, \code{\link{func_minim}}.
 }
 
 \examples{# randomAsf

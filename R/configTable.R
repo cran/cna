@@ -7,9 +7,11 @@
 configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
                         case.cutoff = 0, rm.dup.factors = FALSE, rm.const.factors = FALSE,
                         .cases = NULL, verbose = TRUE){
-  nm.x <- deparse(substitute(x))
+  nm.x <- deparse1(substitute(x))
   stopifnot(is.data.frame(x) || is.matrix(x), length(case.cutoff) == 1)
   if (anyNA(x)) stop("NA values are not allowed in a configuration table.")
+  type <- tolower(type)
+  type <- match.arg(type)
   if (is.matrix(x)) {
     if (is.null(colnames(x)))
       colnames(x) <- make.unique(rep(LETTERS, length.out = ncol(x)))
@@ -19,10 +21,15 @@ configTable <- function(x, type = c("auto", "cs", "mv", "fs"), frequency = NULL,
       stop(nm.x, " already is a configTable - argument frequency is not admissible in this case!")
     frequency <- attr(x, "n", exact = TRUE)
     .cases <- attr(x, "cases")
+    if (type == "auto"){
+      type <- attr(x, "type")
+    } else if (type != attr(x, "type")){
+      warning("Inconsistent input for data type: data is of type ", 
+              dQuote(attr(x, "type")), " while argument 'type' is ", dQuote(type), ":\n",
+              "Data is converted to type ", type, ".", call. = FALSE)
+    }
     x <- as.data.frame(x, warn = FALSE)
   }
-  type <- tolower(type)
-  type <- match.arg(type)
   if (type == "auto") type <- type_from_data(x)
   if (is.null(.cases)){
     .cases <- as.character(rownames(x))
@@ -153,7 +160,7 @@ type_from_data <- function(d){
   if (all(vals %in% 0:1)) return("cs")
   if (all(vals>=0) && all(vals<=1)) return("fs")
   if (all(vals>=0) && all(vals%%1==0)) return("mv")
-  stop("Could not determine data type for data ", deparse(substitute(d)))
+  stop("Could not determine data type for data ", deparse1(substitute(d)))
 }
 
 

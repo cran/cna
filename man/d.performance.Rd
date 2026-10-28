@@ -30,7 +30,7 @@ The data frame contains 214 rows featuring configurations, one column reporting 
 \source{
 Greckhamer, Thomas, Vilmos F. Misangyi, Heather Elms, and Rodney Lacey. 2008.
 \dQuote{Using Qualitative Comparative Analysis in Strategic Management Research: An Examination of Combinations of Industry, Corporate, and Business-Unit Effects.}
-\emph{Organizational Research Methods} 11 (4):695-726.
+\emph{Organizational Research Methods} 11 (4):695-726. \doi{10.1177/1094428107302907}
 }
 
 \keyword{datasets}

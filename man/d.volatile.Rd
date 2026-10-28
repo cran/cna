@@ -31,7 +31,7 @@ The data frame contains 22 rows (cases) and the following 9 columns featuring Bo
 \source{
 Wollebaek, Dag. 2010.
 \dQuote{Volatility and Growth in Populations of Rural Associations.}
-\emph{Rural Sociology} 75:144-166.
+\emph{Rural Sociology} 75:144-166. \doi{10.1111/j.1549-0831.2009.00005.x}
 }
 
 \keyword{datasets}

@@ -38,9 +38,9 @@ The function \code{identical.model} returns \code{TRUE} only if \code{x} (which 
 \references{
 %Baumgartner, Michael and Mathias Ambuehl. 2020. \dQuote{Causal Modeling with Multi-Value and Fuzzy-Set Coincidence Analysis.} \emph{Political Science Research and Methods}. 8:526--542.
 
-Baumgartner, Michael and Alrik Thiem. 2020. \dQuote{Often Trusted But Never (Properly) Tested: Evaluating Qualitative Comparative Analysis}. \emph{Sociological Methods & Research} 49:279-311.
+Baumgartner, Michael and Alrik Thiem. 2020. \dQuote{Often Trusted But Never (Properly) Tested: Evaluating Qualitative Comparative Analysis}. \emph{Sociological Methods & Research} 49:279-311. \doi{10.1177/0049124117701487}
 
-Baumgartner, Michael and Christoph Falk. 2024. \dQuote{Quantifying the Quality of Configurational Causal Models}, \emph{Journal of Causal Inference} 60(1):20230032. doi: 10.1515/jci-2023-0032.
+Baumgartner, Michael and Christoph Falk. 2024. \dQuote{Quantifying the Quality of Configurational Causal Models}, \emph{Journal of Causal Inference} 12(1):20230032.\cr \doi{10.1515/jci-2023-0032}
 
 }
 

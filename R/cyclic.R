@@ -12,7 +12,7 @@ cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbo
   # Check input conditions [identical code in is.submodel()]
   px <- lapply(x, tryparse)
   ok <- !vapply(px, is.null, logical(1)) 
-  ct_type <- if (any(grepl("=", x, fixed = T))) "mv" else "cs"
+  ct_type <- if (any(grepl("=", x, fixed = TRUE))) "mv" else "cs"
   if (ct_type == "cs"){
     vals <- unique.default(unlist(lapply(px, all.vars)))
   } else {
@@ -20,14 +20,15 @@ cyclic <- function(x, cycle.type = c("factor", "value"), use.names = TRUE, verbo
                    stopOps = c("==", "<", ">", "<=", ">="), 
                    validOps = c("<-", "<<-", "=", "&", "|", "(", "-"))
     vals <- unique.default(vals[!vapply(vals, is.symbol, FUN.VALUE = TRUE)])
-    vals <- sub(" == ", "=", vapply(vals, deparse, character(1)))
+    vals <- sub(" == ", "=", vapply(vals, deparse1, character(1)))
   }
   cond_type <- .qcondType(x, values = vals, ct_type = ct_type, stdComplex.multiple.only = FALSE)
   ok <- ok & cond_type %in% c("stdAtomic", "stdComplex")
-  if (any(!ok)) 
+  if (any(!ok)){ 
     stop("Invalid input to cyclic:\n", paste0("  ", x[!ok], collapse = "\n"),
+         "\ncyclic() expects valid asf or csf in standard form.", 
          call. = FALSE)
-
+  }
   # check cyclicity
   fStr <- factorStruct(x, cycle.type = cycle.type, ct_type = ct_type)
   fStrGr <- factorStructGroups(fStr)

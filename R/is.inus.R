@@ -1,12 +1,14 @@
 
 is.inus <- function(cond, x = NULL, csf.info = FALSE, 
-                    def = c("implication", "equivalence")){
+                    def = c("implication", "equivalence"), 
+                    func.minim = FALSE){
   cond <- noblanks(cond)
   def <- match.arg(def)
   out <- rep(NA, length(cond))
   names(out) <- cond
   result <- .inus(x, cond, full = FALSE,
-                  csf.info = csf.info, def = def)
+                  csf.info = csf.info, def = def, 
+                  func.minim = func.minim)  # -> whether to impose fm_structural
   out[] <- result
   attr(out, "csf.info") <- attr(result, "csf.info")
   ok <- !is.na(out)
@@ -32,7 +34,7 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
 
 
 # ==== Default Method (for matrix or data.frame) ====
-.inus.default  <- function(x, cond, full = FALSE, ...){
+.inus.default  <- function(x, cond, full = FALSE, func.minim = FALSE, ...){
   if (!full && is.null(x)){
     x <- auxConfigTable(cond, check = TRUE)
     if (attr(x, "type") == "mv") 
@@ -42,14 +44,14 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   } else if (!inherits(x, "configTable")){
     x <- configTable(x, verbose = FALSE)
   }
-  .inus.configTable(x, cond, full = full, ...)
+  .inus.configTable(x, cond, full = full, func.minim = func.minim, ...)
 }
 
 # ==== Method for class 'configTable' ====
 #   x         configTable
 #   cond      character vector with the csf
 # value: A logical vector with same length as cond
-.inus.configTable <- function(x, cond, full = FALSE, ...){
+.inus.configTable <- function(x, cond, full = FALSE, func.minim = FALSE, ...){
   cti <- ctInfo(x)
   qtypes <- .qcondType(cond, colnames(cti$scores), cti$type, 
                        stdComplex.multiple.only = FALSE) 
@@ -58,7 +60,8 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   if (all(!ok)) return(out)
   cond <- cond[ok]
   if (useCtiList(cti)) cti <- ctiList(cti, cond)
-  result <- .inus(cti, cond, full = full, ..., qtypes = qtypes[ok])
+  result <- .inus(cti, cond, full = full, func.minim = func.minim, 
+                  ..., qtypes = qtypes[ok])
   out[ok] <- result
   attr(out, "csf.info") <- attr(result, "csf.info")
   out
@@ -72,7 +75,7 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
                       qtypes = .qcondType(cond, colnames(x$scores), x$type,  
                                           stdComplex.multiple.only = FALSE), 
                       const.ok = FALSE, csf.info = FALSE, 
-                      def = "implication", ...){
+                      def = "implication", func.minim = FALSE, ...){
   out <- rep(NA, length(cond))
 
   # condition type "constant"
@@ -95,9 +98,10 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
     if (all(!is.na(out) & out)) return(out)
   }
 
-  # condition type "stdAtomic"
+  # condition type "stdComplex"
   if (any(selCond <- !is.na(qtypes) & qtypes == "stdComplex")){
-    out_csf <- .inusInternal_csf(cond[selCond], x, info = csf.info, def = def)
+    out_csf <- .inusInternal_csf(cond[selCond], x, info = csf.info, def = def, 
+                                 func.minim = func.minim)
     out[selCond] <- out_csf
     attr(out, "csf.info") <- attr(out_csf, "csf.info")
   }
@@ -192,7 +196,8 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
 #   * there is >=1 case & < nrow(full.ct) 
 #   * struct redundancies
 #   * partial str red
-.inusInternal_csf <- function(cond, cti, info = FALSE, def = "implication"){
+.inusInternal_csf <- function(cond, cti, info = FALSE, def = "implication", 
+                              func.minim = FALSE){
   # asfs are inus
   asfs <- extract_asf(cond)
   asf_not_inus <- !m_all(lapply(asfs, .inusInternal_asf, cti))
@@ -208,6 +213,10 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   multOutcome <- vapply(happly(asfs, function(x) toupper(rhs(x))), 
                         anyDuplicated, 
                         integer(1)) > 0L
+  # functionally minimal?
+  if (func.minim){
+    fm <- .fm_struct(cti, cond)
+  }
   # mv: All values of some variable as outcome?
   if (cti$type == "mv" && any(!multOutcome)){
     multOutcome[!multOutcome] <- allValuesOutcome(asfs[!multOutcome], cti)
@@ -217,10 +226,14 @@ is.inus <- function(cond, x = NULL, csf.info = FALSE,
   names(out) <- cond
   out[asf_not_inus | redund | redundInCsf | constFact | const | multOutcome] <- FALSE
   out[is.na(asf_not_inus) | is.na(redund) | is.na(redundInCsf) | is.na(constFact) | is.na(const) | is.na(multOutcome)] <- NA
+  if (func.minim){
+    out[!fm] <- FALSE
+  }
   if (info){
     .info <- data.frame(row.names = cond)
     .info[, c("asf_not_inus", "redund", "redundInCsf", "constFact", "const", "multOutcome")] <- 
       data.frame(asf_not_inus, redund, redundInCsf, constFact, const, multOutcome)
+    if (func.minim) .info$not_func_minim <- !fm
     attr(out, "csf.info") <- .info 
   }
   out

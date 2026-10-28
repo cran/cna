@@ -31,7 +31,7 @@ Thiem, Alrik: collection, documentation
 \source{
 Aleman, Jose. 2009.
 \dQuote{The Politics of Tripartite Cooperation in New Democracies: A Multi-level Analysis.}
-\emph{International Political Science Review} 30 (2):141-162.
-}
+\emph{International Political Science Review} 30 (2):141-162. \doi{10.1177/0192512109102433}
+} 
 
 \keyword{datasets}

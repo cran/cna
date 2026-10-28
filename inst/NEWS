@@ -1,3 +1,13 @@
+Changes in version 4.1.0 (2026-xx-xx)
+  * New argument func.minimal.only in cnaControl() and csf() (default FALSE). If TRUE, only functionally minimal csf are returned. Functional minimality is a non-redundancy constraint on causal structures introduced by Zhang and Zhang (2023); it is imposed on completed csf and must be requested explicitly.
+  * New functions fm_structural() and fm_empirical() check functional minimality at the user level.
+  * New detail measures fm_structural and fm_empirical, computed by detailMeasures() and requestable through the details argument; fm_empirical is a standard attribute of csf.
+  * is.inus() gains an argument func.minim. detailMeasures() passes inus.def and inus.func.minim on to the computation.
+  * randomCsf() builds functionally minimal csf only.  
+  * "Same as asf" has been removed from the standard output of print.cna, meaning that the csf table is always printed when requested.
+  * Bug fixes.
+  * Vignette and help pages revised, in particular section 5.5 on functional minimality; the reference sections now carry DOI links.
+
 Changes in version 4.0.3 (2025-06-20)
   * Fixed a bug in the method [.configTable.
 

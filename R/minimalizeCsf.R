@@ -10,7 +10,7 @@ minimalizeCsf.default <- function(
     removeSubCsf = TRUE, verbose = FALSE, ...){
   measures <- resolveMeasures(measures)
   if (length(x) == 0){
-    return(emptyCondTbl("stdComplex", measures = measures))
+    return(emptyCondTbl("stdComplex", measures = measures, fm = TRUE))
   }
   x <- noblanks(x)
   nodata <- is.null(ct)
@@ -57,7 +57,8 @@ minimalizeCsf.default <- function(
       qcondTbl_csf(out$condition, ctifull$scores, ctifull$freq, 
                    conCovDef = measures$def)[c("con", "cov")]
   }
-  out$inus <- .det(cti, out$condition, what = "inus", in.csf = TRUE)$inus
+  out$inus <- .det(cti, out$condition, what = "inus", in.csf = TRUE, 
+                   condType = "stdComplex")$inus
   as.condTbl(out, condClass = "stdComplex", measures = measures)
 }
 
@@ -113,7 +114,7 @@ findSubCsf <- function(cond){
 minimalizeCsf.cna <- function(x, n = 20, verbose = FALSE, ...){
   csfs <- csf(x, n.init = max(n), inus.only = FALSE)$condition
   if (length(csfs) == 0){
-    return(emptyCondTbl("stdComplex", details = getDetailCols(x$details),
+    return(emptyCondTbl("stdComplex", fm = TRUE, details = getDetailCols(x$details),
                         measures = x$measures))
   }
   if (length(n)>1){
@@ -147,6 +148,7 @@ minimalizeCsf.cna <- function(x, n = 20, verbose = FALSE, ...){
 }
 
 .minCsf.cti <- function(x, cond, verbose = FALSE, ...){
+  if (length(cond) == 0) return(cond)
   # x ist expected to be "full"!!
   rr <- .redund(x, cond, full = F, simplify = FALSE)
   anyRed <- m_any(rr)

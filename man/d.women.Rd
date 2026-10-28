@@ -27,7 +27,7 @@ The data frame contains 22 rows (cases) and the following 6 columns featuring Bo
 \source{
 Krook, Mona Lena. 2010.
 \dQuote{Women's Representation in Parliament: A Qualitative Comparative Analysis.}
-\emph{Political Studies} 58 (5):886-908.
+\emph{Political Studies} 58 (5):886-908. \doi{10.1111/j.1467-9248.2010.00833.x}
 }
 
 \keyword{datasets}

@@ -47,9 +47,11 @@ bool C_allFALSE(const LogicalVector x){
 // }
 
 // [[Rcpp::export]]
-bool C_isSubsetOf(const IntegerVector x, const IntegerVector y) {
+bool C_isSubsetOf(const IntegerVector x, const IntegerVector y, const bool strict) {
   int nx = x.size();
   int ny = y.size();
+  if (nx > ny) return(false);
+  if (strict && nx == ny) return(false);
   int i=0, j=0;
   bool out;
   while (true) {
@@ -97,13 +99,13 @@ bool intList_equal(const intList x, const intList y){
 }
 
 // [[Rcpp::export]]
-LogicalVector C_hasSubsetIn(const intList y, const intList x){
+LogicalVector C_hasSubsetIn(const intList y, const intList x, const bool strict){
   int ylen = y.size(), xlen = x.size();
   LogicalVector out(ylen);
   for (int iy=0; iy < ylen; iy++) {
     bool foundSubset=false;
     for (int ix=0; ix < xlen; ix++) {
-      if (C_isSubsetOf(x[ix], y[iy])){
+      if (C_isSubsetOf(x[ix], y[iy], strict)){
         foundSubset=true;
         break;
       }
@@ -120,13 +122,9 @@ LogicalVector C_hasSupersetIn(const intList x, const intList y, const bool ignor
   for (int ix=0; ix<xlen; ix++) {
     bool foundSuperset=false;
     for (int iy=0; iy<ylen; iy++) {
-      if (C_isSubsetOf(x[ix], y[iy])){
-        if (ignore_equals && setequal(x[ix], y[iy])){
-          continue;
-        } else {
-          foundSuperset=true;
-          break;
-        }
+      if (C_isSubsetOf(x[ix], y[iy], ignore_equals)){
+        foundSuperset=true;
+        break;
       }
     }    
     out[ix]=foundSuperset;
@@ -146,7 +144,7 @@ LogicalVector C_hasSubsetInM(const IntegerMatrix y, const IntegerMatrix x){
     bool foundSubset=false;
     for (int ix=0; ix < nrx; ix++) {
       IntegerVector x1 = x(ix, _);
-      if (C_isSubsetOf(x1, y1)){
+      if (C_isSubsetOf(x1, y1, false)){
         foundSubset=true;
         break;
       }

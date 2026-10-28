@@ -16,7 +16,7 @@ fs2cs(x, cutoff = 0.5, border = "up", verbose = FALSE)
 
 \arguments{
   \item{x}{A data frame or \code{\link{configTable}} of type fs.}
-  \item{cutoff}{Minimum membership score required for a factor to count as instantiated in the data and to be integrated in the analysis. Value in the unit interval [0,1]. The default cutoff is 0.5.}
+  \item{cutoff}{Threshold for recoding: membership scores equal to or greater than \code{cutoff} are converted to 1, scores below to 0. Value in the unit interval [0,1]. The default cutoff is 0.5.}
   \item{border}{Character string specifying whether factors with membership scores equal to \code{cutoff} are rounded up (\code{"up"}) or rounded down (\code{"down"}).}
   \item{verbose}{
 Logical; if \code{verbose=TRUE} and a factor becomes constant, this is reported in a console message.}

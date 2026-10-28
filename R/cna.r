@@ -16,7 +16,8 @@ cna <- function (x, outcome = TRUE, con = 1, cov = 1, maxstep = c(3, 4, 10),
   # config table  
   ct <- configTable(x, type = control$type, 
                     rm.const.factors = control$rm.const.factors, 
-                    rm.dup.factors = control$rm.dup.factors)
+                    rm.dup.factors = control$rm.dup.factors, 
+                    verbose = verbose)
   # minimal size for cna
   if (nrow(ct) <= 1 || ncol(ct) <= 1)
     stop("Config table must have at least two rows and two columns.")
@@ -24,11 +25,18 @@ cna <- function (x, outcome = TRUE, con = 1, cov = 1, maxstep = c(3, 4, 10),
   
   # details
   details <- resolveDetails(details)
+  if (!control$func.minimal.only){
+    details <- addDetailMeasure(details, "fm_empirical", "front")
+  }
+  if (!acyclic.only){
+    details <- addDetailMeasure(details, "cyclic", "front")
+  }
   if (!control$inus.only){
     details <- addDetailMeasure(details, "inus", "front")
   }
   # details for asf and msc
-  details_asf <- removeDetailMeasure(details, c("coherence", "redundant", "cyclic"))
+  details_asf <- removeDetailMeasure(details, c("coherence", "redundant", "cyclic", 
+                                                "fm_structural", "fm_empirical"))
   details_msc <- removeDetailMeasure(details_asf, "inus")
 
   # Slightly reduce con, cov, con.msc to avoid failing to find conditions 
@@ -153,7 +161,10 @@ cna <- function (x, outcome = TRUE, con = 1, cov = 1, maxstep = c(3, 4, 10),
     out$call$outcome <- ifelse(outcome %in% notcols, tolower(outcome), outcome)
   }
   out$x <- x
-  out$ordering <- ordering
+  if (!is.null(ordering)){
+    attr(ordering, "strict") <- strict
+    out$ordering <- ordering
+  }
   out$notcols <- notcols
   out$configTable <- ct
   if (attr(ct, "type") == "fs") out$fsInfo <- list(cutoff = control$cutoff, border = control$border)
@@ -230,7 +241,8 @@ make.msc <- function(x, outcome, cti, details){
   if (anyDet(details)){
     out[getDetailCols(details)] <- .det(cti, paste0(out$condition, "->", out$outcome), 
                                         what = details$detailMeasures, 
-                                        conCovMeasures = details$conCovMeasures)
+                                        conCovMeasures = details$conCovMeasures, 
+                                        condType = "stdAtomic")
   }
   rownames(out) <- NULL
   out
@@ -320,9 +332,9 @@ make.asf <- function(cti, zname, .sol, control, details, conCovDef = 1:2,
   if (control$inus.only) details <- addDetailMeasure(details, "inus")
   if (anyDet(details)){
     .detCols <- getDetailCols(details) # always include "inus"
-    asf[getDetailCols(details)] <- 
-      .det(cti, .cond, what = details$detailMeasures, 
-           conCovMeasures = details$conCovMeasures)[.detCols]
+    asf[.detCols] <- .det(cti, .cond, what = details$detailMeasures, 
+                          conCovMeasures = details$conCovMeasures, 
+                          condType = "stdAtomic")[.detCols]
   }
   if (control$inus.only){
     asf <- asf[asf$inus, outCols, drop = FALSE]

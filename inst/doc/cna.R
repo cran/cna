@@ -199,7 +199,7 @@ csf(ana.aut.4)[printCols]
 ###################################################
 ### code chunk number 26: details (eval = FALSE)
 ###################################################
-## cna(d.educate, details = c("e", "f", "co", "cy", "PAcon", "PACcov"))
+## cna(d.educate, details = c("e", "fa", "co", "cy", "PAcon", "PACcov"))
 
 
 ###################################################
@@ -255,7 +255,8 @@ csf(cna(d.educate, details = "faithful"))[printCols]
 ###################################################
 ### code chunk number 34: d.edu4
 ###################################################
-csf(cna(rbind(d.educate,c(1,1,0,1,0)), con = .8, details = "f"))[printCols]
+csf(cna(rbind(d.educate, c(1,1,0,1,0)), con = .8,
+        details = "fa"))[printCols]
 
 
 ###################################################
@@ -288,7 +289,30 @@ csf(cna(d.irrigate, con = .75, cov = .75, acyclic.only = T)) |> nrow()
 
 
 ###################################################
-### code chunk number 39: dat.redun (eval = FALSE)
+### code chunk number 39: aircon
+###################################################
+printCols <- c("condition", "con", "cov", "cyclic", "fm_empirical")
+aircon <- selectCases("(A + B <-> E1)*(A*b + A*C <-> E2)")
+csf(cna(aircon, outcome = c("E1", "E2")))[printCols]
+
+
+###################################################
+### code chunk number 40: aircon.minimal
+###################################################
+csf(cna(aircon, outcome = c("E1", "E2"),
+   func.minimal.only = TRUE))[setdiff(printCols, "fm_empirical")]
+
+
+###################################################
+### code chunk number 41: fm.standalone
+###################################################
+conds <- c("(A*b + A*C <-> E2)", "(A*C + b*E1 <-> E2)")
+fm_structural(conds)
+fm_empirical(conds)
+
+
+###################################################
+### code chunk number 42: dat.redun (eval = FALSE)
 ###################################################
 ## library(causalHyperGraph)
 ## ana.d.women <- cna(d.women)
@@ -296,13 +320,13 @@ csf(cna(d.irrigate, con = .75, cov = .75, acyclic.only = T)) |> nrow()
 
 
 ###################################################
-### code chunk number 40: dat.redun (eval = FALSE)
+### code chunk number 43: dat.redun (eval = FALSE)
 ###################################################
 ## causalHyperGraph("(A=1*B=2 + C=0*D=2 <-> E=1)*(E=1 + F=0 <-> G=1)")
 
 
 ###################################################
-### code chunk number 41: ambigu1
+### code chunk number 44: ambigu1
 ###################################################
 dat7 <- selectCases("a*B + A*b + B*C <-> D")
 printCols <- c("condition", "con", "cov", "exhaustiveness","faithfulness")
@@ -310,13 +334,13 @@ csf(cna(dat7, details = c("ex", "fa")))[printCols]
 
 
 ###################################################
-### code chunk number 42: ambigu2
+### code chunk number 45: ambigu2
 ###################################################
 csf(cna(d.pban, cov = .95, maxstep = c(3, 5, 10)))["condition"]
 
 
 ###################################################
-### code chunk number 43: ambigu3
+### code chunk number 46: ambigu3
 ###################################################
 ana.pban <- cna(d.pban, cov = .95, maxstep = c(6, 6, 10),
    details = c("fa", "ex"))
@@ -325,20 +349,28 @@ length(csf.pban$condition)
 
 
 ###################################################
-### code chunk number 44: ambigu4
+### code chunk number 47: ambigu4
 ###################################################
 csf.pban.ex <- subset(csf.pban, exhaustiveness >= .85)
 length(csf.pban.ex$condition)
 
 
 ###################################################
-### code chunk number 45: ambigu5
+### code chunk number 48: ambigu5
 ###################################################
 subset(csf.pban.ex, complexity == min(csf.pban.ex$complexity))
 
 
 ###################################################
-### code chunk number 46: back1
+### code chunk number 49: ambigu6
+###################################################
+csf.pban.fm <- csf(ana.pban, func.minimal.only = TRUE)
+length(csf.pban.fm$condition)
+csf.pban.fm[c("condition", "con", "cov")]
+
+
+###################################################
+### code chunk number 50: back1
 ###################################################
 dat.aut.2 <- d.autonomy[15:30, c("AU","EM","SP","CO","RE","DE")]
 ana.aut.5 <- cna(dat.aut.2, outcome = c("EM","AU"), con = .91, cov = .91)
@@ -346,13 +378,13 @@ condition(csf(ana.aut.5)$condition, dat.aut.2)
 
 
 ###################################################
-### code chunk number 47: back2
+### code chunk number 51: back2
 ###################################################
 group.by.outcome(condition(asf(ana.aut.5)$condition, dat.aut.2))$AU
 
 
 ###################################################
-### code chunk number 48: details (eval = FALSE)
+### code chunk number 52: details (eval = FALSE)
 ###################################################
 ## # Draw a ground truth with outcomes A=1 and B=2.
 ## fullData <- allCombs(c(4,4,4,4,4)) |> ct2df()
@@ -376,13 +408,13 @@ group.by.outcome(condition(asf(ana.aut.5)$condition, dat.aut.2))$AU
 
 
 ###################################################
-### code chunk number 49: redundant4a
+### code chunk number 53: redundant4a
 ###################################################
 options(width=80)
 
 
 ###################################################
-### code chunk number 50: redundant4
+### code chunk number 54: redundant4
 ###################################################
 printCols <- c("condition", "con", "cov", "inus")
 csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94,
@@ -390,15 +422,13 @@ csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94,
 
 
 ###################################################
-### code chunk number 51: redundant5
+### code chunk number 55: redundant5
 ###################################################
 condTbl("EM -> SP", configTable(d.autonomy))
 
 
 ###################################################
-### code chunk number 52: redundant6
+### code chunk number 56: redundant6
 ###################################################
 csf(cna(d.autonomy, ordering = "AU", con = .9, cov = .94,
    maxstep = c(2, 2, 8), details = "inus"))[printCols]
-
-

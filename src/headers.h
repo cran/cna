@@ -7,8 +7,9 @@ using namespace Rcpp;
 // utils.cpp
 bool C_allTRUE(const LogicalVector x);
 bool C_allFALSE(const LogicalVector x);
-bool C_isSubsetOf(const IntegerVector x, const IntegerVector y);
+bool C_isSubsetOf(const IntegerVector x, const IntegerVector y, const bool strict);
 bool intList_equal(const intList x, const intList y);
+LogicalVector C_hasSubsetIn(const intList y, const intList x, const bool strict);
 LogicalVector C_hasSupersetIn(const intList x, const intList y, const bool ignore_equals);
 LogicalVector C_hasSubsetInM(const IntegerMatrix y, const IntegerMatrix x);
 intList C_append_intList(const intList x, const intList y);

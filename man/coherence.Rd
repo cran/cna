@@ -13,22 +13,22 @@ Calculates the coherence measure of complex solution formulas (csf).
 
 \usage{
 coherence(x, ...)
-\method{coherence}{default}(x, ct, type, ...)
+\method{coherence}{default}(x, ct, type = "auto", ...)
 }
 
 \arguments{
   \item{x}{Character vector specifying an asf or csf.}
   \item{ct}{Data frame or \code{\link{configTable}}.}
-  \item{type}{Character vector specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
+  \item{type}{Character string specifying the type of \code{x}: \code{"auto"} (automatic detection; default), \code{"cs"} (crisp-set), \code{"mv"} (multi-value),  or \code{"fs"} (fuzzy-set).}
   \item{\dots}{Arguments passed to methods.}
 }
 
 \details{
-Coherence is a measure for model fit that is custom-built for complex solution formulas (csf). It measures the degree to which the atomic solution formulas (asf) combined in a csf cohere, i.e. are instantiated together in \code{x} rather than independently of one another. More concretely, coherence is the ratio of the number of cases satisfying all asf contained in a csf to the number of cases satisfying at least one asf in the csf. For example, if the csf contains the three asf asf1, asf2, asf3, coherence amounts to | asf1 * asf2 * asf3 | / | asf1 + asf2 + asf3 |, where |...| expresses the cardinality of the set of cases in \code{x} instantiating the corresponding expression. For asf, \code{coherence} returns 1. For boolean conditions (see \code{\link[cna]{condition}}), the coherence measure is not defined and \code{coherence} hence returns \code{NA}. For multiple csf that do not have a factor in common, \code{coherence} returns the minimum of the separate coherence scores. 
+Coherence is a measure for model fit that is custom-built for complex solution formulas (csf). It measures the degree to which the atomic solution formulas (asf) combined in a csf cohere, i.e. are instantiated together in \code{x} rather than independently of one another. More concretely, coherence is the ratio of the number of cases satisfying all asf contained in a csf to the number of cases satisfying at least one asf in the csf. For example, if the csf contains the three asf asf1, asf2, asf3, coherence amounts to | asf1 * asf2 * asf3 | / | asf1 + asf2 + asf3 |, where |...| expresses the cardinality of the set of cases in \code{x} instantiating the corresponding expression. For asf, \code{coherence} returns 1. Boolean conditions are rejected: \code{coherence} expects atomic or complex solution formulas in standard form. For multiple csf that do not have a factor in common, \code{coherence} returns the minimum of the separate coherence scores. 
 }
 
 \value{
-Numeric vector of coherence values to which \code{cond} is appended as a "names" attribute. If \code{cond} is a \emph{csf} "asf1*asf2*asf3" composed of asf that do not have a factor in common, the \emph{csf} is rendered with commas in the "names" attribute: "asf1, asf2, asf3".
+Numeric vector of coherence values to which \code{x} is appended as a "names" attribute. If \code{x} is a \emph{csf} "asf1*asf2*asf3" composed of asf that do not have a factor in common, the \emph{csf} is rendered with commas in the "names" attribute: "asf1, asf2, asf3".
 }
 
 \seealso{\code{\link{cna}}, \code{\link[cna]{condition}}, \code{\link{selectCases}}, \code{\link{configTable}}, \code{\link{allCombs}}, \code{\link{full.ct}}, \code{\link{condTbl}}}

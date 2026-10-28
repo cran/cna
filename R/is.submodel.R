@@ -16,7 +16,7 @@ is.submodel <- function(x, y, strict = FALSE){
   xy <- unique(c(x, y))
   px <- lapply(xy, tryparse)
   ok <- !vapply(px, is.null, logical(1)) 
-  ct_type <- if (any(grepl("=", xy, fixed = T))) "mv" else "cs"
+  ct_type <- if (any(grepl("=", xy, fixed = TRUE))) "mv" else "cs"
   if (ct_type == "cs"){
     vals <- unique.default(unlist(lapply(px, all.vars)))
   } else {
@@ -24,7 +24,7 @@ is.submodel <- function(x, y, strict = FALSE){
                    stopOps = c("==", "<", ">", "<=", ">="), 
                    validOps = c("<-", "<<-", "=", "&", "|", "(", "-"))
     vals <- unique.default(vals[!vapply(vals, is.symbol, FUN.VALUE = TRUE)])
-    vals <- sub(" == ", "=", vapply(vals, deparse, character(1)))
+    vals <- sub(" == ", "=", vapply(vals, deparse1, character(1)))
   }
   cond_type <- .qcondType(xy, values = vals, ct_type = ct_type, stdComplex.multiple.only = FALSE)
   ok <- ok & cond_type %in% c("stdAtomic", "stdComplex")

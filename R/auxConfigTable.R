@@ -2,7 +2,7 @@
 #' auxConfigTable: Generate a configTable from a cond vector
 #' Creates a 'minimal/incomplete full.ct', i.e. a configTable
 #' containing all factor values (such as A, b - or in mv case: A=1, B=0) 
-#' appearing in cond, but (unlike full.ct)  not all possible row configurations.
+#' appearing in cond, but (unlike full.ct) not all possible row configurations.
 #' This makes it possible to generate a configTable from a cond where full.ct would fail
 #' due to memory limitations.
 #' cond must be either DNF, msc/asf, csf or constant 0/1.
@@ -46,7 +46,7 @@ auxConfigTable  <- function(cond, x = NULL, check = TRUE){
 
 #' extractFactors
 #' Extracts factor names from a cond-Vector (globally, not individually for conds).
-#' Asuming a cond in some standard form (dnf/msc/asf, not csf!)
+#' Assuming a cond in some standard form (dnf/msc/asf, not csf!)
 #' Return char vector with factor names, 
 #' - if type is "mv": adds attr. 'values' (obsolete in cs-case)
 #' - if check=TRUE only returns valid factor names:

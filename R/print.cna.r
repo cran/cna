@@ -4,7 +4,7 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
                       printMeasures = TRUE, details = x$details, 
                       show.cases = NULL, verbose = FALSE, ...){
   cat("--- Coincidence Analysis (CNA) ---\n")
- # cat("\nFunction call:\n", deparse(x$call), "\n", sep = "")
+ # cat("\nFunction call:\n", deparse(x$call, nlines =1), "\n", sep = "")
   whatl <- vapply(c("t", "m", "a", "c"), grepl, what, fixed = TRUE, 
                   FUN.VALUE = logical(1), USE.NAMES = TRUE)
   if (nsolutions == "all") nsolutions <- Inf
@@ -13,14 +13,15 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
     cat("\nConfiguration table:\n")
     printPseudoConfigTable(x, show.cases = show.cases)
   }
-  if (!is.null(x$ordering))
-    cat("\nCausal ordering",
-        if(!is.null(x$call$strict) && eval(x$call$strict)) " (strict)", ":\n",
+  if (!is.null(x$ordering)){
+    strict <- isTRUE(attr(x$ordering, "strict"))
+    cat("\nCausal ordering", if (strict) " (strict)", ":\n",
         C_concat(C_mconcat(x$ordering, sep = ", "), sep = " < "),
         "\n", sep = "")
-  else cat("\nFactors:", C_concat(names(x$configTable), sep = ", "), "\n")
+  } else cat("\nFactors:", C_concat(names(x$configTable), sep = ", "), "\n")
 
-  if (!is.null(outc <- eval(x$call$outcome))){
+  if (!is.null(eval(x$call$outcome))){
+    outc <- names(x$solution)
     cat("Outcome", if (length(outc)>1) "s", ": ", paste0(outc, collapse = ", "), 
         "\n", sep = "")
   }
@@ -59,7 +60,7 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
       names(asf1)[names(asf1) == "condition"] <- "solution"
       has_minimal <- "minimal" %in% names(asf1)
       prntCols <- c(
-        "solution", "con", "cov", "complexity", if (has_minimal) "minimal",
+        "solution", "con", "cov", "complexity", if (has_minimal) "minimal", 
         intersect(getDetailCols(details), names(asf1))) 
       print(asf1[prntCols], n = nsolutions, digits = digits, 
             printMeasures = FALSE, row.names = FALSE, ...)
@@ -72,21 +73,15 @@ print.cna <- function(x, what = x$what, digits = 3, nsolutions = 5,
     if (nrow(asf.df) == 0){
       n.csf <- 0L
       cat("*none*\n")
-    } else if (length(unique(asf.df$outcome)) == 1L && whatl["a"]){
-      cat("Same as asf\n")
     } else {
       csf1 <- csf(x, asfx = asf.df, details = details,
                   inus.only = x$control$inus.only, inus.def = x$control$inus.def, 
                   acyclic.only = x$acyclic.only, cycle.type = x$cycle.type,
                   verbose = verbose)
       n.csf <- nrow(csf1)
-      if (n.csf == 0){
-        cat("*none*\n")
-      } else {
-        names(csf1)[names(csf1) == "condition"] <- "solution"
-        print(csf1, n = nsolutions, digits = digits, 
-              printMeasures = FALSE, row.names = FALSE, ...)
-      }
+      names(csf1)[names(csf1) == "condition"] <- "solution"
+      print(csf1, n = nsolutions, digits = digits, 
+            printMeasures = FALSE, row.names = FALSE, ...)
     }  
   }
   invisible(x)

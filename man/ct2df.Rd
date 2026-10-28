@@ -22,7 +22,7 @@ ct2df(ct)
 \arguments{
   \item{ct,x}{A \code{\link{configTable}}.}
   \item{\dots}{Currently not used.}
-  \item{warn}{Logical; if \code{TRUE} and case frequencies in input are not all equal to 1, a warning is issued.}
+  \item{warn}{Logical; if \code{TRUE} and case frequencies in input are not all equal to 1, a message is shown.}
 }
 
 \details{

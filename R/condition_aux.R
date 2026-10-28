@@ -72,7 +72,7 @@ tryparse <- function(x){
 
 # parsed to visible
 parsed2visible <- function(px){
-  x <- C_concat(noblanks(deparse(invertArrow(px))), sep = "")
+  x <- noblanks(deparse1(invertArrow(px)))
   x <- modifyStrings(.opsParsed[1:11], .opsVisible[1:11], x)
   gsub("<-([^>])", "->\\1", x)
 }

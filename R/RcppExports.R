@@ -213,16 +213,16 @@ C_uniqueCombs <- function(x, idx) {
     .Call(`_cna_C_uniqueCombs`, x, idx)
 }
 
-C_isSubsetOf <- function(x, y) {
-    .Call(`_cna_C_isSubsetOf`, x, y)
+C_isSubsetOf <- function(x, y, strict) {
+    .Call(`_cna_C_isSubsetOf`, x, y, strict)
 }
 
 intList_equal <- function(x, y) {
     .Call(`_cna_intList_equal`, x, y)
 }
 
-C_hasSubsetIn <- function(y, x) {
-    .Call(`_cna_C_hasSubsetIn`, y, x)
+C_hasSubsetIn <- function(y, x, strict) {
+    .Call(`_cna_C_hasSubsetIn`, y, x, strict)
 }
 
 C_hasSupersetIn <- function(x, y, ignore_equals) {

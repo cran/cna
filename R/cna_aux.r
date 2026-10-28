@@ -109,6 +109,7 @@ ctInfo <- function(ct, cutoff = 0.5, border = "up"){
 }
 
 # subset method for class "cti"
+# selects rows
 subset.cti <- function(x, i, ...){
   x$valueId <- x$valueId[i, , drop = FALSE]
   x$scores <- x$scores[i, , drop = FALSE]
@@ -116,19 +117,57 @@ subset.cti <- function(x, i, ...){
   x
 }
 
+## # Select factors in a 'cti' - use subset() method to select rows
+## # i can be char, int or logcal
+## # order of factors is strictly maintained!
+## #' @export
+## reduceCti <- function(x, i){
+##   stopifnot(inherits(x, "cti"))
+##   nms <- names(x$nVal)
+##   if (is.numeric(i)) i <- nms[i]
+##   if (is.character(i)){
+##     if (!all(i %in% nms))
+##       stop("Invalid factor name(s) specified: ", 
+##            paste0(setdiff(i, nms), collapse = ", "))
+##     i <- nms %in% i
+##   }
+##   x$resp_nms <- nms[i]
+##   x$nVal <- x$nVal[i]
+##   x$uniqueValues <- x$uniqueValues[i]
+##   x$config <- x$config[i]
+##   configVals <- unlist(x$config, use.names = FALSE)
+##   x$config[] <- split(seq_along(configVals), 
+##                       rep(seq_along(x$nVal), x$nVal))
+##   x$valueId <- x$valueId[, i, drop = FALSE]
+##   x$valueId[] <- match(x$valueId, configVals)
+##   x$scores <- x$scores[, configVals, drop = FALSE]
+##   x
+## }
+## if (F){
+##   x <- ctInfo(configTable(d.educate))
+##   reduceCti(x, c("U", "L", "E"))
+##   reduceCti(x, c(1, 3, 5))
+##   reduceCti(x, c(3, 1, 5)) # same!
+##   reduceCti(x, c(T, F, T, F, T))
+##   
+##   x <- ctInfo(configTable(d.pban))
+##   reduceCti(x, c("F", "T", "PB"))
+## }
+
+
 # function to build 'scores' matrix
 # --- reintroduced because of cnaOpt dependence!
 factMat <- function(type){
   switch(type, 
     cs =  function(x, ct){
       structure(cbind(ct[[x]], 1 - ct[[x]]), 
-                .Dimnames = list(NULL, c(x, tolower(x))))},
+                dimnames = list(NULL, c(x, tolower(x))))},
     mv = function(x, ct){
       v <- eval(parse(text = sub("=", "==", x, fixed = TRUE), keep.source = FALSE), ct)
       matrix(as.integer(v), dimnames = list(NULL, x))},
     fs = factMat <- function(x, ct){
       structure(cbind(ct[[x]], 1 - ct[[x]]), 
-                .Dimnames = list(NULL, c(x, tolower(x))))}
+                dimnames = list(NULL, c(x, tolower(x))))}
   )
 }
 

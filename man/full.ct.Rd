@@ -44,16 +44,11 @@ allCombs(nvals)
 
 \details{
 \code{full.ct} generates all or \code{nmax} logically possible value configurations of the factors defined in \code{x}, which can either be a character vector or a \code{\link{condTbl}} or an integer or a list or a \code{\link{configTable}} or a data frame or a matrix. \itemize{
-\item{If \code{x} is a character vector, it can contain conditions of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}/\code{\link{condList}}). \code{x} must contain at least one factor. Factor names and admissible values are guessed from the Boolean formulas. If \code{x} contains multi-value factors, only those values are considered admissible that are explicitly contained in \code{x}. Accordingly, in case of multi-value factors, \code{full.ct} should be given the relevant factor definitions by means of a list (see below).
-}
-\item{If \code{x} is a \code{condTbl} as produced by \code{\link{msc}}, \code{\link{asf}}, \code{\link{csf}}, or \code{\link{condTbl}} and containing a character column \code{"condition"}, the output will be the same as when \code{full.ct} is applied to \code{x$condition}, which is a character vector containing conditions (see the previous bullet point).
-}
-\item{If \code{x} is an integer, the output is a configuration table of type \code{"cs"} with \code{x} factors. If \code{x <= 26}, the first \code{x} capital letters of the alphabet are used as the names of the factors. If \code{x > 26}, factors are named "X1" to "Xx". 
-}
-\item{If \code{x} is a list, \code{x} is expected to have named elements each of which provides the factor names with corresponding vectors enumerating their admissible values (i.e. their value ranges). These values must be non-negative integers.
-}
-\item{If \code{x} is a \code{configTable}, data frame, or matrix, \code{colnames(x)} are interpreted as factor names and the rows as enumerating the admissible values (i.e. as value ranges). If \code{x} is a data frame or a matrix, \code{x} is first converted to a \code{configTable} (the function \code{configTable} is called with \code{type} as specified in \code{full.ct}), and the \code{configTable} method of \code{full.ct} is then applied to the result. The \code{configTable} method uses all factors and factor values occurring in the \code{configTable}. If \code{x} is of type \code{"fs"}, 0 and 1 are taken as the admissible values.
-}
+\item If \code{x} is a character vector, it can contain conditions of any of the three types of conditions, \emph{boolean}, \emph{atomic} or \emph{complex} (see \code{\link[cna]{condition}}/\code{\link{condList}}). \code{x} must contain at least one factor. Factor names and admissible values are guessed from the Boolean formulas. If \code{x} contains multi-value factors, only those values are considered admissible that are explicitly contained in \code{x}. Accordingly, in case of multi-value factors, \code{full.ct} should be given the relevant factor definitions by means of a list (see below).
+\item If \code{x} is a \code{condTbl} as produced by \code{\link{msc}}, \code{\link{asf}}, \code{\link{csf}}, or \code{\link{condTbl}} and containing a character column \code{"condition"}, the output will be the same as when \code{full.ct} is applied to \code{x$condition}, which is a character vector containing conditions (see the previous bullet point).
+\item If \code{x} is an integer, the output is a configuration table of type \code{"cs"} with \code{x} factors. If \code{x <= 26}, the first \code{x} capital letters of the alphabet are used as the names of the factors. If \code{x > 26}, factors are named "X1" to "Xx". 
+\item If \code{x} is a list, \code{x} is expected to have named elements each of which provides the factor names with corresponding vectors enumerating their admissible values (i.e. their value ranges). These values must be non-negative integers.
+\item If \code{x} is a \code{configTable}, data frame, or matrix, \code{colnames(x)} are interpreted as factor names and the rows as enumerating the admissible values (i.e. as value ranges). If \code{x} is a data frame or a matrix, \code{x} is first converted to a \code{configTable} (the function \code{configTable} is called with \code{type} as specified in \code{full.ct}), and the \code{configTable} method of \code{full.ct} is then applied to the result. The \code{configTable} method uses all factors and factor values occurring in the \code{configTable}. If \code{x} is of type \code{"fs"}, 0 and 1 are taken as the admissible values.
 }
 
 The computational demand of generating all logically possible configurations increases exponentially with the number of factors in \code{x}. In order to get an output in reasonable time, even when \code{x} features more than about 15 factors, the argument \code{nmax} allows for specifying a maximal number of configurations to be returned (by random sampling).
@@ -120,7 +115,8 @@ incompData <- dplyr::setdiff(fullData, idealData)
 
 # Simulating multi-value data.
 \donttest{groundTruth.2 <- "(JO=3 + TS=1*PE=3 <-> ES=1)*(ES=1*HI=4 + IQ=2*KT=5 <-> FA=1)"
-fullData <- ct2df(full.ct(list(JO=1:3, TS=1:2, PE=1:3, ES=1:2, HI=1:4, IQ=1:5, KT=1:5, FA=1:2)))
+fullData <- ct2df(full.ct(list(JO=1:3, TS=1:2, PE=1:3, ES=1:2, HI=1:4,
+                              IQ=1:5, KT=1:5, FA=1:2)))
 idealData <- ct2df(selectCases(groundTruth.2, fullData))
 # Introduce 20% data fragmentation.
 fragData <- idealData[-sample(1:nrow(idealData), nrow(idealData)*0.2), ] 

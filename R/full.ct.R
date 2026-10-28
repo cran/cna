@@ -69,6 +69,11 @@ full.ct.cti <- function(x, cond = NULL, nmax = NULL, ...){
     varsInCond <- extractFactors(unlist(extract_asf(cond)), x$type)
     x <- selectFactors(x, varsInCond)
   }
+  # check if already full -> if TRUE, return directly
+  isFull <- x$type != "fs" && 
+    length(x$freq) == prod(lengths(x$uniqueValues)) && 
+    all(x$freq == 1)
+  if (isFull) return(x)
   expanded <- .expandUniqvals(x$uniqueValues, nmax = nmax)
   if (x$type == "fs"){
     x$type <- "cs"
@@ -142,7 +147,7 @@ full.ct.default  <- function(x, type = "auto", cond = NULL, nmax = NULL, ...){
   }
   if (is.character(x)){
     x <- noblanks(x)
-    type <- if (any(grepl("=", x))) "mv" else "cs"
+    type <- if (any(grepl("=", x, fixed = TRUE))) "mv" else "cs"
     px <- lapply(x, tryparse)
     if (!all(ok <- !vapply(px, is.null, logical(1))))
       stop("Invalid input to full.ct:\n", paste0("  ", x[!ok], collapse = "\n"),

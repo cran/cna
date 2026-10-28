@@ -16,7 +16,7 @@ the emergence of party ban provisions in sub-Saharan Africa.
 \format{
 The data frame contains 48 rows (cases) and the following 5 columns, some of which feature multi-value factors:
 
-\tabular{rlll}{
+\tabular{rll}{
 [ , 1] \tab \bold{C}    \tab colonial background ("2" British, "1" French, "0" other)\cr
 [ , 2] \tab \bold{F}   \tab former regime type competition ("2" no, "1" limited, "0" multi-party)   \cr
 [ , 3] \tab \bold{T}   \tab transition mode ("2" managed, "1" pacted, "0" democracy before 1990) \cr
@@ -28,7 +28,7 @@ The data frame contains 48 rows (cases) and the following 5 columns, some of whi
 \source{
 Hartmann, Christof, and Joerg Kemmerzell. 2010. \dQuote{Understanding Variations 
 in Party Bans in Africa.} \emph{Democratization} 17(4):642-65.
-doi:10.1080/13510347.2010.491189.
+\doi{10.1080/13510347.2010.491189}
 }
-
+ 
 \keyword{datasets}

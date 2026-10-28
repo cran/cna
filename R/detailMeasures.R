@@ -1,11 +1,22 @@
 
 # ==== details ====
-detailMeasures <- function(cond, x, 
-  what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence"),
+detailMeasures <- function(cond, x, what = TRUE, 
+  inus.def = "implication", inus.func.minim = FALSE,
   cycle.type = c("factor", "value"), ...){
-  what <- resolveDetails(what) #, available = available)
+  if (!is.character(cond)) stop("cond must be a character vector.")
+  if (detailsTRUE <- isTRUE(what)){
+    # provisional value of 'what'
+    # which measures are selected is decided in .det.cti() depending on 
+    # condition types (all asf or csf/mixed)
+    what <- list(detailMeasures = TRUE, conCovMeasures = character(0))
+  } else {
+    what <- resolveDetails(what)
+  }
   out <- .det(x, noblanks(cond), what = what$detailMeasures, cycle.type = cycle.type, 
-              conCovMeasures = what$conCovMeasures, ...)
+              conCovMeasures = what$conCovMeasures, 
+              inus.def = inus.def, inus.func.minim = inus.func.minim, 
+              ...)
+  if (detailsTRUE) what <- resolveDetails(names(out)) 
   out$outcome <- structure(
     C_mconcat(happly(extract_asf(rownames(out)), rhs), sep = ","),
     class = c("outcomeString", "character"))
@@ -21,49 +32,64 @@ detailMeasures <- function(cond, x,
 
 # ==== Default method for data.frame or configTable ====
 #  Converts x to a configTable and then calls the .det.cti
-.det.default <- function(x, cond, 
-    what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence"),
-    type, cycle.type = "factor", inus.def = "implication", ...){
-  if (!inherits(x, "configTable")){
-    if (missing(type)) type <- "auto"
-    x <- configTable(x, type = type, rm.dup.factors = FALSE, rm.const.factors = FALSE, 
-                     verbose = FALSE)
+.det.default <- function(x, cond, what = TRUE,
+    type = "auto", cycle.type = "factor", 
+    inus.def = "implication", inus.func.minim = FALSE, ...){
+  if (inherits(x, "configTable") && (type == "auto" || type == attr(x, "type"))){
+    type <- attr(x, "type")
+  } else {
+    x <- configTable(x, type = type, verbose = FALSE)
   }
   cti <- ctInfo(x)
-  qtypes <- .qcondType(cond, colnames(cti$scores), cti$type,
-                       stdComplex.multiple.only = FALSE) 
-  ok <- qtypes %in% c("stdAtomic", "stdComplex")
+  ctypes <- checkStdCondTypes(cond, cti)
+  if (useCtiList(cti)) cti <- ctiList(cti, cond)
+  .det(cti, cond = cond, what = what, cycle.type = cycle.type, 
+       inus.def = inus.def, inus.func.minim = inus.func.minim, ..., 
+       condType = ctypes)
+}
+
+checkStdCondTypes <- function(cond, cti, functionName = "detailMeasures"){
+  out <- .qcondType(cond, colnames(cti$scores), cti$type, 
+                    stdComplex.multiple.only = FALSE) 
+  ok <- out %in% c("stdAtomic", "stdComplex")
   if (any(!ok)){
     stop("Invalid condition(s):\n", 
          paste0("  ", cond[!ok], collapse = "\n"),
-         "\ndetails() expects valid conditions in standard form.",
+         "\n", functionName, "() expects valid conditions in standard form (asf or csf)",
          call. = FALSE)
   }
-  if (useCtiList(cti)) cti <- ctiList(cti, cond)
-  .det(cti, cond = cond, what = what, available = x$details, cycle.type = cycle.type, 
-       inus.def = inus.def, ...)
+  out
 }
 
 # ==== Method for class 'cti' ====
 #   x        cti
 #   cond     character vector with the csf
 #   what     char-vector: list of required detailMeasures
-#   available, cycle.type
-#            Passed to detailMeasures/resolveDetails
+#   cycle.type Passed to cyclic()
 #   in.csf   special shortcut for the case where .det.cti is called from within csf()
 # value: A data.frame with columns according to what
-.det.cti <- function(x, cond, 
-    what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence"),
-    available = what, cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE, 
-    inus.def = "implication", conCovMeasures = character(0), ...){
-
-  if (any(c("redundant", "inus", "exhaustiveness", "faithfulness") %in% what)){
+.det.cti <- function(x, cond, what = TRUE,
+    cycle.type = "factor", in.csf = FALSE, is.ctiList = FALSE, 
+    inus.def = "implication", inus.func.minim = FALSE, 
+    conCovMeasures = character(0), ..., 
+    condType = NULL){
+  if(is.null(condType)){
+    condType <- checkStdCondTypes(cond, x)
+  }
+  isComplex <- rep(condType == "stdComplex", length.out = length(cond))
+  anyComplex <- any(isComplex)
+  what <- getDetailCols(resolveDetails(what, asfOnly = !anyComplex))
+  usesFull <- c("inus", "exhaustiveness", "faithfulness", 
+                if (anyComplex) c("redundant", "fm_structural"))
+  if (any(usesFull %in% what)){
     x_full <- full.ct(x, cond = cond)
     qc_full <- qcond_csf(cond, x_full$scores, flat = TRUE)
   }
   out <- data.frame(matrix(numeric(0), length(cond)), row.names = cond)
-  if ("redundant" %in% what || (in.csf && "inus" %in% what)){
-    red <- m_any(.redund.cti(x_full, cond, simplify = FALSE, full = TRUE, 
+  if ((anyComplex && "redundant" %in% what) || 
+      (in.csf && "inus" %in% what)){
+    red <- m_any(.redund.cti(x_full, cond[isComplex], 
+                             simplify = FALSE, full = TRUE, 
                              qc_full = qc_full, names = FALSE))
   }
   if ("inus" %in% what){
@@ -80,7 +106,8 @@ detailMeasures <- function(cond, x,
                                        inusDef = inus.def)
       if (any(partStrRed)) out$inus[out$inus][partStrRed] <- FALSE
     } else {
-      out$inus <- .inus.cti(x_full, cond, full = TRUE, def = inus.def)
+      out$inus <- .inus.cti(x_full, cond, full = TRUE, def = inus.def, 
+                            func.minim = inus.func.minim)
     }
   }
   if ("cyclic" %in% what){
@@ -97,10 +124,27 @@ detailMeasures <- function(cond, x,
     }
     out <- cbind(out, exf)
   }
-  if ("coherence" %in% what)
-    out$coherence <- coherence.cti(x, cond, names = FALSE)
+  if ("coherence" %in% what){
+    out$coherence <- rep(1, nrow(out))  # value for asf
+    if (anyComplex){
+      out$coherence[isComplex] <- 
+        coherence.cti(x, cond[isComplex], names = FALSE)
+    }
+  }
   if ("redundant" %in% what){
-    out$redundant <- red
+    out$redundant <- rep(FALSE, nrow(out)) # value for asf
+    if (anyComplex) out$redundant[isComplex] <- red
+  }
+  if ("fm_structural" %in% what){
+    out$fm_structural <- rep(NA, nrow(out)) # value for asf
+    if (anyComplex){
+      out$fm_structural[isComplex] <- 
+        .fm_struct.cti(x, cond[isComplex], names = FALSE)
+    }
+  }
+  if ("fm_empirical" %in% what){
+    out$fm_empirical <- rep(NA, nrow(out)) # value for asf
+    if (anyComplex) out$fm_empirical[isComplex] <- .fm_emp(cond[isComplex])
   }
   if (length(conCovMeasures)){
     extr <- getConCovMeasures(
@@ -128,8 +172,8 @@ getConCovMeasures <- function(cond, cti, measures){
   }
 }
 
-.detailMeasures <- c("inus", "cyclic", "exhaustiveness", "faithfulness", 
-                     "coherence", "redundant")
+.detailMeasures <- c("inus", "cyclic", "fm_empirical", "fm_structural", 
+                     "exhaustiveness", "faithfulness", "coherence", "redundant")
 
 showDetailMeasures <- function(){
   writeLines(.detailMeasures)
@@ -138,10 +182,23 @@ showDetailMeasures <- function(){
 # Aux function resolveDetails()
 #   what           required measures
 #   warn           Logical: warn if some required measure is not available
-resolveDetails <- function(what, warn = TRUE){
-  if (inherits(what, "resolvedDetails")) return(what)
+resolveDetails <- function(what, warn = TRUE, asfOnly = FALSE){
+  if (inherits(what, "resolvedDetails")){
+    if (asfOnly){
+      what <- removeDetailMeasure(
+        what, 
+        c("redundant", "coherence", "fm_structural", "fm_empirical"))
+    }
+    return(what)
+  }
   if (isFALSE(what) || is.null(what)) what <- character(0)
-  if (isTRUE(what)) what <- setdiff(.detailMeasures, "redundant")
+  if (isTRUE(what)){
+    what <- setdiff(.detailMeasures, "redundant")
+    if (asfOnly){
+      what <- setdiff(.detailMeasures, 
+                      c("redundant", "coherence", "fm_structural", "fm_empirical"))
+    }
+  }
   what_in <- what
   what <- tolower(what)
   isConCovMeasure <- pmatch(
@@ -187,9 +244,9 @@ addDetailMeasure <- function(det, what, where = c("back", "front")){
   } else if (where == "front"){
     det$detailMeasures <- c(what, det$detailMeasures)
     pos <- list(
-      details = c(seq_len(l), pos$details + 1L), 
-      conCov = pos$conCov + 1L, 
-      invalid = pos$invalid + 1L)
+      details = c(seq_len(l), pos$details + l), 
+      conCov = pos$conCov + l, 
+      invalid = pos$invalid + l)
   }
   det$positions <- pos
   det
@@ -200,6 +257,8 @@ removeDetailMeasure <- function(det, what){
   if (all(i == 0)) return(det)
   det$detailMeasures <- det$detailMeasures[-i]
   det$positions$details <- det$positions$details[-i]
+  det$positions[] <- 
+    lapply(det$positions, match, sort.default(unlist(det$positions)))
   det
 }
 
@@ -207,9 +266,7 @@ getDetailCols <- function(details, which = c("details", "conCov")){
   stopifnot(inherits(details, "resolvedDetails"))
   out <- as.character(c(if ("details" %in% which) details$detailMeasures, 
                         if ("conCov" %in% which) details$conCovMeasures$shortNames))
-  if (length(which) == 2
-      && all(c("details", "conCov") %in% names(details$positions)) # [remove this row later -- useful in dev phase]
-      ){
+  if (length(which) == 2){
     out <- out[order(unlist(details$positions[c("details", "conCov")]))]
   }
   out
@@ -219,4 +276,3 @@ anyDet <- function(d){
   stopifnot(inherits(d, "resolvedDetails"))
   length(d$detailMeasures) + length(d$conCovMeasures$def) > 0
 }
-

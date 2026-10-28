@@ -54,11 +54,11 @@ These functions are mainly for internal purposes and will not normally be called
     \item{\code{stdCond}, \code{matchCond}:}{
       Standardize and match conditions.
     }
-    \item{\code{relist1}, \code{hstrsplit}, \code{C_mconcat}, \code{C_mconcat}, \code{C_recCharList2char}, \code{C_relist_Int}:}{
+    \item{\code{relist1}, \code{hstrsplit}, \code{C_mconcat}, \code{C_recCharList2char}, \code{C_relist_Int}:}{
       Utility functions for conversion between different represenations of conditions.
     }
     \item{\code{C_redund}:}{
-      Internal version of the test for structural redundancy (used in \code{\link{redundant})}.
+      Internal version of the test for structural redundancy (used in \code{\link{redundant}}).
     }
     \item{\code{getCond}:}{
       Derive a condition from a data set. 

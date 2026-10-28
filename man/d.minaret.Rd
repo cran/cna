@@ -33,7 +33,7 @@ Ruedi Epple: collection, documentation
 \source{
 Baumgartner, Michael, and Ruedi Epple. 2014. \dQuote{A Coincidence Analysis of a
 Causal Chain: The Swiss Minaret Vote.}
-\emph{Sociological Methods & Research} 43 (2):280-312.
-}
+\emph{Sociological Methods & Research} 43 (2):280-312. \doi{10.1177/0049124113502948}
+} 
 
 \keyword{datasets}

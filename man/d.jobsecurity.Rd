@@ -16,7 +16,7 @@ high job security regulations in Western democracies using fsQCA.
 \format{
 The data frame contains 19 rows (cases) and the following 7 columns featuring fuzzy-set factors:
 
-\tabular{rllrll}{
+\tabular{rlll}{
 [ , 1] \tab \bold{S}   \tab statism                  \tab ("1" high, "0" not high)\cr
 [ , 2] \tab \bold{C}   \tab non-market coordination  \tab ("1" high, "0" not high)\cr
 [ , 3] \tab \bold{L}   \tab labour movement strength \tab ("1" high, "0" not high)\cr
@@ -38,7 +38,7 @@ Thiem, Alrik: collection, documentation
 
 \source{
 Emmenegger, Patrick. 2011. \dQuote{Job Security Regulations in Western Democracies: 
-A Fuzzy Set Analysis.} \emph{European Journal of Political Research} 50(3):336-64.
-}
+A Fuzzy Set Analysis.} \emph{European Journal of Political Research} 50(3):336-64. \doi{10.1111/j.1475-6765.2010.01933.x}
+} 
 
 \keyword{datasets}

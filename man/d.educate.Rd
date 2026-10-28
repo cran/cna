@@ -26,7 +26,7 @@ The data frame contains 8 rows (cases) and the following 5 columns featuring Boo
 
 \source{
 Baumgartner, Michael. 2009. \dQuote{Inferring Causal Complexity.}
-\emph{Sociological Methods & Research} 38(1):71-101.
-}
+\emph{Sociological Methods & Research} 38(1):71-101. \doi{10.1177/0049124109339369}
+} 
 
 \keyword{datasets}

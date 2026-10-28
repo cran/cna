@@ -30,7 +30,7 @@ The dataset contains 15 rows (cases) and the following 6 columns featuring Boole
 Lam, Wai Fung, and Elinor Ostrom. 2010.
 \dQuote{Analyzing the Dynamic Complexity of Development Interventions: Lessons
 from an Irrigation Experiment in Nepal.}
-\emph{Policy Sciences} 43 (2):1-25.
+\emph{Policy Sciences} 43 (2):1-25. \doi{10.1007/s11077-009-9082-6} 
 }
 
 \keyword{datasets}

@@ -29,14 +29,14 @@ extern SEXP _cna_C_disj_contained(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_duplicatedMat(SEXP);
 extern SEXP _cna_C_find_asf(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _cna_C_find_first_false(SEXP);
-extern SEXP _cna_C_hasSubsetIn(SEXP, SEXP);
+extern SEXP _cna_C_hasSubsetIn(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_hasSubsetInM(SEXP, SEXP);
 extern SEXP _cna_C_hasSupersetIn(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_increment(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _cna_C_init_ii(SEXP, SEXP);
 extern SEXP _cna_C_intList_minimal_old(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_is_submodel(SEXP, SEXP, SEXP);
-extern SEXP _cna_C_isSubsetOf(SEXP, SEXP);
+extern SEXP _cna_C_isSubsetOf(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_max_which(SEXP);
 extern SEXP _cna_C_mconcat(SEXP, SEXP, SEXP);
 extern SEXP _cna_C_mconj_conCov(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -91,14 +91,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_cna_C_duplicatedMat",           (DL_FUNC) &_cna_C_duplicatedMat,           1},
     {"_cna_C_find_asf",                (DL_FUNC) &_cna_C_find_asf,                8},
     {"_cna_C_find_first_false",        (DL_FUNC) &_cna_C_find_first_false,        1},
-    {"_cna_C_hasSubsetIn",             (DL_FUNC) &_cna_C_hasSubsetIn,             2},
+    {"_cna_C_hasSubsetIn",             (DL_FUNC) &_cna_C_hasSubsetIn,             3},
     {"_cna_C_hasSubsetInM",            (DL_FUNC) &_cna_C_hasSubsetInM,            2},
     {"_cna_C_hasSupersetIn",           (DL_FUNC) &_cna_C_hasSupersetIn,           3},
     {"_cna_C_increment",               (DL_FUNC) &_cna_C_increment,               4},
     {"_cna_C_init_ii",                 (DL_FUNC) &_cna_C_init_ii,                 2},
     {"_cna_C_intList_minimal_old",     (DL_FUNC) &_cna_C_intList_minimal_old,     3},
     {"_cna_C_is_submodel",             (DL_FUNC) &_cna_C_is_submodel,             3},
-    {"_cna_C_isSubsetOf",              (DL_FUNC) &_cna_C_isSubsetOf,              2},
+    {"_cna_C_isSubsetOf",              (DL_FUNC) &_cna_C_isSubsetOf,              3},
     {"_cna_C_max_which",               (DL_FUNC) &_cna_C_max_which,               1},
     {"_cna_C_mconcat",                 (DL_FUNC) &_cna_C_mconcat,                 3},
     {"_cna_C_mconj_conCov",            (DL_FUNC) &_cna_C_mconj_conCov,            5},

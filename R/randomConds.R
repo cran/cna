@@ -186,7 +186,7 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
     outcomeFactor <- outcomeFactors[[i]]
     
     .count_attempts <- 0L
-    repeat{
+    repeat {
       .count_attempts <- .count_attempts + 1L
       if (length(lhs_factors) <= maxVarNum){
         xx <- full.ct(x[c(lhs_factors, outcomeFactor)])
@@ -215,14 +215,16 @@ randomCsf <- function(x, outcome = NULL, positive = TRUE,
         xx <- selectCases(outCsf, xx)
       }
       rasf <- randomAsf(xx, outcome = outc, compl = compl, how = "minimal")
-      if (!(lhs(rasf) %in% c("0", "1"))) break
+      newCsf <- paste0(outCsf, if (nzchar(outCsf)) "*", "(", rasf, ")")
+      if (!(lhs(rasf) %in% c("0", "1")) && 
+          .fm_struct(full.ct(cti, cond = newCsf), newCsf)) break 
       if (.count_attempts >= 100){
         # usually should not happen...
         warning("Did not succeed in generating random csf as requested - returning NA")
         return(NA_character_)
       }
     }
-    outCsf <- paste0(outCsf, if (nzchar(outCsf)) "*", "(", rasf, ")")
+    outCsf <- newCsf
   }
   structure(outCsf, class = c("stdComplex", "character"))
 }

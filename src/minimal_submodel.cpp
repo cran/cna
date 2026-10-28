@@ -21,7 +21,7 @@ LogicalMatrix C_disj_contained(const intList x, const intList y, const bool shor
   for (int i=0; i<lenx; ++i){
     bool anyTrueInRow=false;
     for (int j=0; j<leny; ++j){
-      out(i,j) = C_isSubsetOf(as<IntegerVector>(x[i]), as<IntegerVector>(y[j]));
+      out(i,j) = C_isSubsetOf(as<IntegerVector>(x[i]), as<IntegerVector>(y[j]), false);
       // Rcout << i << " " << j << ": " << out(i,j) << std::endl;
       if (shortcut && !anyTrueInRow && out(i,j)) anyTrueInRow = true;
     }

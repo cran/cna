@@ -3,6 +3,8 @@
 #   condstr  string in 'visible' syntax with 'standard boolean' format, i.e. a disjunction of conjunctions
 #   sc       'scores' matrix
 qcond_bool <- function(condstr, sc){
+  if (length(condstr) == 0) return(structure(numeric(0), dim = c(8L, 0L)))
+    
   if (inherits(sc, "cti")) sc <- sc$scores
   spl <- strsplit(condstr, "+", fixed = TRUE)
   conjs <- as.character(unique(unlist(spl, use.names = FALSE, recursive = FALSE)))
@@ -10,9 +12,14 @@ qcond_bool <- function(condstr, sc){
   # Check for presence of the factors in the data
   usplc <- unlist(splc, recursive = FALSE, use.names = FALSE)
   nms <- colnames(sc)
-  if (!all(usplc %in% nms)) 
-    stop("Invalid factor value(s) in condition: ", paste0(setdiff(usplc, nms), collapse = ","), 
+  if (!all(usplc %in% nms)){
+    s <- seq_along(nms)
+    binData <- identical(nms[s %% 2 == 1], toupper(nms[s %% 2 == 0]))
+    mvCond <- any(grepl("=[0-9]+$", usplc))
+    stop("Invalid factor value(s) in condition: ", paste0(setdiff(usplc, nms), collapse = ","),
+         if (binData && mvCond) "\n  (Incompatible inputs: multi-value condition and binary data)",
          call. = FALSE)
+  }
   factors <- unique(toupper(usplc))
   factor_ok <- !is.na(match(factors, nms))
   if (any(!factor_ok)) stop("Invalid condition specified.", call. = FALSE)
@@ -87,6 +94,7 @@ qcondTbl_asf <- function(condstr, cti, asf.selection = "none", conCovDef = 1:2, 
 # Take an expanded 'qcond_asf' array and return the corresponding condTbl
 # cond   output from qcond_asf or qcond_csf
 cond2condTbl <- function(cond, freqs, conCovDef = 1:2, imposeLength2 = TRUE){
+  if (length(cond) == 0) return(emptyCondTbl())
   coco <- conCovFromArray(cond, freqs, def = conCovDef, 
                           imposeLength2 = imposeLength2)  # !detailed
   if (imposeLength2){

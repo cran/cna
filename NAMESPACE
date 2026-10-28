@@ -11,6 +11,7 @@ export(makeFuzzy, selectCases, selectCases1,
        ctInfo, qcond_csf, qcond_asf, qcond_bool, 
        stdCond, matchCond, 
        redundant, minimalizeCsf,
+       fm_structural, fm_empirical, 
        fs2cs, C_recCharList2char, C_relist_Int, 
        relist1, C_concat, C_mconcat, hstrsplit, 
        C_redund, getComplexity, getCondType, 
@@ -26,7 +27,7 @@ importFrom(Rcpp, sourceCpp)
 importFrom(utils, head, tail, combn, packageVersion, getFromNamespace, flush.console)
 importFrom(stats, as.dist, cutree, hclust, setNames)
 importFrom(Matrix, Matrix)
-importFrom(matrixStats, rowMins, rowMaxs, rowAnys, rowAlls, 
+importFrom(matrixStats, rowMins, rowMaxs, rowAnys, rowAlls, rowAnyNAs,
            colMins, colAnys, colAlls)
 importFrom(car, some)
 
@@ -119,5 +120,8 @@ S3method(.minCsf, ctiList)
 
 S3method(coherence, default)
 S3method(coherence, cti)
+
+S3method(.fm_struct, cti)
+S3method(.fm_struct, ctiList)
 
 S3method(print, measuresDefinition)

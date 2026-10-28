@@ -5,16 +5,66 @@
 # Allow computing lighter 'full.cti'.
 # A ctiList is always related to a set of conditions;
 # every tbls-component of ctiList contains only the factors
-# that are present in the respective cond's.
+# that are present in the respective conds.
+# 
+# A simple example where it is used:
+# cond <- replicate(10, randomAsf(sample(LETTERS, 6)))
+# is.inus(cond) # <- calls ctiList() in .inus.configTable()
 
 # cond a (general) cond
 ctiList <- function(x, cond){
   cond <- noblanks(cond)
+  factGrps <- .createFactorGroups(cond)
+  tbls <- lapply(factGrps$nms, function(nms) selectFactors(x, nms))
+  structure(c(
+    x[c("type", "resp_nms", "nVal", "uniqueValues", 
+        if (x$type == "fs") "fsInfo")],
+    list(scores = x$scores[0, , drop = FALSE],
+         conds = cond, 
+         tbls = tbls, 
+         indices = factGrps$indices)), 
+    class = "ctiList")
+}
+
+# Create grouping of conds according to factors apprearing in them (includes lhs and rhs)
+# Params
+#   cond      character vect
+#   x         a cti (optional, but required depending on context)
+#   outcomes  Logical: If FALSE, rhs&lhs variables are returned indiscriminately
+#             in output element 'nms'. If FALSE, 'nms'  contains only lhs factors
+#             and rhs factors are included in 'outcomes'
+#             !!IMPORTANT!! In current implementation, outcomes=TRUE requires that cond has only asfs!
+#             
+# Returns 
+#   list(nms, indices) where nms ist a list of char vectors with factor names
+#   additional elements 'outcomes' if requested.
+#   
+# Examples/Illustration:
+# set.seed(3)
+# cond <- replicate(3, randomCsf(6, compl = 2))
+# cna:::.createFactorGroups(cond, ctInfo(full.ct(cond)))
+# cna:::.createFactorGroups(unlist(extract_asf(cond)), 
+#                           ctInfo(full.ct(cond)), outcomes = T)
+#   
+.createFactorGroups <- function(cond, x, outcomes = FALSE){
+  
   condListed <- extract_asf(cond)
   csfLengths <- lengths(condListed)
+  if (outcomes){
+    stopifnot(csfLengths == 1)
+    outFact <- rhs(unlist(condListed))
+    condListed[] <- lhs(condListed)
+  }
   ff <- hstrsplit(condListed, c("<*->", "+", "*"), 
                   relist = FALSE, fixed = c(FALSE, TRUE, TRUE))
-  if (x$type == "mv") ff[] <- sub("=[0-9]+", "", as.vector(ff))
+  if (!missing(x)){
+    if (x$type == "mv") ff[] <- sub("=[0-9]+", "", as.vector(ff))
+    factNms <- names(x$nVal)
+  } else {
+    values <- sort(unique(ff))
+    if (any(grepl("=", values))) ff[] <- sub("=[0-9]+", "", as.vector(ff))
+    factNms <- unique(toupper(ff))
+  }
   ll <- as.vector(rowsum(collapse(attr(ff, "lengths"), 2:3)[[1]], 
                          rep(seq_along(csfLengths), csfLengths)))
   nmsList <- C_relist_Char(toupper(as.vector(ff)), ll)
@@ -22,19 +72,13 @@ ctiList <- function(x, cond){
   nmsStrings <- C_mconcat(nmsList, "\r")
   uNmsStrings <- unique(nmsStrings)
   uNmsList <- strsplit(uNmsStrings, "\r", fixed = TRUE)
-  if (!all(unique(unlist(uNmsList)) %in% names(x$nVal))){  
-    uNmsList[] <- lapply(uNmsList, intersect, names(x$nVal))
+  if (!all(unique(unlist(uNmsList)) %in% factNms)){  
+    uNmsList[] <- lapply(uNmsList, intersect, factNms)
   }
   indices <- match(nmsStrings, uNmsStrings)
-  tbls <- lapply(uNmsList, function(nms) selectFactors(x, nms))
-  structure(c(
-    x[c("type", "resp_nms", "nVal", "uniqueValues", 
-        if (x$type == "fs") "fsInfo")],
-    list(scores = x$scores[0, , drop = FALSE],
-         conds = cond, 
-         tbls = tbls, 
-         indices = indices)), 
-    class = "ctiList")
+  out <- list(nms = uNmsList, indices = indices)
+  if (outcomes) out$outcomes <- outFact
+  out
 }
 
 # decide whether full.ct() is used separately by variable set in cond
@@ -102,27 +146,47 @@ full.ct.ctiList <- function(x, ...){
 }
 
 
-.det.ctiList <- function(x, cond = x$conds, 
-    what = c("inus", "cyclic", "exhaustiveness", "faithfulness", "coherence", "redundant"), 
-    available = what, cycle.type = "factor", in.csf = FALSE, ...){
+.det.ctiList <- function(x, cond = x$conds, what = TRUE, 
+    cycle.type = "factor", in.csf = FALSE, ..., condType = NULL){
+  if (length(condType) == length(x$indices)){
+    argCondType <- split(condType, x$indices) 
+  } else {
+    argCondType <- vector("list", length(x$tbls))
+  }
   out <- mapply(.det.cti, 
-    x = x$tbls, cond = split(x$conds, x$indices), 
-    MoreArgs = list(what = what, available = available, cycle.type = cycle.type, 
-                    in.csf = in.csf, ...),
+    x = x$tbls, cond = split(x$conds, x$indices), condType = argCondType,
+    MoreArgs = list(what = what, cycle.type = cycle.type, in.csf = in.csf, ...),
     SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  if (isTRUE(what)){
+    what <- unique(unlist(nms <- lapply(out, names)))
+    incomplete <- !vapply(nms, setequal, what, FUN.VALUE = logical(1))
+    if (any(incomplete)){
+      # Case what=TRUE and some partial conds contain only asfs, some contain csf
+      # -> then the set of columns in partial output tables differ
+      out[incomplete] <- lapply(out[incomplete], .appendDetCols, cols = what)
+    }
+  }
   out <- do.call(rbind, out)
   out[getPos(x), , drop = FALSE]
 }
-
+.appendDetCols <- function(x, cols){
+  if (setequal(names(x), cols)) return(x[cols])
+  newCols <- setdiff(cols, names(x))
+  if ("coherence" %in% newCols) x$coherence <- 1
+  if ("redundant" %in% newCols) x$redundant <- FALSE
+  if (any(c("fm_structural", "fm_empirical") %in% newCols)) 
+    x[intersect(c("fm_structural", "fm_empirical"), newCols)] <- NA
+  x[cols]
+}
 
 .inus.ctiList <- function(x, cond, full = FALSE, qtypes, 
                           const.ok = FALSE, csf.info = FALSE, 
-                          def = "implication", ...){
+                          def = "implication", func.minim = FALSE, ...){
   out0 <- mapply(.inus.cti, 
     x = x$tbls, cond = split(x$conds, x$indices), 
     qtypes = split(qtypes, x$indices), 
     MoreArgs = list(full = full, const.ok = const.ok, csf.info = csf.info, 
-                    def = def),
+                    def = def, func.minim = func.minim),
     SIMPLIFY = FALSE, USE.NAMES = FALSE)
   out <- do.call(c, out0)
   out <- out[getPos(x)]
@@ -192,4 +256,13 @@ full.ct.ctiList <- function(x, ...){
   c(recurs, noRed)
 }
 
+
+.fm_struct.ctiList <- function(x, cond, verbose, ...){
+  out <- mapply(.fm_struct.cti, 
+    x = x$tbls, cond = split(x$conds, x$indices), 
+    MoreArgs = list(verbose = verbose, ...),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  out <- do.call(c, out)
+  out[getPos(x)]
+}
 

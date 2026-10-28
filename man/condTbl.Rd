@@ -3,7 +3,6 @@
 \alias{print.condTbl}
 \alias{as.data.frame.condTbl}
 \alias{as.condTbl}
-\alias{condTbl}
 
 \title{
 Create summary tables for conditions
@@ -57,7 +56,7 @@ The argument \code{digits} applies to the \code{print} method. It determines how
 }
 
 \value{
-\code{The functions as.condTbl} and \code{condTbl} return an object of class \dQuote{condTbl}, a concise summary table featuring a set of conditions (boolean, atomic, complex), their outcomes (if the condition is an atomic or complex solution formula), and their scores on given summary measures (e.g. consistency and coverage).
+The functions \code{as.condTbl} and \code{condTbl} return an object of class \dQuote{condTbl}, a concise summary table featuring a set of conditions (boolean, atomic, complex), their outcomes (if the condition is an atomic or complex solution formula), and their scores on given summary measures (e.g. consistency and coverage).
 Technically, an object of class \dQuote{\code{condTbl}} is a \code{\link{data.frame}} with an additional class attribute \code{"condTbl"}. It prints slightly differently by default than a \code{data.frame} with respect to column alignment and number of digits.
 
 The section \dQuote{Value} in \code{\link{cna-solutions}} has an enumeration of the columns that are most commonly present in a \code{condTbl}.

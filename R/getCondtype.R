@@ -213,6 +213,9 @@ maybeComplex <- function(x, ct_type, multiple.only = TRUE){
 # possible values:
 # "constant" , "stdBoolean", "stdAtomic", "stdComplex", "unknown", "invalidValue"
 .qcondType <- function(x, values, ct_type, stdComplex.multiple.only = TRUE){
+  if (inherits(x, c("stdBoolean", "stdAtomic", "stdComplex"))){
+    return(rep(class(x)[[1]], length(x)))
+  }
   out <- rep("unknown", length(x))
   names(out) <- x
   
